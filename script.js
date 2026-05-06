@@ -29,6 +29,8 @@ const btnDetailedReport = document.getElementById("btnDetailedReport");
 const btnToggleChart = document.getElementById("btnToggleChart");
 const btnLimparFiltros = document.getElementById("btnLimparFiltros");
 const headerSentinel = document.getElementById("header-sentinel");
+const btnBackup = document.getElementById("btnBackup");
+const btnRestaurar = document.getElementById("btnRestaurar");
 
 // Estado da aplicação: carrega dados salvos ou inicia array vazio
 let dadosSalvos = JSON.parse(localStorage.getItem("professores"));
@@ -53,7 +55,8 @@ if (dadosSalvos && dadosSalvos.length > 0) {
     }
 }
 
-let professores = (dadosSalvos && dadosSalvos.length > 0) ? dadosSalvos : [
+// Alteração: Garante que se houver uma lista salva (mesmo que vazia), ela seja respeitada.
+let professores = dadosSalvos || [
     { nome: "ANA CAROLINA VENTUROSO BÉRGAMO CÂNDIDO", escola: "ALZIRA", disciplina: "EDM", ano: "4º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
     { nome: "ÁUREA APARECIDA SOUZA CARDOSO", escola: "ALZIRA", disciplina: "EDM", ano: "1º", turma: "E", turno: "TARDE", telefone: "(00) 00000-0000" },
     { nome: "CRISTIANE AUGUSTA COSTA", escola: "ALZIRA", disciplina: "EDM", ano: "3º", turma: "E", turno: "TARDE", telefone: "(00) 00000-0000" },
@@ -304,8 +307,11 @@ function renderTable() {
         deleteBtn.textContent = "Excluir";
         deleteBtn.classList.add("btn-delete"); // Usa a classe definida no CSS
         deleteBtn.onclick = () => {
-            if (confirm(`Tem certeza que deseja remover o(a) professor(a) ${prof.nome}?`)) {
+            const senha = prompt(`Para excluir o(a) professor(a) ${prof.nome}, digite a senha de segurança:`);
+            if (senha === "qwe123") {
                 removeProfessor(prof.originalIndex);
+            } else if (senha !== null) {
+                alert("Senha incorreta! A exclusão foi cancelada.");
             }
         };
         actionsCell.appendChild(deleteBtn);
@@ -322,6 +328,7 @@ function saveAndRender() {
 
 function removeProfessor(index) {
     professores.splice(index, 1);
+    resetForm(); // Limpa o estado de edição para evitar conflitos de índice
     saveAndRender();
 }
 
@@ -352,7 +359,7 @@ function editProfessor(index) {
     document.getElementById("ano").value = professorToEdit.ano || "";
     document.getElementById("turma").value = professorToEdit.turma || "";
     document.getElementById("turno").value = professorToEdit.turno || "";
-    document.getElementById("telefone").value = professorToEdit.telefone;
+    document.getElementById("telefone").value = professorToEdit.telefone || ""; // Fallback para campo vazio
 
     if (registrationSection) {
         registrationSection.classList.remove("hidden");
@@ -565,16 +572,12 @@ if (btnDetailedReport) {
             return;
         }
 
-        // Agrupa por Escola, depois por Ano, depois por Turma
+        // Agrupa apenas por Escola
         const groupedData = listaParaRelatorio.reduce((acc, prof) => {
             if (!acc[prof.escola]) {
-                acc[prof.escola] = {};
+                acc[prof.escola] = [];
             }
-            const key = `${prof.ano} - ${prof.turma}`;
-            if (!acc[prof.escola][key]) {
-                acc[prof.escola][key] = [];
-            }
-            acc[prof.escola][key].push(prof);
+            acc[prof.escola].push(prof);
             return acc;
         }, {});
 
@@ -586,55 +589,46 @@ if (btnDetailedReport) {
                     body { font-family: Arial, sans-serif; margin: 20px; }
                     h1 { text-align: center; color: #333; }
                     h2 { color: #4CAF50; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 25px; }
-                    h3 { color: #3498db; margin-left: 15px; margin-top: 15px; }
-                    table { width: 100%; border-collapse: collapse; margin-left: 30px; margin-bottom: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 30px; }
                     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
                     th { background-color: #f2f2f2; }
                 </style>
             </head>
             <body>
-                <h1>Relatório Detalhado de Professores</h1>
+                <h1>Lista de Presença Presencial</h1>
         `;
 
         // Ordena as escolas alfabeticamente para o relatório
         const escolasOrdenadas = Object.keys(groupedData).sort((a, b) => a.localeCompare(b));
 
         escolasOrdenadas.forEach(escola => {
-            const totalEscola = Object.values(groupedData[escola]).flat().length;
+            const totalEscola = groupedData[escola].length;
             reportHtml += `<h2>Escola: ${escola} (${totalEscola} professores)</h2>`;
-
-            // Ordena as chaves (Ano - Turma) dentro da escola
-            const chavesOrdenadas = Object.keys(groupedData[escola]).sort((a, b) => a.localeCompare(b));
-
-            chavesOrdenadas.forEach(chave => {
-                reportHtml += `<h3>${chave} (${groupedData[escola][chave].length} professores)</h3>`;
-                reportHtml += `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Disciplina</th>
-                                <th>Turno</th>
-                                <th>Telefone</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                groupedData[escola][chave].forEach(prof => {
-                    reportHtml += `
+            reportHtml += `
+                <table>
+                    <thead>
                         <tr>
-                            <td>${prof.nome}</td>
-                            <td>${prof.disciplina}</td>
-                            <td>${prof.turno}</td>
-                            <td>${prof.telefone}</td>
+                            <th>Nome do Professor</th>
+                            <th>Assinatura</th>
                         </tr>
-                    `;
-                });
+                    </thead>
+                    <tbody>
+            `;
+            
+            // Ordena os professores por nome dentro da escola
+            groupedData[escola].sort((a, b) => a.nome.localeCompare(b.nome)).forEach(prof => {
                 reportHtml += `
-                        </tbody>
-                    </table>
+                    <tr>
+                        <td>${prof.nome}</td>
+                        <td><div style="width: 300px; height: 20px; border-bottom: 1px solid #000;"></div></td>
+                    </tr>
                 `;
             });
+
+            reportHtml += `
+                    </tbody>
+                </table>
+            `;
         });
 
         reportHtml += `
@@ -647,6 +641,46 @@ if (btnDetailedReport) {
         newWindow.document.close(); // Importante para alguns navegadores
         newWindow.print();
         // newWindow.close(); // Opcional: fechar após o diálogo de impressão ser dispensado
+    };
+}
+
+// Função para Backup JSON (Segurança de Dados)
+if (btnBackup) {
+    btnBackup.onclick = () => {
+        const dataStr = JSON.stringify(professores, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `backup_professores_${new Date().toISOString().slice(0,10)}.json`;
+        link.click();
+    };
+}
+
+// Função para Restaurar Backup
+if (btnRestaurar) {
+    btnRestaurar.onclick = () => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".json";
+        input.onchange = e => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = readerEvent => {
+                try {
+                    const content = JSON.parse(readerEvent.target.result);
+                    if (Array.isArray(content) && confirm("Isso substituirá todos os dados atuais. Continuar?")) {
+                        professores = content;
+                        saveAndRender();
+                        alert("Dados restaurados com sucesso!");
+                    }
+                } catch (err) {
+                    alert("Arquivo de backup inválido.");
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     };
 }
 
@@ -702,9 +736,9 @@ if (form) {
         // RegEx para validar telefone com a máscara (ex: (11) 99999-9999)
         const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
 
-        if (telefone !== "" && !phoneRegex.test(telefone)) {
+        if (telefone === "" || !phoneRegex.test(telefone)) {
             telefoneInput.classList.add("invalid");
-            alert("Por favor, insira um telefone válido com o DDD (ex: (11) 99999-9999).");
+            alert("O campo Telefone é obrigatório e deve seguir o padrão (00) 00000-0000.");
             return;
         }
 
