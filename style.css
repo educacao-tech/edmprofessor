@@ -1,4 +1,9 @@
 /* Estilo geral da página */
+* {
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
 body {
     font-family: Arial, Helvetica, sans-serif;
     background-color: #f9f9f9;
@@ -15,7 +20,8 @@ h1 {
 
 /* Estilo da tabela */
 table {
-    width: 70%;
+    width: 95%;
+    max-width: 900px;
     margin: 20px auto;
     border-collapse: collapse;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -48,7 +54,8 @@ tr:hover {
 
 /* Estilo do formulário */
 form {
-    width: 50%;
+    width: 95%;
+    max-width: 500px;
     margin: 30px auto;
     padding: 20px;
     background-color: #fff;
@@ -82,6 +89,25 @@ button {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+}
+
+/* Botão de edição específico */
+button.btn-edit {
+    background-color: #3498db; /* Um azul agradável */
+    margin-right: 5px; /* Espaçamento entre os botões */
+}
+
+button.btn-edit:hover {
+    background-color: #2980b9;
+}
+
+/* Botão de exclusão específico */
+button.btn-delete {
+    background-color: #e74c3c;
+}
+
+button.btn-delete:hover {
+    background-color: #c0392b;
 }
 
 button:hover {
