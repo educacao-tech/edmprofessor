@@ -43,6 +43,9 @@ body {
 
 /* Menu Superior */
 .main-header {
+    position: sticky;
+    top: 0;
+    z-index: 1500;
     background-color: #fff;
     padding: 15px 5%;
     display: flex;
@@ -52,25 +55,32 @@ body {
     margin-bottom: 20px;
 }
 
+.logo-group {
+    display: flex;
+    align-items: center;
+    flex: 1; /* Ocupa o espaço da esquerda */
+}
+
+.header-logo {
+    height: 40px;
+    margin-right: 15px;
+}
+
 .main-header h1 {
+    flex: 2; /* Ocupa o centro e garante mais espaço para o texto */
+    text-align: center;
     margin: 0;
     font-size: 1.5rem;
 }
 
 .btn-menu {
+    flex: 0 0 auto; /* Mantém o tamanho original do botão */
     background-color: #2ecc71;
     font-weight: bold;
 }
 
 .btn-menu:hover {
     background-color: #27ae60;
-}
-
-/* Título centralizado */
-h1 {
-    text-align: center;
-    color: #333;
-    margin-top: 20px;
 }
 
 /* Estilo da tabela */
@@ -85,16 +95,25 @@ table {
 
 /* Cabeçalho da tabela */
 th {
+    position: sticky;
+    top: 70px; /* Ajustado para ficar logo abaixo do menu principal fixo */
+    z-index: 1000;
+    background-clip: padding-box; /* Garante que as bordas apareçam corretamente com sticky */
     background-color: #4CAF50;
     color: white;
     padding: 12px;
     text-align: left;
+    white-space: nowrap; /* Impede quebra de linha no cabeçalho */
+    overflow: hidden; /* Oculta o texto que excede */
 }
 
 /* Células da tabela */
 td {
     border: 1px solid #ddd;
     padding: 10px;
+    white-space: nowrap; /* Impede quebra de linha no conteúdo */
+    overflow: hidden; /* Oculta o texto que excede */
+    text-overflow: ellipsis; /* Adiciona "..." para texto cortado */
 }
 
 /* Linhas alternadas */
@@ -159,6 +178,12 @@ input[type="tel"] {
     border-radius: 4px;
 }
 
+/* Classe de validação de erro */
+input.invalid {
+    border-color: #e74c3c !important;
+    background-color: #fff6f6;
+}
+
 /* Botão */
 button {
     background-color: #4CAF50;
@@ -208,8 +233,8 @@ button.btn-delete:hover {
 }
 
 #searchInput {
-    flex: 2;
-    min-width: 250px;
+    width: 100%; /* Preenche o container flex: 2 definido no HTML */
+    min-width: 150px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -226,8 +251,13 @@ button.btn-delete:hover {
 /* Estilo para os grupos de filtro */
 .filter-group {
     flex: 1;
-    min-width: 200px;
+    min-width: 120px;
     margin-top: 0;
+}
+
+.filter-group.search-group {
+    flex: 1 0 100%; /* Ocupa a largura total no topo */
+    margin-bottom: 5px;
 }
 
 .filter-group label {
@@ -240,7 +270,7 @@ button.btn-delete:hover {
 
 .filter-group select {
     width: 100%;
-    padding: 9px;
+    padding: 10px; /* Equalizando a altura com o input de busca */
     margin-bottom: 0; 
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -295,11 +325,119 @@ button.btn-delete:hover {
     }
 }
 
+/* Container do Gráfico de Estatísticas */
+.stats-container {
+    width: 95%;
+    max-width: 1000px;
+    margin: 0 auto 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.stats-container h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.1rem;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 5px;
+    display: inline-block;
+}
+
+.chart-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.chart-label {
+    width: 180px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chart-bar-bg {
+    flex-grow: 1;
+    background: #f0f0f0;
+    height: 18px;
+    border-radius: 9px;
+    margin: 0 15px;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+.chart-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #81c784);
+    border-radius: 9px;
+    width: 0%; /* Inicia em 0 para a animação */
+    transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.chart-count {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+    width: 35px;
+    text-align: right;
+}
+
 /* Ajuste para a tabela acompanhar a largura da busca */
 table {
-    max-width: 1000px;
+    max-width: 1200px; /* Aumenta a largura máxima para acomodar mais colunas */
 }
 
 button:hover {
     background-color: #45a049;
+}
+
+/* Responsividade para celulares */
+@media (max-width: 600px) {
+    .filter-group.search-group,
+    .filter-group {
+        flex: 1 0 100%; /* Força cada filtro a ocupar uma linha inteira */
+    }
+
+    .search-footer {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+
+    /* Responsividade para o cabeçalho */
+    .main-header {
+        flex-direction: column; /* Empilha os itens verticalmente */
+        padding: 15px 20px; /* Ajusta o padding para telas menores */
+    }
+
+    .logo-group {
+        flex: none; /* Remove o comportamento flex: 1 */
+        margin-bottom: 10px; /* Espaçamento entre os logos e o título */
+        justify-content: center; /* Centraliza os logos dentro do grupo */
+    }
+
+    .header-logo {
+        height: 30px; /* Reduz o tamanho dos logos em telas pequenas */
+        margin-right: 10px;
+    }
+
+    .main-header h1 {
+        flex: none; /* Remove o comportamento flex: 2 */
+        font-size: 1.2rem; /* Ajusta o tamanho da fonte do título */
+        margin-top: 10px; /* Espaçamento entre o título e o botão */
+    }
+
+    .btn-menu {
+        flex: none; /* Remove o comportamento flex: 0 0 auto */
+        width: 100%; /* Faz o botão ocupar a largura total */
+        max-width: 250px; /* Limita a largura máxima do botão */
+        margin-top: 15px; /* Espaçamento entre o título e o botão */
+    }
 }

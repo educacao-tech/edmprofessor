@@ -7,6 +7,11 @@
 </head>
 <body>
     <header class="main-header">
+        <div class="logo-group">
+            <img src="https://raw.githubusercontent.com/educacao-tech/edmprofessor/main/batatais.png" alt="Logo Batatais" class="header-logo">
+            <img src="https://raw.githubusercontent.com/educacao-tech/edmprofessor/main/secretaria.png" alt="Logo Secretaria" class="header-logo">
+            <img src="https://raw.githubusercontent.com/educacao-tech/edmprofessor/main/edm.png" alt="Logo EDM" class="header-logo">
+        </div>
         <h1>Gestão de Professores</h1>
         <button id="btnAbrirCadastro" class="btn-menu">➕ Novo Professor</button>
     </header>
@@ -25,6 +30,12 @@
         <label for="disciplina">Disciplina:</label>
         <input type="text" id="disciplina" placeholder="Ex: Matemática" required>
 
+        <label for="turma">Turma:</label>
+        <input type="text" id="turma" placeholder="Ex: 4º B">
+
+        <label for="turno">Turno:</label>
+        <input type="text" id="turno" placeholder="Ex: MANHÃ">
+
         <label for="telefone">Telefone:</label>
         <input type="tel" id="telefone" placeholder="(DDD) 99999-9999" required>
 
@@ -38,7 +49,7 @@
     <!-- Campo de Busca -->
     <div class="search-container">
         <div class="filters-grid">
-            <div class="filter-group" style="flex: 2;">
+            <div class="filter-group search-group">
                 <label for="searchInput">Busca Rápida:</label>
                 <input type="text" id="searchInput" placeholder="NOME OU ESCOLA...">
             </div>
@@ -56,6 +67,20 @@
                     <option value="">TODAS</option>
                 </select>
             </div>
+
+            <div class="filter-group">
+                <label for="filterTurma">Turma:</label>
+                <select id="filterTurma">
+                    <option value="">TODAS</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filterTurno">Turno:</label>
+                <select id="filterTurno">
+                    <option value="">TODAS</option>
+                </select>
+            </div>
         </div>
 
         <div class="search-footer">
@@ -63,11 +88,22 @@
                 Professores encontrados: 0
             </div>
             <div class="report-actions">
+                <button type="button" id="btnToggleChart" class="btn-report">Ocultar Gráfico</button>
+                <button type="button" id="btnLimparFiltros" class="btn-report">Limpar Filtros</button>
                 <button type="button" id="btnExportar" class="btn-report">Exportar CSV</button>
                 <button type="button" id="btnImprimir" class="btn-report">Imprimir Relatório</button>
             </div>
         </div>
     </div>
+
+    <!-- Seção de Estatísticas -->
+    <div id="statsSection" class="stats-container hidden">
+        <h3>Distribuição por Escola</h3>
+        <div id="chartContainer"></div>
+    </div>
+
+    <!-- Sentinela invisível para detectar o estado sticky do cabeçalho -->
+    <div id="header-sentinel"></div>
 
     <!-- Tabela de Dados -->
     <table>
@@ -76,6 +112,8 @@
                 <th>Nome</th>
                 <th>Escola</th>
                 <th>Disciplina</th>
+                <th>Turma</th>
+                <th>Turno</th>
                 <th>Telefone</th>
                 <th>Ações</th>
             </tr>
