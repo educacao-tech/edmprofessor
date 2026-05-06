@@ -11,6 +11,7 @@ const searchInput = document.getElementById("searchInput");
 const contadorElement = document.getElementById("contador");
 const btnAbrirCadastro = document.getElementById("btnAbrirCadastro");
 const registrationSection = document.getElementById("registrationSection");
+const closeModalBtn = document.getElementById("closeModalBtn");
 const filterEscolaSelect = document.getElementById("filterEscola");
 const filterDisciplinaSelect = document.getElementById("filterDisciplina");
 const btnExportar = document.getElementById("btnExportar");
@@ -256,6 +257,27 @@ if (btnAbrirCadastro && registrationSection) {
         if (isHidden) resetForm();
     };
 }
+
+// Evento do botão (X) para fechar o modal
+if (closeModalBtn) {
+    closeModalBtn.onclick = () => resetForm();
+}
+
+// Fechar modal ao clicar no fundo escurecido
+if (registrationSection) {
+    registrationSection.addEventListener("click", (e) => {
+        if (e.target === registrationSection) {
+            resetForm();
+        }
+    });
+}
+
+// Atalho de teclado para fechar o modal com a tecla 'Esc'
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && registrationSection && !registrationSection.classList.contains("hidden")) {
+        resetForm();
+    }
+});
 
 // Event listeners para os novos filtros
 if (filterEscolaSelect) {

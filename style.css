@@ -15,8 +15,18 @@ body {
     display: none !important;
 }
 
-/* Animação de entrada para o formulário */
-#registrationSection:not(.hidden) {
+/* Modal e Fundo Escurecido */
+#registrationSection {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Fundo escurecido */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000; /* Garante que fique acima de tudo */
     animation: fadeIn 0.4s ease-out;
 }
 
@@ -99,14 +109,33 @@ tr:hover {
 
 /* Estilo do formulário */
 form {
+    position: relative; /* Necessário para posicionar o botão de fechar em relação ao form */
     width: 95%;
     max-width: 600px;
-    margin: 30px auto;
+    margin: 0; /* Centralização agora é feita pelo Flexbox do pai */
     padding: 20px;
     background-color: #fff;
     border: 1px solid #ddd;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border-radius: 8px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none !important; /* Remove o fundo verde padrão */
+    border: none;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #666 !important; /* Cor do X */
+    cursor: pointer;
+    line-height: 1;
+    padding: 5px;
+}
+
+.close-modal:hover {
+    color: #e74c3c !important; /* Muda para vermelho no hover */
 }
 
 /* Labels e inputs */
