@@ -12,6 +12,7 @@ const contadorElement = document.getElementById("contador");
 const nomeInput = document.getElementById("nome");
 const escolaInput = document.getElementById("escola");
 const disciplinaInput = document.getElementById("disciplina");
+const anoInput = document.getElementById("ano");
 const turmaInput = document.getElementById("turma");
 const turnoInput = document.getElementById("turno");
 const btnAbrirCadastro = document.getElementById("btnAbrirCadastro");
@@ -19,6 +20,7 @@ const registrationSection = document.getElementById("registrationSection");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const filterEscolaSelect = document.getElementById("filterEscola");
 const filterDisciplinaSelect = document.getElementById("filterDisciplina");
+const filterAnoSelect = document.getElementById("filterAno");
 const filterTurmaSelect = document.getElementById("filterTurma");
 const filterTurnoSelect = document.getElementById("filterTurno");
 const btnExportar = document.getElementById("btnExportar");
@@ -29,56 +31,80 @@ const btnLimparFiltros = document.getElementById("btnLimparFiltros");
 const headerSentinel = document.getElementById("header-sentinel");
 
 // Estado da aplicação: carrega dados salvos ou inicia array vazio
-const dadosSalvos = JSON.parse(localStorage.getItem("professores"));
+let dadosSalvos = JSON.parse(localStorage.getItem("professores"));
+
+// MIGRACAO AUTOMÁTICA: Detecta dados no formato antigo (ex: "5º B" no campo turma)
+// e separa automaticamente em 'ano' e 'turma' para manter a consistência do banco.
+if (dadosSalvos && dadosSalvos.length > 0) {
+    let houveMigracao = false;
+    dadosSalvos = dadosSalvos.map(prof => {
+        // Se a turma contém "º" (indicando o ano) e o campo ano está vazio ou N/A
+        if (prof.turma && prof.turma.includes("º") && (!prof.ano || prof.ano === "N/A")) {
+            const partes = prof.turma.trim().split(/\s+/);
+            if (partes.length >= 2) {
+                houveMigracao = true;
+                return { ...prof, ano: partes[0], turma: partes[1] };
+            }
+        }
+        return prof;
+    });
+    if (houveMigracao) {
+        localStorage.setItem("professores", JSON.stringify(dadosSalvos));
+    }
+}
+
 let professores = (dadosSalvos && dadosSalvos.length > 0) ? dadosSalvos : [
-    { nome: "ANA CAROLINA VENTUROSO BÉRGAMO CÂNDIDO", escola: "ALZIRA", disciplina: "EDM", turma: "4º B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "ÁUREA APARECIDA SOUZA CARDOSO", escola: "ALZIRA", disciplina: "EDM", turma: "1º E", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "CRISTIANE AUGUSTA COSTA", escola: "ALZIRA", disciplina: "EDM", turma: "3º E", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ELIZÂNGELA CERCE CONUNCHUC", escola: "ALZIRA", disciplina: "EDM", turma: "1º C", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "FABIANA CÁSSIA DOS SANTOS", escola: "ALZIRA", disciplina: "EDM", turma: "2º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "FABIANA KARINA DE OLIVEIRA", escola: "ALZIRA", disciplina: "EDM", turma: "2º B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "GABRIELA BOLOGNA BÉRGAMO VENDRUSCOLO", escola: "ALZIRA", disciplina: "EDM", turma: "1º D", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ISABEL CRISTINA MANIERI DANIEL", escola: "ALZIRA", disciplina: "EDM", turma: "1º B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "LOURDES RAYMUNDINI DA SILVA", escola: "ALZIRA", disciplina: "EDM", turma: "2º D", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "LUCIANA PAULA LEMES", escola: "ALZIRA", disciplina: "EDM", turma: "3º C", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "MARTA LUZIA PACHETI", escola: "ALZIRA", disciplina: "EDM", turma: "5º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "NEUSA HELENA DE CASTRO GALANTI", escola: "ALZIRA", disciplina: "EDM", turma: "4º E", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "PATRÍCIA CORSINI COSTA", escola: "ALZIRA", disciplina: "EDM", turma: "3º B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "VIVIANE TOMAZ BANACO", escola: "ALZIRA", disciplina: "EDM", turma: "4º D", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "JESILDA BATISTA DA SILVA DOMINGOS", escola: "ANNA", disciplina: "EDM", turma: "2º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "LEILA APARECIDA MILAN BARBOZA", escola: "ANNA", disciplina: "EDM", turma: "1º D", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "LETÍCIA NARA PIRES", escola: "ANNA", disciplina: "EDM", turma: "N/A", turno: "N/A", telefone: "(00) 00000-0000" },
-    { nome: "LÚCIA HELENA SAQUETO G. GONÇALVES", escola: "ANNA", disciplina: "EDM", turma: "3º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "MARCELA YARA V. L. RAYMUNDO A. CARNEIRO", escola: "ANNA", disciplina: "EDM", turma: "5º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "NAYRA RODRIGUES OLIVÉRIO CAMPI", escola: "ANNA", disciplina: "EDM", turma: "3º B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "SUELLEN FRANCINE DA SILVA e SILVA", escola: "ANNA", disciplina: "EDM", turma: "1º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "DEILANE FRANZONI", escola: "BRAGA", disciplina: "EDM", turma: "1º B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "ELISÂNGELA ALMINDA OLIVEIRA BIBIANO", escola: "BRAGA", disciplina: "EDM", turma: "3º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "MARIANA R. DE FARIA EVANGELISTA", escola: "BRAGA", disciplina: "EDM", turma: "4º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "PRISCILA BRONDI ANHEZINI IVAN", escola: "BRAGA", disciplina: "EDM", turma: "1º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "ROSANA APARECIDA DA SILVA", escola: "BRAGA", disciplina: "EDM", turma: "4º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "TALUANA BARBOSA PEREIRA", escola: "BRAGA", disciplina: "EDM", turma: "2º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "MARLENE APARECIDA BARBOSA DUARTE", escola: "CAIC", disciplina: "EDM", turma: "N/A", turno: "INTEGRAL", telefone: "(00) 00000-0000" },
-    { nome: "ADMILDE GABRIEL DE SOUSA", escola: "CÉLIA", disciplina: "EDM", turma: "5º B", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ALINE SANTOS DA COSTA", escola: "CÉLIA", disciplina: "EDM", turma: "5º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "EDNILSA GABRIEL DE SOUSA", escola: "CÉLIA", disciplina: "EDM", turma: "1º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "JAQUELINE ARANTES RIBEIRO", escola: "CÉLIA", disciplina: "EDM", turma: "1º B", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ADRIANA APARECIDA VITAL DA SILVA", escola: "ESTHER", disciplina: "EDM", turma: "5º B", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ALEXANDRE SILVA PEDROSO", escola: "ESTHER", disciplina: "EDM", turma: "3º A", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "DAIANE ROBERTA DE SOUSA", escola: "ESTHER", disciplina: "EDM", turma: "1º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "DOUGLAS WILLIAM DA SILVA", escola: "ESTHER", disciplina: "EDM", turma: "4º B", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "JULIANA MENDES FERREIRA FUKUDA", escola: "ESTHER", disciplina: "EDM", turma: "1º A", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "MARTA VIEIRA ALVES", escola: "ESTHER", disciplina: "EDM", turma: "2º B", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "MICHELLE CRISTINA SILVA", escola: "ESTHER", disciplina: "EDM", turma: "2º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ANDRÉA LÚCIA STOPPA DE O. BAVIERA", escola: "PADRE", disciplina: "EDM", turma: "5º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "ARETA FIGUEIREDO ROSA", escola: "PADRE", disciplina: "EDM", turma: "2º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "DANIELA PARADA FERREIRA", escola: "PADRE", disciplina: "EDM", turma: "3º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ELAINE CRISTINA DE SOUSA GOULART", escola: "PADRE", disciplina: "EDM", turma: "5º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "FABIANA MEIRE NAZAR", escola: "PADRE", disciplina: "EDM", turma: "4º B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "GIOVANA TAIS DE OLIVEIRA BAGIO", escola: "PADRE", disciplina: "EDM", turma: "4º C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "LANA MARA FIOCO DOS SANTOS", escola: "PADRE", disciplina: "EDM", turma: "4º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "MARIA HELOÍSA DE ARAÚJO CRUZ", escola: "PADRE", disciplina: "EDM", turma: "1º A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "VERENA DE FÁTIMA CARVALHO", escola: "PADRE", disciplina: "EDM", turma: "2º A", turno: "MANHÃ", telefone: "(00) 00000-0000" }
+    { nome: "ANA CAROLINA VENTUROSO BÉRGAMO CÂNDIDO", escola: "ALZIRA", disciplina: "EDM", ano: "4º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "ÁUREA APARECIDA SOUZA CARDOSO", escola: "ALZIRA", disciplina: "EDM", ano: "1º", turma: "E", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "CRISTIANE AUGUSTA COSTA", escola: "ALZIRA", disciplina: "EDM", ano: "3º", turma: "E", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "ELIZÂNGELA CERCE CONUNCHUC", escola: "ALZIRA", disciplina: "EDM", ano: "1º", turma: "C", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "FABIANA CÁSSIA DOS SANTOS", escola: "ALZIRA", disciplina: "EDM", ano: "2º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "FABIANA KARINA DE OLIVEIRA", escola: "ALZIRA", disciplina: "EDM", ano: "2º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "GABRIELA BOLOGNA BÉRGAMO VENDRUSCOLO", escola: "ALZIRA", disciplina: "EDM", ano: "1º", turma: "D", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "ISABEL CRISTINA MANIERI DANIEL", escola: "ALZIRA", disciplina: "EDM", ano: "1º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "JACKELINE SILVA RODRIGUES", escola: "ALZIRA", disciplina: "EDM", ano: "N/A", turma: "N/A", turno: "N/A", telefone: "(00) 00000-0000" },
+    { nome: "LARISSA DANIELE DIAS", escola: "ALZIRA", disciplina: "EDM", ano: "N/A", turma: "N/A", turno: "N/A", telefone: "(00) 00000-0000" },
+    { nome: "LOURDES RAYMUNDINI DA SILVA", escola: "ALZIRA", disciplina: "EDM", ano: "2º", turma: "D", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "LUCIANA PAULA LEMES", escola: "ALZIRA", disciplina: "EDM", ano: "3º", turma: "C", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "MARTA LUZIA PACHETI", escola: "ALZIRA", disciplina: "EDM", ano: "5º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "NEUSA HELENA DE CASTRO GALANTI", escola: "ALZIRA", disciplina: "EDM", ano: "4º", turma: "E", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "PATRÍCIA ALEIXO SILVA de OLIVEIRA", escola: "ALZIRA", disciplina: "EDM", ano: "N/A", turma: "N/A", turno: "N/A", telefone: "(00) 00000-0000" },
+    { nome: "PATRÍCIA CORSINI COSTA", escola: "ALZIRA", disciplina: "EDM", ano: "3º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "VIVIANE TOMAZ BANACO", escola: "ALZIRA", disciplina: "EDM", ano: "4º", turma: "D", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "JESILDA BATISTA DA SILVA DOMINGOS", escola: "ANNA", disciplina: "EDM", ano: "2º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "LEILA APARECIDA MILAN BARBOZA", escola: "ANNA", disciplina: "EDM", ano: "1º", turma: "D", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "LETÍCIA NARA PIRES", escola: "ANNA", disciplina: "EDM", ano: "N/A", turma: "N/A", turno: "N/A", telefone: "(00) 00000-0000" },
+    { nome: "LÚCIA HELENA SAQUETO G. GONÇALVES", escola: "ANNA", disciplina: "EDM", ano: "3º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "MARCELA YARA V. L. RAYMUNDO A. CARNEIRO", escola: "ANNA", disciplina: "EDM", ano: "5º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "NAYRA RODRIGUES OLIVÉRIO CAMPI", escola: "ANNA", disciplina: "EDM", ano: "3º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "SUELLEN FRANCINE DA SILVA e SILVA", escola: "ANNA", disciplina: "EDM", ano: "1º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "DEILANE FRANZONI", escola: "BRAGA", disciplina: "EDM", ano: "1º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "ELISÂNGELA ALMINDA OLIVEIRA BIBIANO", escola: "BRAGA", disciplina: "EDM", ano: "3º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "MARIANA R. DE FARIA EVANGELISTA", escola: "BRAGA", disciplina: "EDM", ano: "4º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "PRISCILA BRONDI ANHEZINI IVAN", escola: "BRAGA", disciplina: "EDM", ano: "1º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "ROSANA APARECIDA DA SILVA", escola: "BRAGA", disciplina: "EDM", ano: "4º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "TALUANA BARBOSA PEREIRA", escola: "BRAGA", disciplina: "EDM", ano: "2º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "MARLENE APARECIDA BARBOSA DUARTE", escola: "CAIC", disciplina: "EDM", ano: "N/A", turma: "N/A", turno: "INTEGRAL", telefone: "(00) 00000-0000" },
+    { nome: "ADMILDE GABRIEL DE SOUSA", escola: "CÉLIA", disciplina: "EDM", ano: "5º", turma: "B", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "ALINE SANTOS DA COSTA", escola: "CÉLIA", disciplina: "EDM", ano: "5º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "EDNILSA GABRIEL DE SOUSA", escola: "CÉLIA", disciplina: "EDM", ano: "1º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "JAQUELINE ARANTES RIBEIRO", escola: "CÉLIA", disciplina: "EDM", ano: "1º", turma: "B", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "ADRIANA APARECIDA VITAL DA SILVA", escola: "ESTHER", disciplina: "EDM", ano: "5º", turma: "B", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "ALEXANDRE SILVA PEDROSO", escola: "ESTHER", disciplina: "EDM", ano: "3º", turma: "A", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "DAIANE ROBERTA DE SOUSA", escola: "ESTHER", disciplina: "EDM", ano: "1º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "DOUGLAS WILLIAM DA SILVA", escola: "ESTHER", disciplina: "EDM", ano: "4º", turma: "B", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "JULIANA MENDES FERREIRA FUKUDA", escola: "ESTHER", disciplina: "EDM", ano: "1º", turma: "A", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "MARTA VIEIRA ALVES", escola: "ESTHER", disciplina: "EDM", ano: "2º", turma: "B", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "MICHELLE CRISTINA SILVA", escola: "ESTHER", disciplina: "EDM", ano: "2º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "ANDRÉA LÚCIA STOPPA DE O. BAVIERA", escola: "PADRE", disciplina: "EDM", ano: "5º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "ARETA FIGUEIREDO ROSA", escola: "PADRE", disciplina: "EDM", ano: "2º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "DANIELA PARADA FERREIRA", escola: "PADRE", disciplina: "EDM", ano: "3º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "ELAINE CRISTINA DE SOUSA GOULART", escola: "PADRE", disciplina: "EDM", ano: "5º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "FABIANA MEIRE NAZAR", escola: "PADRE", disciplina: "EDM", ano: "4º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "GIOVANA TAIS DE OLIVEIRA BAGIO", escola: "PADRE", disciplina: "EDM", ano: "4º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
+    { nome: "LANA MARA FIOCO DOS SANTOS", escola: "PADRE", disciplina: "EDM", ano: "4º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "MARIA HELOÍSA DE ARAÚJO CRUZ", escola: "PADRE", disciplina: "EDM", ano: "1º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
+    { nome: "VERENA DE FÁTIMA CARVALHO", escola: "PADRE", disciplina: "EDM", ano: "2º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" }
 ];
 
 // Variável global para rastrear se estamos editando e qual índice
@@ -123,6 +149,16 @@ function populateFilters() {
         option.value = disciplina;
         option.textContent = disciplina;
         filterDisciplinaSelect.appendChild(option);
+    });
+
+    // Coleta anos únicos e ordena
+    const anos = [...new Set(professores.map(p => p.ano).filter(Boolean))].sort();
+    filterAnoSelect.innerHTML = '<option value="">TODAS</option>';
+    anos.forEach(ano => {
+        const option = document.createElement("option");
+        option.value = ano;
+        option.textContent = ano;
+        filterAnoSelect.appendChild(option);
     });
 
     // Coleta turmas únicas e ordena
@@ -211,6 +247,7 @@ function renderTable() {
     // Pega os valores selecionados nos filtros de escola e disciplina
     const selectedEscola = filterEscolaSelect ? filterEscolaSelect.value : "";
     const selectedDisciplina = filterDisciplinaSelect ? filterDisciplinaSelect.value : "";
+    const selectedAno = filterAnoSelect ? filterAnoSelect.value : "";
     const selectedTurma = filterTurmaSelect ? filterTurmaSelect.value : "";
     const selectedTurno = filterTurnoSelect ? filterTurnoSelect.value : "";
 
@@ -220,6 +257,7 @@ function renderTable() {
         .filter(prof => 
             removerAcentos(prof.nome).includes(termoBusca) || 
             removerAcentos(prof.escola).includes(termoBusca) ||
+            removerAcentos(prof.ano || "").includes(termoBusca) ||
             removerAcentos(prof.turma || "").includes(termoBusca) ||
             removerAcentos(prof.turno || "").includes(termoBusca)
         );
@@ -228,6 +266,7 @@ function renderTable() {
     const listaFiltradaPorDropdown = listaExibida.filter(prof => 
         (selectedEscola === "" || prof.escola === selectedEscola) &&
         (selectedDisciplina === "" || prof.disciplina === selectedDisciplina) &&
+        (selectedAno === "" || prof.ano === selectedAno) &&
         (selectedTurma === "" || prof.turma === selectedTurma) &&
         (selectedTurno === "" || prof.turno === selectedTurno)
     );
@@ -246,12 +285,13 @@ function renderTable() {
         newRow.insertCell(0).textContent = prof.nome;
         newRow.insertCell(1).textContent = prof.escola;
         newRow.insertCell(2).textContent = prof.disciplina;
-        newRow.insertCell(3).textContent = prof.turma || "";
-        newRow.insertCell(4).textContent = prof.turno || "";
-        newRow.insertCell(5).textContent = prof.telefone;
+        newRow.insertCell(3).textContent = prof.ano || "";
+        newRow.insertCell(4).textContent = prof.turma || "";
+        newRow.insertCell(5).textContent = prof.turno || "";
+        newRow.insertCell(6).textContent = prof.telefone;
 
         // Coluna de Ações (Excluir)
-        const actionsCell = newRow.insertCell(6);
+        const actionsCell = newRow.insertCell(7);
 
         // Botão de Edição
         const editBtn = document.createElement("button");
@@ -294,7 +334,7 @@ function resetForm() {
     if (registrationSection) registrationSection.classList.add("hidden");
 
     // Remove classes de erro de todos os campos
-    [nomeInput, escolaInput, disciplinaInput, turmaInput, turnoInput, telefoneInput].forEach(input => {
+    [nomeInput, escolaInput, disciplinaInput, anoInput, turmaInput, turnoInput, telefoneInput].forEach(input => {
         if (input) input.classList.remove("invalid");
     });
 
@@ -309,6 +349,7 @@ function editProfessor(index) {
     document.getElementById("nome").value = professorToEdit.nome;
     document.getElementById("escola").value = professorToEdit.escola;
     document.getElementById("disciplina").value = professorToEdit.disciplina;
+    document.getElementById("ano").value = professorToEdit.ano || "";
     document.getElementById("turma").value = professorToEdit.turma || "";
     document.getElementById("turno").value = professorToEdit.turno || "";
     document.getElementById("telefone").value = professorToEdit.telefone;
@@ -347,7 +388,7 @@ if (telefoneInput) {
 }
 
 // Remove a borda vermelha assim que o usuário começa a digitar
-[nomeInput, escolaInput, disciplinaInput, turmaInput, turnoInput, telefoneInput].forEach(input => {
+[nomeInput, escolaInput, disciplinaInput, anoInput, turmaInput, turnoInput, telefoneInput].forEach(input => {
     if (input) {
         input.addEventListener("input", () => input.classList.remove("invalid"));
     }
@@ -393,6 +434,9 @@ if (filterEscolaSelect) {
 if (filterDisciplinaSelect) {
     filterDisciplinaSelect.addEventListener("change", () => renderTable());
 }
+if (filterAnoSelect) {
+    filterAnoSelect.addEventListener("change", () => renderTable());
+}
 if (filterTurmaSelect) {
     filterTurmaSelect.addEventListener("change", () => renderTable());
 }
@@ -411,6 +455,7 @@ if (btnLimparFiltros) {
         if (searchInput) searchInput.value = "";
         if (filterEscolaSelect) filterEscolaSelect.value = "";
         if (filterDisciplinaSelect) filterDisciplinaSelect.value = "";
+        if (filterAnoSelect) filterAnoSelect.value = "";
         if (filterTurmaSelect) filterTurmaSelect.value = "";
         if (filterTurnoSelect) filterTurnoSelect.value = "";
         renderTable();
@@ -438,18 +483,21 @@ if (btnExportar) {
         const termoBusca = searchInput ? removerAcentos(searchInput.value.toUpperCase()) : "";
         const selectedEscola = filterEscolaSelect ? filterEscolaSelect.value : "";
         const selectedDisciplina = filterDisciplinaSelect ? filterDisciplinaSelect.value : "";
+        const selectedAno = filterAnoSelect ? filterAnoSelect.value : "";
         const selectedTurma = filterTurmaSelect ? filterTurmaSelect.value : "";
         const selectedTurno = filterTurnoSelect ? filterTurnoSelect.value : "";
 
         const listaFiltradaPorBusca = professores.filter(prof =>
             removerAcentos(prof.nome).includes(termoBusca) || 
             removerAcentos(prof.escola).includes(termoBusca) ||
+            removerAcentos(prof.ano || "").includes(termoBusca) ||
             removerAcentos(prof.turma || "").includes(termoBusca) ||
             removerAcentos(prof.turno || "").includes(termoBusca)
         );
         const listaParaExportar = listaFiltradaPorBusca.filter(prof => 
             (selectedEscola === "" || prof.escola === selectedEscola) &&
             (selectedDisciplina === "" || prof.disciplina === selectedDisciplina) &&
+            (selectedAno === "" || prof.ano === selectedAno) &&
             (selectedTurma === "" || prof.turma === selectedTurma) &&
             (selectedTurno === "" || prof.turno === selectedTurno)
         );
@@ -460,10 +508,10 @@ if (btnExportar) {
         }
 
         // Criar conteúdo CSV
-        let csvContent = "\uFEFFNome;Escola;Disciplina;Turma;Turno;Telefone\n";
+        let csvContent = "\uFEFFNome;Escola;Disciplina;Ano;Turma;Turno;Telefone\n";
         
         listaParaExportar.forEach(prof => {
-            csvContent += `"${prof.nome}";"${prof.escola}";"${prof.disciplina}";"${prof.turma || ''}";"${prof.turno || ''}";"${prof.telefone}"\n`;
+            csvContent += `"${prof.nome}";"${prof.escola}";"${prof.disciplina}";"${prof.ano || ''}";"${prof.turma || ''}";"${prof.turno || ''}";"${prof.telefone}"\n`;
         });
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -486,6 +534,7 @@ if (btnDetailedReport) {
         const termoBusca = searchInput ? removerAcentos(searchInput.value.toUpperCase()) : "";
         const selectedEscola = filterEscolaSelect ? filterEscolaSelect.value : "";
         const selectedDisciplina = filterDisciplinaSelect ? filterDisciplinaSelect.value : "";
+        const selectedAno = filterAnoSelect ? filterAnoSelect.value : "";
         const selectedTurma = filterTurmaSelect ? filterTurmaSelect.value : "";
         const selectedTurno = filterTurnoSelect ? filterTurnoSelect.value : "";
 
@@ -493,15 +542,18 @@ if (btnDetailedReport) {
             const profNome = removerAcentos(prof.nome);
             const profEscola = removerAcentos(prof.escola);
             const profTurma = removerAcentos(prof.turma || "");
+            const profAno = removerAcentos(prof.ano || "");
             const profTurno = removerAcentos(prof.turno || "");
 
             const matchesSearch = profNome.includes(termoBusca) ||
                                   profEscola.includes(termoBusca) ||
+                                  profAno.includes(termoBusca) ||
                                   profTurma.includes(termoBusca) ||
                                   profTurno.includes(termoBusca);
 
             const matchesDropdowns = (selectedEscola === "" || prof.escola === selectedEscola) &&
                                      (selectedDisciplina === "" || prof.disciplina === selectedDisciplina) &&
+                                     (selectedAno === "" || prof.ano === selectedAno) &&
                                      (selectedTurma === "" || prof.turma === selectedTurma) &&
                                      (selectedTurno === "" || prof.turno === selectedTurno);
             
@@ -513,15 +565,16 @@ if (btnDetailedReport) {
             return;
         }
 
-        // Agrupa por Escola e depois por Turma
+        // Agrupa por Escola, depois por Ano, depois por Turma
         const groupedData = listaParaRelatorio.reduce((acc, prof) => {
             if (!acc[prof.escola]) {
                 acc[prof.escola] = {};
             }
-            if (!acc[prof.escola][prof.turma]) {
-                acc[prof.escola][prof.turma] = [];
+            const key = `${prof.ano} - ${prof.turma}`;
+            if (!acc[prof.escola][key]) {
+                acc[prof.escola][key] = [];
             }
-            acc[prof.escola][prof.turma].push(prof);
+            acc[prof.escola][key].push(prof);
             return acc;
         }, {});
 
@@ -543,10 +596,18 @@ if (btnDetailedReport) {
                 <h1>Relatório Detalhado de Professores</h1>
         `;
 
-        for (const escola in groupedData) {
-            reportHtml += `<h2>Escola: ${escola} (${Object.values(groupedData[escola]).flat().length} professores)</h2>`;
-            for (const turma in groupedData[escola]) {
-                reportHtml += `<h3>Turma: ${turma} (${groupedData[escola][turma].length} professores)</h3>`;
+        // Ordena as escolas alfabeticamente para o relatório
+        const escolasOrdenadas = Object.keys(groupedData).sort((a, b) => a.localeCompare(b));
+
+        escolasOrdenadas.forEach(escola => {
+            const totalEscola = Object.values(groupedData[escola]).flat().length;
+            reportHtml += `<h2>Escola: ${escola} (${totalEscola} professores)</h2>`;
+
+            // Ordena as chaves (Ano - Turma) dentro da escola
+            const chavesOrdenadas = Object.keys(groupedData[escola]).sort((a, b) => a.localeCompare(b));
+
+            chavesOrdenadas.forEach(chave => {
+                reportHtml += `<h3>${chave} (${groupedData[escola][chave].length} professores)</h3>`;
                 reportHtml += `
                     <table>
                         <thead>
@@ -559,7 +620,7 @@ if (btnDetailedReport) {
                         </thead>
                         <tbody>
                 `;
-                groupedData[escola][turma].forEach(prof => {
+                groupedData[escola][chave].forEach(prof => {
                     reportHtml += `
                         <tr>
                             <td>${prof.nome}</td>
@@ -573,8 +634,8 @@ if (btnDetailedReport) {
                         </tbody>
                     </table>
                 `;
-            }
-        }
+            });
+        });
 
         reportHtml += `
             </body>
@@ -608,6 +669,7 @@ if (form) {
         const nome = document.getElementById("nome").value.trim().toUpperCase();
         const escola = document.getElementById("escola").value.trim().toUpperCase();
         const disciplina = document.getElementById("disciplina").value.trim().toUpperCase();
+        const ano = document.getElementById("ano").value.trim().toUpperCase();
         const turma = document.getElementById("turma").value.trim().toUpperCase();
         const turno = document.getElementById("turno").value.trim().toUpperCase();
         const telefone = document.getElementById("telefone").value.trim();
@@ -617,9 +679,9 @@ if (form) {
             { el: nomeInput, val: nome },
             { el: escolaInput, val: escola },
             { el: disciplinaInput, val: disciplina },
+            { el: anoInput, val: ano },
             { el: turmaInput, val: turma },
-            { el: turnoInput, val: turno },
-            { el: telefoneInput, val: telefone }
+            { el: turnoInput, val: turno }
         ];
 
         let formValido = true;
@@ -640,7 +702,7 @@ if (form) {
         // RegEx para validar telefone com a máscara (ex: (11) 99999-9999)
         const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
 
-        if (!phoneRegex.test(telefone)) {
+        if (telefone !== "" && !phoneRegex.test(telefone)) {
             telefoneInput.classList.add("invalid");
             alert("Por favor, insira um telefone válido com o DDD (ex: (11) 99999-9999).");
             return;
@@ -660,14 +722,14 @@ if (form) {
 
         if (editingIndex !== -1) {
             // Atualiza o professor existente
-            professores[editingIndex] = { nome, escola, disciplina, turma, turno, telefone };
+            professores[editingIndex] = { nome, escola, disciplina, ano, turma, turno, telefone };
             editingIndex = -1; // Reseta o estado de edição
             if (submitButton) {
                 submitButton.textContent = "Adicionar Professor"; // Reseta o texto do botão
             }
         } else {
             // Adiciona um novo professor
-            professores.push({ nome, escola, disciplina, turma, turno, telefone });
+            professores.push({ nome, escola, disciplina, ano, turma, turno, telefone });
         }
         saveAndRender();
         resetForm();

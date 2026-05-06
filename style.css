@@ -170,7 +170,8 @@ input[type="text"] {
 }
 
 input[type="text"],
-input[type="tel"] {
+input[type="tel"],
+form select {
     width: 100%;
     padding: 8px;
     margin-bottom: 15px;
