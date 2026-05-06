@@ -23,6 +23,7 @@ const filterTurmaSelect = document.getElementById("filterTurma");
 const filterTurnoSelect = document.getElementById("filterTurno");
 const btnExportar = document.getElementById("btnExportar");
 const btnImprimir = document.getElementById("btnImprimir");
+const btnDetailedReport = document.getElementById("btnDetailedReport");
 const btnToggleChart = document.getElementById("btnToggleChart");
 const btnLimparFiltros = document.getElementById("btnLimparFiltros");
 const headerSentinel = document.getElementById("header-sentinel");
@@ -475,6 +476,116 @@ if (btnExportar) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+}
+
+// Função para gerar o relatório detalhado agrupado por Escola e Turma
+if (btnDetailedReport) {
+    btnDetailedReport.onclick = () => {
+        // Re-aplica todos os filtros para obter a lista exata para o relatório
+        const termoBusca = searchInput ? removerAcentos(searchInput.value.toUpperCase()) : "";
+        const selectedEscola = filterEscolaSelect ? filterEscolaSelect.value : "";
+        const selectedDisciplina = filterDisciplinaSelect ? filterDisciplinaSelect.value : "";
+        const selectedTurma = filterTurmaSelect ? filterTurmaSelect.value : "";
+        const selectedTurno = filterTurnoSelect ? filterTurnoSelect.value : "";
+
+        const listaParaRelatorio = professores.filter(prof => {
+            const profNome = removerAcentos(prof.nome);
+            const profEscola = removerAcentos(prof.escola);
+            const profTurma = removerAcentos(prof.turma || "");
+            const profTurno = removerAcentos(prof.turno || "");
+
+            const matchesSearch = profNome.includes(termoBusca) ||
+                                  profEscola.includes(termoBusca) ||
+                                  profTurma.includes(termoBusca) ||
+                                  profTurno.includes(termoBusca);
+
+            const matchesDropdowns = (selectedEscola === "" || prof.escola === selectedEscola) &&
+                                     (selectedDisciplina === "" || prof.disciplina === selectedDisciplina) &&
+                                     (selectedTurma === "" || prof.turma === selectedTurma) &&
+                                     (selectedTurno === "" || prof.turno === selectedTurno);
+            
+            return matchesSearch && matchesDropdowns;
+        });
+
+        if (listaParaRelatorio.length === 0) {
+            alert("Não há professores para gerar o relatório com os filtros atuais.");
+            return;
+        }
+
+        // Agrupa por Escola e depois por Turma
+        const groupedData = listaParaRelatorio.reduce((acc, prof) => {
+            if (!acc[prof.escola]) {
+                acc[prof.escola] = {};
+            }
+            if (!acc[prof.escola][prof.turma]) {
+                acc[prof.escola][prof.turma] = [];
+            }
+            acc[prof.escola][prof.turma].push(prof);
+            return acc;
+        }, {});
+
+        let reportHtml = `
+            <html>
+            <head>
+                <title>Relatório Detalhado de Professores</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1 { text-align: center; color: #333; }
+                    h2 { color: #4CAF50; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 25px; }
+                    h3 { color: #3498db; margin-left: 15px; margin-top: 15px; }
+                    table { width: 100%; border-collapse: collapse; margin-left: 30px; margin-bottom: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                </style>
+            </head>
+            <body>
+                <h1>Relatório Detalhado de Professores</h1>
+        `;
+
+        for (const escola in groupedData) {
+            reportHtml += `<h2>Escola: ${escola} (${Object.values(groupedData[escola]).flat().length} professores)</h2>`;
+            for (const turma in groupedData[escola]) {
+                reportHtml += `<h3>Turma: ${turma} (${groupedData[escola][turma].length} professores)</h3>`;
+                reportHtml += `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Disciplina</th>
+                                <th>Turno</th>
+                                <th>Telefone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                groupedData[escola][turma].forEach(prof => {
+                    reportHtml += `
+                        <tr>
+                            <td>${prof.nome}</td>
+                            <td>${prof.disciplina}</td>
+                            <td>${prof.turno}</td>
+                            <td>${prof.telefone}</td>
+                        </tr>
+                    `;
+                });
+                reportHtml += `
+                        </tbody>
+                    </table>
+                `;
+            }
+        }
+
+        reportHtml += `
+            </body>
+            </html>
+        `;
+
+        const newWindow = window.open("", "_blank");
+        newWindow.document.write(reportHtml);
+        newWindow.document.close(); // Importante para alguns navegadores
+        newWindow.print();
+        // newWindow.close(); // Opcional: fechar após o diálogo de impressão ser dispensado
     };
 }
 
