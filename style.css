@@ -11,6 +11,35 @@ body {
     padding: 0;
 }
 
+.hidden {
+    display: none !important;
+}
+
+/* Menu Superior */
+.main-header {
+    background-color: #fff;
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.main-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.btn-menu {
+    background-color: #2ecc71;
+    font-weight: bold;
+}
+
+.btn-menu:hover {
+    background-color: #27ae60;
+}
+
 /* Título centralizado */
 h1 {
     text-align: center;
@@ -55,7 +84,7 @@ tr:hover {
 /* Estilo do formulário */
 form {
     width: 95%;
-    max-width: 500px;
+    max-width: 600px;
     margin: 30px auto;
     padding: 20px;
     background-color: #fff;
@@ -70,6 +99,10 @@ label {
     margin-bottom: 8px;
     font-weight: bold;
     color: #333;
+}
+
+input[type="text"] {
+    text-transform: uppercase;
 }
 
 input[type="text"],
@@ -108,6 +141,118 @@ button.btn-delete {
 
 button.btn-delete:hover {
     background-color: #c0392b;
+}
+
+.search-container {
+    width: 95%;
+    max-width: 1000px;
+    margin: 0 auto 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+/* Grade de Filtros Horizontais */
+.filters-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+#searchInput {
+    flex: 2;
+    min-width: 250px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.contador-vagas {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: bold;
+}
+
+/* Estilo para os grupos de filtro */
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+    margin-top: 0;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+    color: #555;
+    font-size: 0.85rem;
+}
+
+.filter-group select {
+    width: 100%;
+    padding: 9px;
+    margin-bottom: 0; 
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    text-transform: uppercase;
+}
+
+.search-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.report-actions {
+    margin-top: 0;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-report {
+    background-color: #7f8c8d !important;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+}
+
+.btn-report:hover {
+    background-color: #636e72 !important;
+}
+
+/* Configurações para Impressão de Relatório */
+@media print {
+    body {
+        background-color: white;
+    }
+    form,
+    .search-container, 
+    .report-actions, 
+    .filter-group, /* Oculta os novos filtros na impressão */
+    .btn-edit, 
+    .btn-delete, 
+    th:last-child, 
+    td:last-child {
+        display: none !important;
+    }
+    table {
+        width: 100%;
+        box-shadow: none;
+        margin: 0;
+    }
+}
+
+/* Ajuste para a tabela acompanhar a largura da busca */
+table {
+    max-width: 1000px;
 }
 
 button:hover {

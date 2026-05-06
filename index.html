@@ -3,48 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <title>Cadastro de Professores</title>
-    <style>
-        table {
-            width: 60%;
-            border-collapse: collapse;
-            margin: 20px auto;
-        }
-        th, td {
-            border: 1px solid #333;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        h1 {
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Cadastro de Professores</h1>
+    <header class="main-header">
+        <h1>Gestão de Professores</h1>
+        <button id="btnAbrirCadastro" class="btn-menu">➕ Novo Professor</button>
+    </header>
+
+    <!-- Formulário de Cadastro -->
+    <section id="registrationSection" class="hidden">
+        <form id="professorForm">
+            <h3>Dados do Professor</h3>
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" placeholder="Nome do Professor" required>
+
+        <label for="escola">Escola:</label>
+        <input type="text" id="escola" placeholder="Nome da Escola" required>
+
+        <label for="disciplina">Disciplina:</label>
+        <input type="text" id="disciplina" placeholder="Ex: Matemática" required>
+
+        <label for="telefone">Telefone:</label>
+        <input type="tel" id="telefone" placeholder="(DDD) 99999-9999" required>
+
+        <div class="form-actions">
+            <button type="submit">Adicionar Professor</button>
+            <button type="button" id="cancelBtn" class="btn-cancel" style="display: none;">Cancelar</button>
+        </div>
+        </form>
+    </section>
+
+    <!-- Campo de Busca -->
+    <div class="search-container">
+        <div class="filters-grid">
+            <div class="filter-group" style="flex: 2;">
+                <label for="searchInput">Busca Rápida:</label>
+                <input type="text" id="searchInput" placeholder="NOME OU ESCOLA...">
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterEscola">Escola:</label>
+                <select id="filterEscola">
+                    <option value="">TODAS</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filterDisciplina">Disciplina:</label>
+                <select id="filterDisciplina">
+                    <option value="">TODAS</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="search-footer">
+            <div id="contador" class="contador-vagas">
+                Professores encontrados: 0
+            </div>
+            <div class="report-actions">
+                <button type="button" id="btnExportar" class="btn-report">Exportar CSV</button>
+                <button type="button" id="btnImprimir" class="btn-report">Imprimir Relatório</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Dados -->
     <table>
-        <tr>
-            <th>Nome</th>
-            <th>Disciplina</th>
-            <th>Telefone</th>
-        </tr>
-        <tr>
-            <td>Maria Silva</td>
-            <td>Matemática</td>
-            <td>(16) 99999-1111</td>
-        </tr>
-        <tr>
-            <td>João Pereira</td>
-            <td>História</td>
-            <td>(16) 98888-2222</td>
-        </tr>
-        <tr>
-            <td>Ana Souza</td>
-            <td>Português</td>
-            <td>(16) 97777-3333</td>
-        </tr>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Escola</th>
+                <th>Disciplina</th>
+                <th>Telefone</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Os dados aparecerão aqui dinamicamente via JavaScript -->
+        </tbody>
     </table>
+
+    <script src="script.js"></script>
 </body>
 </html>
