@@ -587,7 +587,17 @@ if (btnDetailedReport) {
                 <title>Relatório Detalhado de Professores</title>
                 <style>
                     body { font-family: Arial, sans-serif; margin: 20px; }
-                    h1 { text-align: center; color: #333; }
+                .report-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    border-bottom: 2px solid #4CAF50;
+                    padding-bottom: 10px;
+                    margin-bottom: 20px;
+                }
+                .report-logos { display: flex; align-items: center; gap: 10px; flex: 1; }
+                .report-logos img { height: 40px; }
+                .report-header h1 { flex: 2; text-align: center; margin: 0; font-size: 1.5rem; color: #333; }
                     h2 { color: #4CAF50; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 25px; }
                     table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 30px; }
                     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -595,7 +605,14 @@ if (btnDetailedReport) {
                 </style>
             </head>
             <body>
+            <div class="report-header">
+                <div class="report-logos">
+                    <img src="https://raw.githubusercontent.com/educacao-tech/edmprofessor/main/batatais.png" alt="Batatais">
+                    <img src="https://raw.githubusercontent.com/educacao-tech/edmprofessor/main/secretaria.png" alt="Secretaria">
+                    <img src="https://raw.githubusercontent.com/educacao-tech/edmprofessor/main/edm.png" alt="EDM">
+                </div>
                 <h1>Lista de Presença Presencial</h1>
+            </div>
         `;
 
         // Ordena as escolas alfabeticamente para o relatório
@@ -638,8 +655,12 @@ if (btnDetailedReport) {
 
         const newWindow = window.open("", "_blank");
         newWindow.document.write(reportHtml);
-        newWindow.document.close(); // Importante para alguns navegadores
-        newWindow.print();
+        newWindow.document.close();
+        
+        // Aguarda as imagens carregarem antes de abrir a impressão
+        newWindow.onload = () => {
+            newWindow.print();
+        };
         // newWindow.close(); // Opcional: fechar após o diálogo de impressão ser dispensado
     };
 }
