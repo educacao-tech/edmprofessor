@@ -44,6 +44,7 @@ const btnBackup = document.getElementById("btnBackup");
 const btnRestaurar = document.getElementById("btnRestaurar");
 const deleteBtnModal = document.getElementById("deleteBtnModal");
 const editModeIndicator = document.getElementById("editModeIndicator");
+const btnTheme = document.getElementById("btnTheme");
 
 // Estado da aplicação: carrega dados salvos ou inicia array vazio
 let dadosSalvos = JSON.parse(localStorage.getItem("professores"));
@@ -134,6 +135,9 @@ let disciplinas = JSON.parse(localStorage.getItem("disciplinas")) ||
 // Variável global para rastrear se estamos editando e qual índice
 let editingIndex = -1; // -1 significa que nenhum professor está sendo editado
 
+// Controle de autenticação temporária (reseta automaticamente ao recarregar a página)
+let usuarioAutenticado = false;
+
 // Verifica se os elementos essenciais foram encontrados
 if (!form) {
     console.error("Erro: Formulário não encontrado.");
@@ -151,36 +155,48 @@ if (!submitButton && form) {
 // Função auxiliar para remover acentos (Global)
 const removerAcentos = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-// Função para renderizar a lista de escolas no modal
-function renderSchoolList() {
-    if (!listaEscolasCadastradas) return;
-    listaEscolasCadastradas.innerHTML = "";
+// Função Genérica para renderizar listas de metadados (Escolas/Disciplinas)
+function renderMetadataList(list, container, typeLabel, onEdit, onDelete) {
+    if (!container) return;
+    container.innerHTML = "";
     
-    escolas.sort().forEach((escola, index) => {
-        const qtdProfessores = professores.filter(p => p.escola === escola).length;
+    [...list].sort().forEach((item, index) => {
+        const originalIndex = list.indexOf(item);
+        const qtdProfessores = professores.filter(p => p[typeLabel] === item).length;
         const li = document.createElement("li");
-        li.className = "school-item";
+        li.className = `${typeLabel}-item`;
         li.innerHTML = `
-            <span>${escola} (${qtdProfessores})</span>
+            <span>${item} (${qtdProfessores})</span>
             <div style="display: flex; gap: 5px;">
                 <button class="btn-edit" style="padding: 5px 10px; font-size: 0.7rem;">Editar</button>
                 <button class="btn-delete" style="padding: 5px 10px; font-size: 0.7rem;">Excluir</button>
             </div>
         `;
-        li.querySelector(".btn-edit").onclick = () => editSchool(index);
+        li.querySelector(".btn-edit").onclick = () => onEdit(originalIndex);
         li.querySelector(".btn-delete").onclick = () => {
-            if (!verificarAutenticacao(`Para excluir a escola "${escola}"`)) return;
+            if (!verificarAutenticacao(`Para excluir "${item}"`)) return;
             
             if (qtdProfessores > 0) {
-                alert(`Não é possível excluir a escola "${escola}" pois existem ${qtdProfessores} professor(es) vinculado(s) a ela. Remova ou altere os professores antes de excluir a escola.`);
+                alert(`Não é possível excluir pois existem ${qtdProfessores} professor(es) vinculado(s).`);
                 return;
             }
-            if (confirm(`Deseja realmente excluir a escola "${escola}"?`)) {
-                escolas.splice(index, 1);
-                saveSchools();
-            }
+            onDelete(originalIndex);
         };
-        listaEscolasCadastradas.appendChild(li);
+        container.appendChild(li);
+    });
+}
+
+function renderSchoolList() {
+    renderMetadataList(escolas, listaEscolasCadastradas, 'escola', editSchool, (idx) => {
+        escolas.splice(idx, 1);
+        saveSchools();
+    });
+}
+
+function renderDisciplineList() {
+    renderMetadataList(disciplinas, listaDisciplinasCadastradas, 'disciplina', editDiscipline, (idx) => {
+        disciplinas.splice(idx, 1);
+        saveDisciplines();
     });
 }
 
@@ -465,7 +481,7 @@ function getSecurityPassword() {
 
 // Função para verificar se o usuário já autenticou nesta sessão
 function verificarAutenticacao(contextoMensagem) {
-    if (sessionStorage.getItem("isAuthorized") === "true") {
+    if (usuarioAutenticado) {
         return true;
     }
 
@@ -475,7 +491,7 @@ function verificarAutenticacao(contextoMensagem) {
     const senhaDigitada = prompt(`${contextoMensagem}, digite a senha de segurança:`);
     
     if (senhaDigitada === expectedPassword) {
-        sessionStorage.setItem("isAuthorized", "true");
+        usuarioAutenticado = true;
         return true;
     } else if (senhaDigitada !== null) {
         alert("Senha incorreta!");
@@ -502,7 +518,7 @@ function changeSecurityPassword() {
     let newPassword = prompt("Digite a nova senha:");
     if (newPassword && newPassword.trim() !== "") {
         localStorage.setItem("adminDeletionPassword", newPassword);
-        sessionStorage.removeItem("isAuthorized"); // Obriga a reautenticar com a nova senha
+        usuarioAutenticado = false; // Obriga a reautenticar com a nova senha
         alert("Senha alterada com sucesso!");
     } else {
         alert("Alteração cancelada ou senha inválida.");
@@ -718,6 +734,23 @@ if (telefoneInput) {
     });
 }
 
+// Limpeza automática de espaços duplos no campo Nome enquanto o usuário digita
+if (nomeInput) {
+    nomeInput.addEventListener("input", (e) => {
+        const input = e.target;
+        const selectionStart = input.selectionStart;
+        const originalValue = input.value;
+        const cleanValue = originalValue.replace(/\s{2,}/g, " ");
+
+        if (originalValue !== cleanValue) {
+            input.value = cleanValue;
+            // Reposiciona o cursor corretamente após a remoção do espaço extra
+            const newPosition = selectionStart - (originalValue.length - cleanValue.length);
+            input.setSelectionRange(newPosition, newPosition);
+        }
+    });
+}
+
 // Validação em tempo real para feedback visual (Ícone de Check)
 [nomeInput, escolaInput, disciplinaInput, anoInput, turmaInput, turnoInput, telefoneInput].forEach(input => {
     if (input) {
@@ -728,6 +761,9 @@ if (telefoneInput) {
             if (input === telefoneInput) {
                 const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
                 isValid = phoneRegex.test(val);
+            } else if (input === nomeInput) {
+                const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/;
+                isValid = val !== "" && nameRegex.test(val);
             } else if (input.tagName === "SELECT") {
                 isValid = input.value !== "" && input.value !== null;
             } else {
@@ -1024,7 +1060,12 @@ if (btnDetailedReport) {
 // Função para Backup JSON (Segurança de Dados)
 if (btnBackup) {
     btnBackup.onclick = () => {
-        const dataStr = JSON.stringify(professores, null, 2);
+        const fullBackup = {
+            professores: professores,
+            escolas: escolas,
+            disciplinas: disciplinas
+        };
+        const dataStr = JSON.stringify(fullBackup, null, 2);
         const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -1051,8 +1092,16 @@ if (btnRestaurar) {
             reader.onload = readerEvent => {
                 try {
                     const content = JSON.parse(readerEvent.target.result);
-                    if (Array.isArray(content) && confirm("Isso substituirá todos os dados atuais. Continuar?")) {
-                        professores = content;
+                    // Verifica se o backup é do novo formato (objeto) ou antigo (array)
+                    const dataToRestore = Array.isArray(content) ? content : content.professores;
+                    
+                    if (Array.isArray(dataToRestore) && confirm("Isso substituirá todos os dados atuais. Continuar?")) {
+                        professores = dataToRestore;
+                        if (content.escolas) escolas = content.escolas;
+                        if (content.disciplinas) disciplinas = content.disciplinas;
+                        
+                        saveSchools();
+                        saveDisciplines();
                         saveAndRender();
                         alert("Dados restaurados com sucesso!");
                     }
@@ -1134,6 +1183,16 @@ if (form) {
             return;
         }
 
+        // RegEx para validar nome (apenas letras e espaços)
+        const nameRegex = /^[A-ZÀ-Ÿ\s]+$/;
+        if (!nameRegex.test(nome)) {
+            nomeInput.classList.add("invalid");
+            nomeInput.classList.add("shake");
+            setTimeout(() => nomeInput.classList.remove("shake"), 400);
+            alert("O campo Nome deve conter apenas letras e espaços, sem números ou caracteres especiais.");
+            return;
+        }
+
         // RegEx para validar telefone com a máscara (ex: (11) 99999-9999)
         const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
 
@@ -1195,4 +1254,22 @@ renderTable();        // Renderiza a tabela e atualiza o gráfico
 // Define o texto inicial do botão de alternar gráfico com base na visibilidade real
 if (btnToggleChart && statsSection) {
     btnToggleChart.textContent = statsSection.classList.contains("hidden") ? "Mostrar Gráfico" : "Ocultar Gráfico";
+}
+
+// Lógica de Tema Escuro
+const currentTheme = localStorage.getItem("theme");
+if (currentTheme === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+    if (btnTheme) btnTheme.textContent = "☀️ Tema";
+}
+
+if (btnTheme) {
+    btnTheme.onclick = () => {
+        let theme = document.documentElement.getAttribute("data-theme");
+        let newTheme = theme === "dark" ? "light" : "dark";
+        
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+        btnTheme.textContent = newTheme === "dark" ? "☀️ Tema" : "🌙 Tema";
+    };
 }

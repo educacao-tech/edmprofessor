@@ -1,12 +1,43 @@
 /* Estilo geral da página */
+:root {
+    --primary-color: #4CAF50;
+    --primary-hover: #45a049;
+    --secondary-color: #3498db;
+    --secondary-hover: #2980b9;
+    --danger-color: #e74c3c;
+    --danger-hover: #c0392b;
+    --warning-color: #f39c12;
+    --text-color: #333;
+    --bg-color: #f9f9f9;
+    --modal-bg: rgba(0, 0, 0, 0.7);
+    --card-bg: #ffffff;
+    --border-color: #dddddd;
+    --input-bg: #ffffff;
+    --header-bg: #ffffff;
+    --row-even: #f2f2f2;
+    --row-hover: #d9f2d9;
+}
+
+[data-theme="dark"] {
+    --text-color: #f0f0f0;
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --border-color: #333333;
+    --input-bg: #2c2c2c;
+    --header-bg: #1e1e1e;
+    --row-even: #252525;
+    --row-hover: #2c3e2d;
+    --modal-bg: rgba(0, 0, 0, 0.9);
+}
+
 * {
     box-sizing: border-box;
-    transition: all 0.3s ease;
 }
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background-color: #f9f9f9;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     margin: 0;
     padding: 0;
 }
@@ -24,7 +55,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Fundo escurecido */
+    background-color: var(--modal-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -44,7 +75,7 @@ body {
 }
 
 .modal-content {
-    background-color: #fff;
+    background-color: var(--card-bg);
     padding: 30px;
     border-radius: 8px;
     width: 95%;
@@ -57,7 +88,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 1500;
-    background-color: #fff;
+    background-color: var(--header-bg);
     padding: 15px 5%;
     display: flex;
     justify-content: space-between;
@@ -81,6 +112,7 @@ body {
     flex: 2; /* Ocupa o centro e garante mais espaço para o texto */
     text-align: center;
     margin: 0;
+    color: var(--text-color);
     font-size: 1.5rem;
 }
 
@@ -105,7 +137,7 @@ body {
 }
 
 .btn-menu:hover {
-    background-color: #27ae60;
+    background-color: var(--primary-hover);
 }
 
 /* Estilo da tabela */
@@ -115,7 +147,7 @@ table {
     margin: 20px auto;
     border-collapse: collapse;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    background-color: #fff;
+    background-color: var(--card-bg);
 }
 
 /* Cabeçalho da tabela */
@@ -124,7 +156,7 @@ th {
     top: 70px; /* Ajustado para ficar logo abaixo do menu principal fixo */
     z-index: 1000;
     background-clip: padding-box; /* Garante que as bordas apareçam corretamente com sticky */
-    background-color: #4CAF50;
+    background-color: var(--primary-color);
     color: white;
     padding: 12px;
     text-align: left;
@@ -135,11 +167,12 @@ th {
 /* Torna as linhas da tabela clicáveis */
 tbody tr {
     cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 /* Células da tabela */
 td {
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     padding: 10px;
     white-space: nowrap; /* Impede quebra de linha no conteúdo */
     overflow: hidden; /* Oculta o texto que excede */
@@ -148,12 +181,12 @@ td {
 
 /* Linhas alternadas */
 tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: var(--row-even);
 }
 
 /* Efeito hover */
 tr:hover {
-    background-color: #d9f2d9;
+    background-color: var(--row-hover);
 }
 
 /* Estilo do formulário */
@@ -163,8 +196,8 @@ form {
     max-width: 600px;
     margin: 0; /* Centralização agora é feita pelo Flexbox do pai */
     padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border-radius: 8px;
 }
@@ -177,7 +210,7 @@ form {
     border: none;
     font-size: 2rem;
     font-weight: bold;
-    color: #666 !important; /* Cor do X */
+    color: var(--text-color) !important; /* Cor do X */
     cursor: pointer;
     line-height: 1;
     padding: 5px;
@@ -192,7 +225,7 @@ label {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
-    color: #333;
+    color: var(--text-color);
 }
 
 .field-container {
@@ -227,7 +260,9 @@ form select {
     width: 100%;
     padding: 8px;
     margin-bottom: 0;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-color);
     border-radius: 4px;
 }
 
@@ -257,7 +292,7 @@ select.valid {
 
 /* Botão */
 button {
-    background-color: #4CAF50;
+    background-color: var(--primary-color);
     color: white;
     padding: 10px 16px;
     border: none;
@@ -267,26 +302,26 @@ button {
 
 /* Botão de edição específico */
 button.btn-edit {
-    background-color: #3498db; /* Um azul agradável */
+    background-color: var(--secondary-color);
     margin-right: 5px; /* Espaçamento entre os botões */
 }
 
 button.btn-edit:hover {
-    background-color: #2980b9;
+    background-color: var(--secondary-hover);
 }
 
 /* Botão de exclusão específico */
 button.btn-delete {
-    background-color: #e74c3c;
+    background-color: var(--danger-color);
 }
 
 button.btn-delete:hover {
-    background-color: #c0392b;
+    background-color: var(--danger-hover);
 }
 
 /* Botão de exclusão no modal */
 #deleteBtnModal {
-    background-color: #e74c3c;
+    background-color: var(--danger-color);
 }
 
 .search-container {
@@ -294,8 +329,8 @@ button.btn-delete:hover {
     max-width: 1000px;
     margin: 0 auto 20px auto;
     padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border-radius: 8px;
 }
@@ -312,7 +347,7 @@ button.btn-delete:hover {
     width: 100%; /* Preenche o container flex: 2 definido no HTML */
     min-width: 150px;
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     text-transform: uppercase;
 }
@@ -348,9 +383,10 @@ button.btn-delete:hover {
     width: 100%;
     padding: 10px; /* Equalizando a altura com o input de busca */
     margin-bottom: 0; 
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
-    background-color: #fff;
+    background-color: var(--input-bg);
+    color: var(--text-color);
     text-transform: uppercase;
 }
 
@@ -407,8 +443,8 @@ button.btn-delete:hover {
     max-width: 1000px;
     margin: 0 auto 20px auto;
     padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border-radius: 8px;
 }
@@ -416,7 +452,7 @@ button.btn-delete:hover {
 .stats-container h3 {
     margin-top: 0;
     margin-bottom: 20px;
-    color: #333;
+    color: var(--text-color);
     font-size: 1.1rem;
     border-bottom: 2px solid #4CAF50;
     padding-bottom: 5px;
@@ -433,7 +469,7 @@ button.btn-delete:hover {
     width: 180px;
     font-size: 0.85rem;
     font-weight: bold;
-    color: #555;
+    color: var(--text-color);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -441,12 +477,12 @@ button.btn-delete:hover {
 
 .chart-bar-bg {
     flex-grow: 1;
-    background: #f0f0f0;
+    background: var(--border-color);
     height: 18px;
     border-radius: 9px;
     margin: 0 15px;
     overflow: hidden;
-    border: 1px solid #eee;
+    border: 1px solid var(--border-color);
 }
 
 .chart-bar-fill {
@@ -460,7 +496,7 @@ button.btn-delete:hover {
 .chart-count {
     font-size: 0.9rem;
     font-weight: bold;
-    color: #333;
+    color: var(--text-color);
     width: 35px;
     text-align: right;
 }
