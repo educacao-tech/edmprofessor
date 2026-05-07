@@ -13,7 +13,10 @@
             <img src="https://raw.githubusercontent.com/educacao-tech/edmprofessor/main/edm.png" alt="Logo EDM" class="header-logo">
         </div>
         <h1>Gestão de Professores</h1>
+        <button id="btnAbrirEscolas" class="btn-menu" style="background-color: #3498db; margin-right: 10px;">🏫 Escolas</button>
+        <button id="btnAbrirDisciplinas" class="btn-menu" style="background-color: #9b59b6; margin-right: 10px;">📚 Disciplinas</button>
         <button id="btnAbrirCadastro" class="btn-menu">➕ Novo Professor</button>
+        <div id="editModeIndicator" class="edit-mode-indicator hidden">MODO DE EDIÇÃO ATIVO</div>
     </header>
 
     <!-- Formulário de Cadastro -->
@@ -22,47 +25,118 @@
             <button type="button" class="close-modal" id="closeModalBtn">&times;</button>
             <h3>Dados do Professor</h3>
         <label for="nome">Nome:</label>
-        <input type="text" id="nome" placeholder="Nome do Professor" required>
+        <div class="field-container">
+            <input type="text" id="nome" placeholder="Nome do Professor" required>
+            <span class="valid-icon">✔</span>
+        </div>
 
         <label for="escola">Escola:</label>
-        <input type="text" id="escola" placeholder="Nome da Escola" required>
+        <div class="field-container">
+            <select id="escola" required>
+                <option value="" disabled>Selecione a Escola</option>
+            </select>
+            <span class="valid-icon">✔</span>
+        </div>
 
         <label for="disciplina">Disciplina:</label>
-        <input type="text" id="disciplina" placeholder="Ex: Matemática" required>
+        <div class="field-container">
+            <select id="disciplina" required></select>
+            <span class="valid-icon">✔</span>
+        </div>
 
         <label for="ano">Ano:</label>
-        <select id="ano" required>
-            <option value="" disabled selected>Selecione o Ano</option>
-            <option value="1º">1º</option>
-            <option value="2º">2º</option>
-            <option value="3º">3º</option>
-            <option value="4º">4º</option>
-            <option value="5º">5º</option>
-            <option value="N/A">N/A</option>
-        </select>
+        <div class="field-container">
+            <select id="ano" required>
+                <option value="" disabled selected>Selecione o Ano</option>
+                <option value="1º">1º</option>
+                <option value="2º">2º</option>
+                <option value="3º">3º</option>
+                <option value="4º">4º</option>
+                <option value="5º">5º</option>
+                <option value="N/A">N/A</option>
+            </select>
+            <span class="valid-icon">✔</span>
+        </div>
 
         <label for="turma">Turma:</label>
-        <select id="turma" required>
-            <option value="" disabled selected>Selecione a Turma</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="E">E</option>
-            <option value="N/A">N/A</option>
-        </select>
+        <div class="field-container">
+            <select id="turma" required>
+                <option value="" disabled selected>Selecione a Turma</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+                <option value="N/A">N/A</option>
+            </select>
+            <span class="valid-icon">✔</span>
+        </div>
 
         <label for="turno">Turno:</label>
-        <input type="text" id="turno" placeholder="Ex: MANHÃ">
+        <div class="field-container">
+            <select id="turno" required>
+                <option value="MANHÃ" selected>MANHÃ</option>
+                <option value="TARDE">TARDE</option>
+                <option value="INTEGRAL">INTEGRAL</option>
+                <option value="N/A">N/A</option>
+            </select>
+            <span class="valid-icon">✔</span>
+        </div>
 
         <label for="telefone">Telefone:</label>
-        <input type="tel" id="telefone" placeholder="(DDD) 99999-9999">
+        <div class="field-container">
+            <input type="tel" id="telefone" placeholder="(DDD) 99999-9999">
+            <span class="valid-icon">✔</span>
+        </div>
 
         <div class="form-actions">
             <button type="submit">Adicionar Professor</button>
+            <button type="button" id="deleteBtnModal" class="btn-delete" style="display: none;">Excluir Professor</button>
             <button type="button" id="cancelBtn" class="btn-cancel" style="display: none;">Cancelar</button>
         </div>
         </form>
+    </section>
+
+    <!-- Modal de Cadastro de Escolas -->
+    <section id="schoolModalSection" class="hidden">
+        <div class="modal-content">
+            <button type="button" class="close-modal" id="closeSchoolModalBtn">&times;</button>
+            <h3>Gerenciar Escolas</h3>
+            <form id="schoolForm" style="box-shadow: none; width: 100%; border: none; padding: 0;">
+                <label for="novaEscola">Nome da Escola:</label>
+                <div class="field-container">
+                    <input type="text" id="novaEscola" placeholder="Ex: EMEB ALZIRA" required>
+                </div>
+                <button type="submit" style="width: 100%; margin-bottom: 20px;">Cadastrar Escola</button>
+            </form>
+            
+            <div style="max-height: 300px; overflow-y: auto; border-top: 1px solid #eee; pt-10">
+                <ul id="listaEscolasCadastradas" style="list-style: none; padding: 0; margin-top: 15px;">
+                    <!-- Escolas aparecerão aqui -->
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal de Cadastro de Disciplinas -->
+    <section id="disciplineModalSection" class="hidden">
+        <div class="modal-content">
+            <button type="button" class="close-modal" id="closeDisciplineModalBtn">&times;</button>
+            <h3>Gerenciar Disciplinas</h3>
+            <form id="disciplineForm" style="box-shadow: none; width: 100%; border: none; padding: 0;">
+                <label for="novaDisciplina">Nome da Disciplina:</label>
+                <div class="field-container">
+                    <input type="text" id="novaDisciplina" placeholder="Ex: MATEMÁTICA" required>
+                </div>
+                <button type="submit" style="width: 100%; margin-bottom: 20px;">Cadastrar Disciplina</button>
+            </form>
+            
+            <div style="max-height: 300px; overflow-y: auto; border-top: 1px solid #eee; pt-10">
+                <ul id="listaDisciplinasCadastradas" style="list-style: none; padding: 0; margin-top: 15px;">
+                    <!-- Disciplinas aparecerão aqui -->
+                </ul>
+            </div>
+        </div>
     </section>
 
     <!-- Campo de Busca -->
@@ -121,6 +195,7 @@
                 <button type="button" id="btnImprimir" class="btn-report">Imprimir Relatório</button>
                 <button type="button" id="btnBackup" class="btn-report" style="background-color: #2980b9 !important;">Backup JSON</button>
                 <button type="button" id="btnRestaurar" class="btn-report" style="background-color: #8e44ad !important;">Restaurar Backup</button>
+                <button type="button" id="btnChangePassword" class="btn-report" style="background-color: #f39c12 !important;">Alterar Senha</button>
             </div>
         </div>
     </div>
@@ -145,7 +220,6 @@
                 <th>Turma</th>
                 <th>Turno</th>
                 <th>Telefone</th>
-                <th>Ações</th>
             </tr>
         </thead>
         <tbody>

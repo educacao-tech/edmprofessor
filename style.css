@@ -16,7 +16,9 @@ body {
 }
 
 /* Modal e Fundo Escurecido */
-#registrationSection {
+#registrationSection,
+#schoolModalSection,
+#disciplineModalSection {
     position: fixed;
     top: 0;
     left: 0;
@@ -39,6 +41,15 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 95%;
+    max-width: 500px;
+    position: relative;
 }
 
 /* Menu Superior */
@@ -79,6 +90,20 @@ body {
     font-weight: bold;
 }
 
+/* Indicador de Modo de Edição */
+.edit-mode-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f39c12; /* Laranja para destaque */
+    color: white;
+    text-align: center;
+    padding: 5px 0;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
 .btn-menu:hover {
     background-color: #27ae60;
 }
@@ -105,6 +130,11 @@ th {
     text-align: left;
     white-space: nowrap; /* Impede quebra de linha no cabeçalho */
     overflow: hidden; /* Oculta o texto que excede */
+}
+
+/* Torna as linhas da tabela clicáveis */
+tbody tr {
+    cursor: pointer;
 }
 
 /* Células da tabela */
@@ -165,6 +195,28 @@ label {
     color: #333;
 }
 
+.field-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.valid-icon {
+    display: none;
+    position: absolute;
+    right: 12px;
+    top: 8px;
+    color: #2ecc71;
+    font-size: 1.1rem;
+    pointer-events: none;
+    z-index: 5;
+}
+
+input.valid + .valid-icon,
+select.valid + .valid-icon {
+    display: block;
+}
+
 input[type="text"] {
     text-transform: uppercase;
 }
@@ -174,7 +226,7 @@ input[type="tel"],
 form select {
     width: 100%;
     padding: 8px;
-    margin-bottom: 15px;
+    margin-bottom: 0;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
@@ -183,6 +235,24 @@ form select {
 input.invalid {
     border-color: #e74c3c !important;
     background-color: #fff6f6;
+}
+
+/* Animação de Balanço (Shake) */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    50% { transform: translateX(8px); }
+    75% { transform: translateX(-8px); }
+}
+
+.shake {
+    animation: shake 0.4s ease-in-out;
+}
+
+input.valid, 
+select.valid {
+    border-color: #2ecc71 !important;
+    padding-right: 35px;
 }
 
 /* Botão */
@@ -212,6 +282,11 @@ button.btn-delete {
 
 button.btn-delete:hover {
     background-color: #c0392b;
+}
+
+/* Botão de exclusão no modal */
+#deleteBtnModal {
+    background-color: #e74c3c;
 }
 
 .search-container {
@@ -388,6 +463,22 @@ button.btn-delete:hover {
     color: #333;
     width: 35px;
     text-align: right;
+}
+
+/* Estilo da lista de escolas no modal */
+.school-item,
+.discipline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.school-item:last-child {
+    border-bottom: none;
 }
 
 /* Ajuste para a tabela acompanhar a largura da busca */
