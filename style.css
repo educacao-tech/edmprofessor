@@ -558,6 +558,11 @@ button.btn-delete:hover {
     display: none; /* Esconde os rótulos para ganhar altura */
 }
 
+/* Garante que os rótulos dentro do dropdown de filtros sejam sempre visíveis */
+.filter-dropdown-content .filter-group label {
+    display: block;
+}
+
 .scrolled-compact #searchInput,
 .scrolled-compact .btn-report {
     height: 30px;
@@ -681,6 +686,16 @@ button.btn-delete:hover {
     display: inline-block;
 }
 
+/* Estilo para a seta de dropdown com animação de rotação */
+.drop-arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.dropdown:hover .drop-arrow {
+    transform: rotate(180deg);
+}
+
 /* Estilo específico para o dropdown de filtros */
 .filter-dropdown {
     flex: 1 1 auto; /* Permite que o dropdown de filtros ocupe espaço flexível */
@@ -721,11 +736,19 @@ button.btn-delete:hover {
     flex: none; /* Anula o flex: 1 da grade principal */
     min-width: auto; /* Anula o min-width da grade principal */
     margin-bottom: 10px; /* Espaçamento entre os grupos de filtro */
+    padding-left: 10px; /* Espaço para a borda colorida */
 }
 
 .filter-dropdown-content .filter-group:last-child {
     margin-bottom: 0; /* Remove margem do último item */
 }
+
+/* Cores de identificação para cada filtro */
+.filter-group-escola { border-left: 4px solid #3498db; }
+.filter-group-disciplina { border-left: 4px solid #9b59b6; }
+.filter-group-ano { border-left: 4px solid #e67e22; }
+.filter-group-turma { border-left: 4px solid #2ecc71; }
+.filter-group-turno { border-left: 4px solid #34495e; }
 
 .dropdown:hover .dropdown-content {
     display: block;
@@ -922,6 +945,69 @@ button:hover {
 
 .btn-cancel { background-color: #7f8c8d; }
 .btn-cancel:hover { background-color: #636e72; }
+
+/* Estilos do Rodapé */
+.main-footer {
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    padding: 20px 5%;
+    margin-top: 50px;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.footer-version {
+    background: var(--bg-color);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    border: 1px solid var(--border-color);
+}
+
+.separator { color: var(--border-color); }
+
+@media (max-width: 600px) {
+    .footer-content { flex-direction: column; text-align: center; }
+    .footer-tips { display: none; } /* Esconde dicas em telas muito pequenas */
+}
+
+.footer-link {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s, opacity 0.2s;
+    display: inline-flex;
+    align-items: center;
+}
+
+.footer-link svg {
+    transition: transform 0.3s ease; /* Define a suavidade da rotação */
+}
+
+.footer-link:hover {
+    color: var(--secondary-hover);
+    opacity: 0.8;
+}
+
+.footer-link:hover svg {
+    transform: rotate(20deg); /* Gira o ícone levemente para a direita */
+}
 
 /* Estilos para o Efeito de Onda (Ripple) */
 .ripple-effect {

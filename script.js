@@ -1311,7 +1311,22 @@ if (btnBackup) {
         link.href = url;
         link.download = `backup_professores_${new Date().toISOString().slice(0,10)}.json`;
         link.click();
+
+        // Salva e exibe a data do último backup
+        const now = new Date();
+        const backupDateStr = now.toLocaleDateString() + " às " + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        localStorage.setItem("lastBackupDate", backupDateStr);
+        updateLastBackupDisplay();
     };
+}
+
+// Função para atualizar a exibição da data do último backup no rodapé
+function updateLastBackupDisplay() {
+    const lastBackup = localStorage.getItem("lastBackupDate");
+    const display = document.getElementById("lastBackupDisplay");
+    if (display) {
+        display.textContent = lastBackup ? `Último backup: ${lastBackup}` : "Último backup: Nunca";
+    }
 }
 
 // Função para Restaurar Backup
@@ -1506,6 +1521,7 @@ if (headerSentinel && table) {
 ordenarProfessores(); // Ordena a lista inicial
 populateFilters();    // Popula os filtros com as escolas/disciplinas existentes
 renderTable();        // Renderiza a tabela e atualiza o gráfico
+updateLastBackupDisplay(); // Inicializa a exibição do último backup no rodapé
 
 // Define o texto inicial do botão de alternar gráfico com base na visibilidade real
 if (btnToggleChart && statsSection) {
