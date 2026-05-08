@@ -43,8 +43,14 @@ const headerSentinel = document.getElementById("header-sentinel");
 const btnBackup = document.getElementById("btnBackup");
 const btnRestaurar = document.getElementById("btnRestaurar");
 const deleteBtnModal = document.getElementById("deleteBtnModal");
+const confirmModalSection = document.getElementById("confirmModalSection");
+const btnConfirmOk = document.getElementById("btnConfirmOk");
+const btnConfirmCancel = document.getElementById("btnConfirmCancel");
+const confirmTitle = document.getElementById("confirmTitle");
+const confirmMessage = document.getElementById("confirmMessage");
 const editModeIndicator = document.getElementById("editModeIndicator");
 const btnTheme = document.getElementById("btnTheme");
+const btnBackToTop = document.getElementById("btnBackToTop");
 
 // Estado da aplicação: carrega dados salvos ou inicia array vazio
 let dadosSalvos = JSON.parse(localStorage.getItem("professores"));
@@ -135,6 +141,26 @@ let disciplinas = JSON.parse(localStorage.getItem("disciplinas")) ||
 // Variável global para rastrear se estamos editando e qual índice
 let editingIndex = -1; // -1 significa que nenhum professor está sendo editado
 
+// Definição dinâmica das colunas
+let columnOrder = [
+    { id: 'nome', label: 'Nome', searchable: true, visible: true },
+    { id: 'escola', label: 'Escola', searchable: true, visible: true },
+    { id: 'disciplina', label: 'Disciplina', searchable: false, visible: true },
+    { id: 'ano', label: 'Ano', searchable: true, visible: true },
+    { id: 'turma', label: 'Turma', searchable: true, visible: true },
+    { id: 'turno', label: 'Turno', searchable: true, visible: true },
+    { id: 'telefone', label: 'Telefone', searchable: false, visible: true }
+];
+
+// Variável para persistir a seleção (Nome + Escola) mesmo após filtrar ou ordenar
+let selectedProfessorKey = null;
+
+// Variável global para armazenar a linha da tabela atualmente selecionada
+let selectedRowElement = null;
+
+// Estado de Ordenação: controla qual coluna e qual direção
+let currentSort = { column: 'nome', direction: 'asc' };
+
 // Controle de autenticação temporária (reseta automaticamente ao recarregar a página)
 let usuarioAutenticado = false;
 
@@ -154,6 +180,24 @@ if (!submitButton && form) {
 
 // Função auxiliar para remover acentos (Global)
 const removerAcentos = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+// Função para destacar o termo de busca no texto original preservando a formatação
+function highlightText(text, termoBuscaNorm) {
+    if (!termoBuscaNorm) return text;
+    const textNorm = removerAcentos(text).toUpperCase();
+    let result = "";
+    let lastIndex = 0;
+    let index = textNorm.indexOf(termoBuscaNorm);
+
+    while (index !== -1) {
+        result += text.substring(lastIndex, index);
+        result += `<span class="highlight">${text.substring(index, index + termoBuscaNorm.length)}</span>`;
+        lastIndex = index + termoBuscaNorm.length;
+        index = textNorm.indexOf(termoBuscaNorm, lastIndex);
+    }
+    result += text.substring(lastIndex);
+    return result;
+}
 
 // Função Genérica para renderizar listas de metadados (Escolas/Disciplinas)
 function renderMetadataList(list, container, typeLabel, onEdit, onDelete) {
@@ -194,9 +238,17 @@ function renderSchoolList() {
 }
 
 function renderDisciplineList() {
-    renderMetadataList(disciplinas, listaDisciplinasCadastradas, 'disciplina', editDiscipline, (idx) => {
-        disciplinas.splice(idx, 1);
-        saveDisciplines();
+    renderMetadataList(disciplinas, listaDisciplinasCadastradas, 'disciplina', editDiscipline, async (idx) => {
+        const confirmed = await showConfirm(
+            "Excluir Disciplina",
+            `Deseja realmente excluir a disciplina "${disciplinas[idx]}"?`,
+            "Excluir",
+            "Cancelar"
+        );
+        if (confirmed) {
+            disciplinas.splice(idx, 1);
+            saveDisciplines();
+        }
     });
 }
 
@@ -230,39 +282,6 @@ function editSchool(index) {
     saveAndRender(); // Salva professores, ordena, popula filtros e renderiza tabela
     renderSchoolList(); // Atualiza a lista visual no modal
     alert("Escola e registros de professores atualizados com sucesso!");
-}
-
-// Função para renderizar a lista de disciplinas no modal
-function renderDisciplineList() {
-    if (!listaDisciplinasCadastradas) return;
-    listaDisciplinasCadastradas.innerHTML = "";
-    
-    disciplinas.sort().forEach((disc, index) => {
-        const qtdProfessores = professores.filter(p => p.disciplina === disc).length;
-        const li = document.createElement("li");
-        li.className = "discipline-item";
-        li.innerHTML = `
-            <span>${disc} (${qtdProfessores})</span>
-            <div style="display: flex; gap: 5px;">
-                <button class="btn-edit" style="padding: 5px 10px; font-size: 0.7rem;">Editar</button>
-                <button class="btn-delete" style="padding: 5px 10px; font-size: 0.7rem;">Excluir</button>
-            </div>
-        `;
-        li.querySelector(".btn-edit").onclick = () => editDiscipline(index);
-        li.querySelector(".btn-delete").onclick = () => {
-            if (!verificarAutenticacao(`Para excluir a disciplina "${disc}"`)) return;
-
-            if (qtdProfessores > 0) {
-                alert(`Não é possível excluir a disciplina "${disc}" pois existem ${qtdProfessores} professor(es) vinculado(s) a ela. Remova ou altere os professores antes de excluir a disciplina.`);
-                return;
-            }
-            if (confirm(`Deseja realmente excluir a disciplina "${disc}"?`)) {
-                disciplinas.splice(index, 1);
-                saveDisciplines();
-            }
-        };
-        listaDisciplinasCadastradas.appendChild(li);
-    });
 }
 
 // Função para editar o nome de uma disciplina e atualizar os professores vinculados
@@ -454,9 +473,126 @@ function populateFilters() {
     });
 }
 
+// Função utilitária para gerenciar modais
+function toggleModal(modalElement, show = true) {
+    if (!modalElement) return;
+    if (show) {
+        modalElement.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+    } else {
+        modalElement.classList.add("hidden");
+        document.body.style.overflow = "";
+        if (modalElement === registrationSection) resetForm();
+    }
+}
+
+// Função para exibição de confirmação moderna utilizando Promises
+function showConfirm(title, message, confirmText = "Confirmar", cancelText = "Cancelar") {
+    return new Promise((resolve) => {
+        confirmTitle.textContent = title;
+        confirmMessage.textContent = message;
+        btnConfirmOk.textContent = confirmText;
+        btnConfirmCancel.textContent = cancelText;
+
+        toggleModal(confirmModalSection, true);
+
+        const onConfirm = () => {
+            cleanup();
+            resolve(true);
+        };
+
+        const onCancel = () => {
+            cleanup();
+            resolve(false);
+        };
+
+        const cleanup = () => {
+            btnConfirmOk.removeEventListener("click", onConfirm);
+            btnConfirmCancel.removeEventListener("click", onCancel);
+            toggleModal(confirmModalSection, false);
+        };
+
+        btnConfirmOk.addEventListener("click", onConfirm);
+        btnConfirmCancel.addEventListener("click", onCancel);
+    });
+}
+
+// Função para mover colunas no array
+function moveColumn(index, direction) {
+    const newIndex = index + direction;
+    if (newIndex >= 0 && newIndex < columnOrder.length) {
+        const temp = columnOrder[index];
+        columnOrder[index] = columnOrder[newIndex];
+        columnOrder[newIndex] = temp;
+        renderTable();
+    }
+}
+
+// Função para renderizar a lista de seleção de colunas
+function renderColumnToggleList() {
+    if (!listaColunasVisiveis) return;
+    listaColunasVisiveis.innerHTML = "";
+
+    columnOrder.forEach((col, index) => {
+        const li = document.createElement("li");
+        li.className = "column-item";
+        li.innerHTML = `
+            <input type="checkbox" id="chkCol-${col.id}" ${col.visible ? 'checked' : ''}>
+            <label for="chkCol-${col.id}" style="margin: 0; cursor: pointer; flex-grow: 1;">${col.label}</label>
+        `;
+        
+        li.onclick = (e) => {
+            if (e.target.tagName !== 'INPUT') {
+                const chk = li.querySelector('input');
+                chk.checked = !chk.checked;
+            }
+            columnOrder[index].visible = li.querySelector('input').checked;
+            renderTable();
+        };
+        listaColunasVisiveis.appendChild(li);
+    });
+}
+
+// Função para gerar o cabeçalho dinamicamente
+function renderHeaders() {
+    const thead = document.getElementById("tableHeader");
+    if (!thead) return;
+    thead.innerHTML = "";
+    const tr = document.createElement("tr");
+
+    columnOrder.forEach((col, index) => {
+        if (!col.visible) return;
+        const th = document.createElement("th");
+        // O th agora contém o texto centralizado e os controles absolutos por cima
+        th.innerHTML = `
+            <span class="th-label">${col.label}</span>
+            <div class="column-controls">
+                <button class="btn-move" title="Mover para esquerda" onclick="event.stopPropagation(); moveColumn(${index}, -1)">❮</button>
+                <button class="btn-move" title="Mover para direita" onclick="event.stopPropagation(); moveColumn(${index}, 1)">❯</button>
+            </div>
+        `;
+        
+        if (currentSort.column === col.id) {
+            th.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+        }
+        th.onclick = () => handleSort(col.id);
+        tr.appendChild(th);
+    });
+    thead.appendChild(tr);
+}
+
 // Função para ordenar a lista por nome
 function ordenarProfessores() {
-    professores.sort((a, b) => removerAcentos(a.nome).localeCompare(removerAcentos(b.nome)));
+    const { column, direction } = currentSort;
+    const factor = direction === 'asc' ? 1 : -1;
+
+    professores.sort((a, b) => {
+        const valA = removerAcentos(String(a[column] || "")).toUpperCase();
+        const valB = removerAcentos(String(b[column] || "")).toUpperCase();
+        
+        // localeCompare com numeric: true trata corretamente casos como "1º" e "10º"
+        return valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' }) * factor;
+    });
 }
 
 // Função para obter a senha de segurança. Se não existir, solicita ao usuário para definir uma.
@@ -527,7 +663,7 @@ function changeSecurityPassword() {
 
 // Função centralizada para obter os dados filtrados com base na busca e dropdowns
 function getFilteredData() {
-    const termoBusca = searchInput ? removerAcentos(searchInput.value.toUpperCase()) : "";
+    const termoBusca = searchInput ? removerAcentos(searchInput.value).toUpperCase() : "";
     const selectedEscola = filterEscolaSelect ? filterEscolaSelect.value : "";
     const selectedDisciplina = filterDisciplinaSelect ? filterDisciplinaSelect.value : "";
     const selectedAno = filterAnoSelect ? filterAnoSelect.value : "";
@@ -537,12 +673,19 @@ function getFilteredData() {
     return professores
         .map((prof, originalIndex) => ({ ...prof, originalIndex }))
         .filter(prof => {
+            // Normaliza os campos para comparação (Maiúsculas e Sem Acentos)
+            const nomeNorm = removerAcentos(prof.nome || "").toUpperCase();
+            const escolaNorm = removerAcentos(prof.escola || "").toUpperCase();
+            const anoNorm = removerAcentos(prof.ano || "").toUpperCase();
+            const turmaNorm = removerAcentos(prof.turma || "").toUpperCase();
+            const turnoNorm = removerAcentos(prof.turno || "").toUpperCase();
+
             const matchesSearch = 
-                removerAcentos(prof.nome).includes(termoBusca) || 
-                removerAcentos(prof.escola).includes(termoBusca) ||
-                removerAcentos(prof.ano || "").includes(termoBusca) ||
-                removerAcentos(prof.turma || "").includes(termoBusca) ||
-                removerAcentos(prof.turno || "").includes(termoBusca);
+                nomeNorm.includes(termoBusca) || 
+                escolaNorm.includes(termoBusca) ||
+                anoNorm.includes(termoBusca) ||
+                turmaNorm.includes(termoBusca) ||
+                turnoNorm.includes(termoBusca);
 
             const matchesDropdowns = 
                 (selectedEscola === "" || prof.escola === selectedEscola) &&
@@ -602,41 +745,87 @@ function updateChart(lista) {
         });
 }
 
+// Função para criar os controles de paginação
 // Função para renderizar a tabela com base no array de professores
 function renderTable() {
     if (!tableBody) return;
-
-    // Limpa o conteúdo atual para re-renderizar
+    
+    renderHeaders(); // Desenha o cabeçalho baseado na ordem atual
     tableBody.innerHTML = "";
+    selectedRowElement = null; // Limpa a referência da linha selecionada ao re-renderizar a tabela
+    const fragment = document.createDocumentFragment();
 
     const listaFiltrada = getFilteredData();
+    const termoBusca = searchInput ? removerAcentos(searchInput.value).toUpperCase() : "";
 
-    // Atualiza o contador
     if (contadorElement) {
         contadorElement.textContent = `Professores encontrados: ${listaFiltrada.length}`;
+        // Reinicia a animação de pulsação
+        contadorElement.classList.remove("pulse-animation");
+        void contadorElement.offsetWidth; // Força reflow para permitir reiniciar a animação CSS
+        contadorElement.classList.add("pulse-animation");
     }
 
-    // Atualiza o gráfico com a lista filtrada
     updateChart(listaFiltrada);
 
-    listaFiltrada.forEach((prof) => {
-        const newRow = tableBody.insertRow();
+    listaFiltrada.forEach((prof, index) => {
+        const newRow = document.createElement("tr");
+        
+        // Restaura o destaque visual se este professor for o que estava selecionado
+        const profKey = `${prof.nome}|${prof.escola}`;
+        if (profKey === selectedProfessorKey) {
+            newRow.classList.add("selected-row");
+            selectedRowElement = newRow;
+        }
 
-        newRow.insertCell(0).textContent = prof.nome;
-        newRow.insertCell(1).textContent = prof.escola;
-        newRow.insertCell(2).textContent = prof.disciplina;
-        newRow.insertCell(3).textContent = prof.ano || "";
-        newRow.insertCell(4).textContent = prof.turma || "";
-        newRow.insertCell(5).textContent = prof.turno || "";
-        newRow.insertCell(6).textContent = prof.telefone;
+        newRow.classList.add("animated-row");
+        newRow.style.animationDelay = `${Math.min(index * 0.02, 0.4)}s`;
 
-        // Ao clicar na linha, abre a edição (com verificação de senha)
+        // Preenche as células baseadas na ordem das colunas
+        let cellIdx = 0;
+        columnOrder.forEach((col) => {
+            if (!col.visible) return;
+            const cell = newRow.insertCell(cellIdx++);
+            const value = prof[col.id] || "";
+            if (col.searchable) {
+                cell.innerHTML = highlightText(value, termoBusca);
+            } else {
+                cell.textContent = value;
+            }
+        });
+
         newRow.onclick = () => {
+            // Armazena a chave única para persistência
+            selectedProfessorKey = `${prof.nome}|${prof.escola}`;
+
+            // Remove o destaque da linha anteriormente selecionada, se houver
+            if (selectedRowElement) {
+                selectedRowElement.classList.remove("selected-row");
+            }
+            // Adiciona o destaque à linha clicada e armazena sua referência
+            newRow.classList.add("selected-row");
+            selectedRowElement = newRow;
             if (verificarAutenticacao(`Para editar o(a) professor(a) ${prof.nome}`)) {
                 editProfessor(prof.originalIndex);
             }
         };
+        fragment.appendChild(newRow);
     });
+    tableBody.appendChild(fragment);
+
+    // Rola automaticamente para a linha selecionada se ela estiver presente na tabela
+    if (selectedRowElement) {
+        // O setTimeout de 100ms garante que a animação de entrada (fadeInRow) 
+        // e a renderização do DOM foram concluídas antes de rolar.
+        setTimeout(() => {
+            selectedRowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Adiciona o efeito de piscar
+            selectedRowElement.classList.add("pulse-row");
+            // Remove a classe após a animação (0.6s * 3 = 1.8s) para permitir nova execução
+            setTimeout(() => selectedRowElement.classList.remove("pulse-row"), 1800);
+        }, 100);
+    }
 }
 
 // Salva no localStorage e atualiza a tela
@@ -657,14 +846,21 @@ function removeProfessor(index) {
 function resetForm() {
     form.reset();
     editingIndex = -1;
+    selectedProfessorKey = null;
     
+    // Remove o destaque da linha selecionada ao resetar o formulário
+    if (selectedRowElement) {
+        selectedRowElement.classList.remove("selected-row");
+        selectedRowElement = null;
+    }
+
     // Garante que a disciplina volte para o padrão EDM após o reset
     if (disciplinaInput) disciplinaInput.value = "EDM";
     if (turnoInput) turnoInput.value = "MANHÃ";
 
     if (submitButton) submitButton.textContent = "Adicionar Professor";
-    if (cancelBtn) cancelBtn.style.display = "none";
-    if (deleteBtnModal) deleteBtnModal.style.display = "none";
+    if (cancelBtn) cancelBtn.classList.add("hidden");
+    if (deleteBtnModal) deleteBtnModal.classList.add("hidden");
     if (editModeIndicator) editModeIndicator.classList.add("hidden");
     if (registrationSection) registrationSection.classList.add("hidden");
 
@@ -708,10 +904,10 @@ function editProfessor(index) {
         submitButton.textContent = "Atualizar Professor";
     }
     if (cancelBtn) {
-        cancelBtn.style.display = "inline-block";
+        cancelBtn.classList.remove("hidden");
     }
     if (deleteBtnModal) {
-        deleteBtnModal.style.display = "inline-block";
+        deleteBtnModal.classList.remove("hidden");
     }
 }
 
@@ -763,7 +959,7 @@ if (nomeInput) {
                 isValid = phoneRegex.test(val);
             } else if (input === nomeInput) {
                 const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/;
-                isValid = val !== "" && nameRegex.test(val);
+                isValid = val.length >= 3 && nameRegex.test(val);
             } else if (input.tagName === "SELECT") {
                 isValid = input.value !== "" && input.value !== null;
             } else {
@@ -846,6 +1042,31 @@ if (disciplineModalSection) {
     });
 }
 
+// Controle do Modal de Colunas
+if (btnAbrirColunas && columnModalSection) {
+    btnAbrirColunas.onclick = () => {
+        columnModalSection.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        renderColumnToggleList();
+    };
+}
+
+if (closeColumnModalBtn) {
+    closeColumnModalBtn.onclick = () => {
+        columnModalSection.classList.add("hidden");
+        document.body.style.overflow = "";
+    };
+}
+
+if (columnModalSection) {
+    columnModalSection.addEventListener("click", (e) => {
+        if (e.target === columnModalSection) {
+            columnModalSection.classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+    });
+}
+
 // Evento do botão (X) para fechar o modal
 if (closeModalBtn) {
     closeModalBtn.onclick = () => resetForm();
@@ -873,6 +1094,13 @@ document.addEventListener("keydown", (e) => {
         disciplineModalSection.classList.add("hidden");
         document.body.style.overflow = "";
     }
+    if (e.key === "Escape" && confirmModalSection && !confirmModalSection.classList.contains("hidden")) {
+        btnConfirmCancel.click(); // Simula o cancelamento
+    }
+    if (e.key === "Escape" && columnModalSection && !columnModalSection.classList.contains("hidden")) {
+        columnModalSection.classList.add("hidden");
+        document.body.style.overflow = "";
+    }
 });
 
 // Event listeners para os novos filtros
@@ -895,6 +1123,17 @@ if (filterTurnoSelect) {
 // Evento de busca
 if (searchInput) {
     searchInput.addEventListener("input", () => renderTable());
+}
+
+// Função auxiliar para tratar a ordenação (chamada pelos headers dinâmicos)
+function handleSort(columnId) {
+    if (currentSort.column === columnId) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = columnId;
+        currentSort.direction = 'asc';
+    }
+    saveAndRender();
 }
 
 // Função para Limpar Filtros
@@ -1089,21 +1328,29 @@ if (btnRestaurar) {
         input.onchange = e => {
             const file = e.target.files[0];
             const reader = new FileReader();
-            reader.onload = readerEvent => {
+            reader.onload = async readerEvent => {
                 try {
                     const content = JSON.parse(readerEvent.target.result);
                     // Verifica se o backup é do novo formato (objeto) ou antigo (array)
                     const dataToRestore = Array.isArray(content) ? content : content.professores;
                     
-                    if (Array.isArray(dataToRestore) && confirm("Isso substituirá todos os dados atuais. Continuar?")) {
-                        professores = dataToRestore;
-                        if (content.escolas) escolas = content.escolas;
-                        if (content.disciplinas) disciplinas = content.disciplinas;
-                        
-                        saveSchools();
-                        saveDisciplines();
-                        saveAndRender();
-                        alert("Dados restaurados com sucesso!");
+                    if (Array.isArray(dataToRestore)) {
+                        const confirmed = await showConfirm(
+                            "Restaurar Backup",
+                            "Isso substituirá todos os dados atuais por este backup. Esta ação não pode ser desfeita. Continuar?",
+                            "Restaurar",
+                            "Cancelar"
+                        );
+                        if (confirmed) {
+                            professores = dataToRestore;
+                            if (content.escolas) escolas = content.escolas;
+                            if (content.disciplinas) disciplinas = content.disciplinas;
+                            
+                            saveSchools();
+                            saveDisciplines();
+                            saveAndRender();
+                            alert("Dados restaurados com sucesso!");
+                        }
                     }
                 } catch (err) {
                     alert("Arquivo de backup inválido.");
@@ -1132,15 +1379,21 @@ if (cancelBtn) {
 
 // Evento do botão excluir dentro do modal
 if (deleteBtnModal) {
-    deleteBtnModal.onclick = () => {
+    deleteBtnModal.onclick = async () => {
         const nome = document.getElementById("nome").value;
-        if (editingIndex !== -1 && confirm(`Deseja realmente excluir o(a) professor(a) ${nome}?`)) {
-            removeProfessor(editingIndex);
+        if (editingIndex !== -1) {
+            const confirmed = await showConfirm(
+                "Excluir Professor",
+                `Deseja realmente excluir o(a) professor(a) ${nome}? Esta ação não pode ser desfeita.`,
+                "Excluir",
+                "Manter"
+            );
+            if (confirmed) {
+                removeProfessor(editingIndex);
+            }
         }
     };
 }
-
-// Captura o evento de envio do formulário
 if (form) {
     form.addEventListener("submit", function(event) {
         event.preventDefault(); // impede o recarregamento da página
@@ -1185,11 +1438,11 @@ if (form) {
 
         // RegEx para validar nome (apenas letras e espaços)
         const nameRegex = /^[A-ZÀ-Ÿ\s]+$/;
-        if (!nameRegex.test(nome)) {
+        if (nome.length < 3 || !nameRegex.test(nome)) {
             nomeInput.classList.add("invalid");
             nomeInput.classList.add("shake");
             setTimeout(() => nomeInput.classList.remove("shake"), 400);
-            alert("O campo Nome deve conter apenas letras e espaços, sem números ou caracteres especiais.");
+            alert("O campo Nome deve conter pelo menos 3 letras e apenas caracteres alfabéticos.");
             return;
         }
 
@@ -1211,11 +1464,14 @@ if (form) {
         const jaExiste = professores.some((prof, index) => 
             removerAcentos(prof.nome) === nomeSemAcento && 
             removerAcentos(prof.escola) === escolaSemAcento &&
-            index !== editingIndex
+            index !== editingIndex // Ignora o próprio professor se estiver em modo de edição
         );
 
         if (jaExiste) {
             alert(`O(A) professor(a) "${nome}" já está cadastrado(a) na escola "${escola}".`);
+            nomeInput.classList.add("invalid");
+            nomeInput.classList.add("shake");
+            setTimeout(() => nomeInput.classList.remove("shake"), 400);
             return;
         }
 
@@ -1241,7 +1497,7 @@ if (headerSentinel && table) {
         // Se o sentinela não estiver visível na área de intersecção, o header está stuck
         table.classList.toggle("stuck-header", !entry.isIntersecting);
     }, {
-        rootMargin: "-71px 0px 0px 0px" // Dispara quando passa pelo limite do menu fixo (70px + 1px)
+        rootMargin: "-113px 0px 0px 0px" // Ajustado para a média entre o estado normal e compacto
     });
     observer.observe(headerSentinel);
 }
@@ -1260,7 +1516,9 @@ if (btnToggleChart && statsSection) {
 const currentTheme = localStorage.getItem("theme");
 if (currentTheme === "dark") {
     document.documentElement.setAttribute("data-theme", "dark");
-    if (btnTheme) btnTheme.textContent = "☀️ Tema";
+    if (btnTheme) btnTheme.innerHTML = '<span class="theme-icon">☀️</span> Tema';
+} else {
+    if (btnTheme) btnTheme.innerHTML = '<span class="theme-icon">🌙</span> Tema';
 }
 
 if (btnTheme) {
@@ -1270,6 +1528,69 @@ if (btnTheme) {
         
         document.documentElement.setAttribute("data-theme", newTheme);
         localStorage.setItem("theme", newTheme);
-        btnTheme.textContent = newTheme === "dark" ? "☀️ Tema" : "🌙 Tema";
+        const icon = newTheme === "dark" ? "☀️" : "🌙";
+        btnTheme.innerHTML = `<span class="theme-icon rotate-animation">${icon}</span> Tema`;
     };
 }
+
+// Lógica de Rolagem (Scroll): Compactar barra e Botão Voltar ao Topo
+window.addEventListener("scroll", () => {
+    const scrollY = window.scrollY;
+
+    // Compactar barra de ferramentas após 50px de rolagem
+    document.body.classList.toggle("scrolled-compact", scrollY > 50);
+
+    // Mostrar/Ocultar botão voltar ao topo
+    if (btnBackToTop) {
+        btnBackToTop.classList.toggle("visible", scrollY > 300);
+    }
+});
+
+if (btnBackToTop) {
+    btnBackToTop.onclick = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+}
+
+// Lógica do Efeito de Onda (Ripple Effect)
+document.addEventListener("click", function (e) {
+    const button = e.target.closest("button");
+    
+    // Ignora se não for um botão ou se o botão estiver desativado
+    if (!button || button.disabled) return;
+
+    const circle = document.createElement("span");
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const radius = diameter / 2;
+    const rect = button.getBoundingClientRect();
+
+    // Calcula a cor da onda baseada no brilho do fundo do botão
+    const style = window.getComputedStyle(button);
+    const bgColor = style.backgroundColor;
+    const rgb = bgColor.match(/\d+/g);
+    let rippleColor = "rgba(255, 255, 255, 0.4)"; // Onda clara padrão
+
+    if (rgb) {
+        const [r, g, b] = rgb.map(Number);
+        // Fórmula YIQ para determinar brilho: (R*299 + G*587 + B*114) / 1000
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        if (brightness > 180) { // Se o fundo for muito claro
+            rippleColor = "rgba(0, 0, 0, 0.2)"; // Onda escura sutil
+        }
+    }
+
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${e.clientX - rect.left - radius}px`;
+    circle.style.top = `${e.clientY - rect.top - radius}px`;
+    circle.style.backgroundColor = rippleColor;
+    circle.classList.add("ripple-effect");
+
+    // Remove ripples antigos antes de adicionar um novo
+    const oldRipple = button.querySelector(".ripple-effect");
+    if (oldRipple) oldRipple.remove();
+
+    button.appendChild(circle);
+
+    // Remove o elemento após a animação terminar
+    setTimeout(() => circle.remove(), 600);
+});

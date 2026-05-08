@@ -13,10 +13,11 @@
             <img src="https://raw.githubusercontent.com/educacao-tech/edmprofessor/main/edm.png" alt="Logo EDM" class="header-logo">
         </div>
         <h1>Gestão de Professores</h1>
-        <button id="btnAbrirEscolas" class="btn-menu" style="background-color: #3498db; margin-right: 10px;">🏫 Escolas</button>
-        <button id="btnAbrirDisciplinas" class="btn-menu" style="background-color: #9b59b6; margin-right: 10px;">📚 Disciplinas</button>
-        <button id="btnTheme" class="btn-menu" style="background-color: #34495e; margin-right: 10px;">🌙 Tema</button>
-        <button id="btnAbrirCadastro" class="btn-menu">➕ Novo Professor</button>
+        <button id="btnAbrirEscolas" class="btn-menu btn-blue">🏫 Escolas</button>
+        <button id="btnAbrirDisciplinas" class="btn-menu btn-purple">📚 Disciplinas</button>
+        <button id="btnAbrirColunas" class="btn-menu btn-orange">📊 Colunas</button>
+        <button id="btnTheme" class="btn-menu btn-dark">🌙 Tema</button>
+        <button id="btnAbrirCadastro" class="btn-menu btn-green">➕ Novo Professor</button>
         <div id="editModeIndicator" class="edit-mode-indicator hidden">MODO DE EDIÇÃO ATIVO</div>
     </header>
 
@@ -92,8 +93,8 @@
 
         <div class="form-actions">
             <button type="submit">Adicionar Professor</button>
-            <button type="button" id="deleteBtnModal" class="btn-delete" style="display: none;">Excluir Professor</button>
-            <button type="button" id="cancelBtn" class="btn-cancel" style="display: none;">Cancelar</button>
+            <button type="button" id="deleteBtnModal" class="btn-delete hidden">Excluir Professor</button>
+            <button type="button" id="cancelBtn" class="btn-cancel hidden">Cancelar</button>
         </div>
         </form>
     </section>
@@ -103,7 +104,7 @@
         <div class="modal-content">
             <button type="button" class="close-modal" id="closeSchoolModalBtn">&times;</button>
             <h3>Gerenciar Escolas</h3>
-            <form id="schoolForm" style="box-shadow: none; width: 100%; border: none; padding: 0;">
+            <form id="schoolForm" class="form-compact">
                 <label for="novaEscola">Nome da Escola:</label>
                 <div class="field-container">
                     <input type="text" id="novaEscola" placeholder="Ex: EMEB ALZIRA" required>
@@ -140,63 +141,96 @@
         </div>
     </section>
 
+    <!-- Modal de Configuração de Colunas -->
+    <section id="columnModalSection" class="hidden">
+        <div class="modal-content">
+            <button type="button" class="close-modal" id="closeColumnModalBtn">&times;</button>
+            <h3>Visibilidade das Colunas</h3>
+            <p style="font-size: 0.8rem; margin-bottom: 15px; color: #666;">Marque as colunas que deseja visualizar na tabela.</p>
+            <ul id="listaColunasVisiveis" style="list-style: none; padding: 0;">
+                <!-- Opções de colunas aparecerão aqui -->
+            </ul>
+        </div>
+    </section>
+
+    <!-- Modal de Confirmação Moderno -->
+    <section id="confirmModalSection" class="hidden">
+        <div class="modal-content confirm-modal">
+            <div class="confirm-icon">⚠️</div>
+            <h3 id="confirmTitle">Confirmar Ação</h3>
+            <p id="confirmMessage">Você tem certeza que deseja realizar esta operação?</p>
+            <div class="confirm-actions">
+                <button id="btnConfirmCancel" class="btn-cancel">Cancelar</button>
+                <button id="btnConfirmOk" class="btn-delete">Excluir</button>
+            </div>
+        </div>
+    </section>
+
     <!-- Campo de Busca -->
     <div class="search-container">
         <div class="filters-grid">
             <div class="filter-group search-group">
-                <label for="searchInput">Busca Rápida:</label>
+                <label for="searchInput">Busca:</label>
                 <input type="text" id="searchInput" placeholder="NOME OU ESCOLA...">
             </div>
             
-            <div class="filter-group">
-                <label for="filterEscola">Escola:</label>
-                <select id="filterEscola">
-                    <option value="">TODAS</option>
-                </select>
+            <div class="dropdown filter-dropdown">
+                <button type="button" class="btn-report dropbtn">Filtros ▼</button>
+                <div class="dropdown-content filter-dropdown-content">
+                    <div class="filter-group">
+                        <label for="filterEscola">Escola:</label>
+                        <select id="filterEscola">
+                            <option value="">TODAS</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterDisciplina">Disciplina:</label>
+                        <select id="filterDisciplina">
+                            <option value="">TODAS</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterAno">Ano:</label>
+                        <select id="filterAno">
+                            <option value="">TODAS</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterTurma">Turma:</label>
+                        <select id="filterTurma">
+                            <option value="">TODAS</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterTurno">Turno:</label>
+                        <select id="filterTurno">
+                            <option value="">TODAS</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
-            <div class="filter-group">
-                <label for="filterDisciplina">Disciplina:</label>
-                <select id="filterDisciplina">
-                    <option value="">TODAS</option>
-                </select>
+            <button type="button" id="btnToggleChart" class="btn-report">Ocultar Gráfico</button>
+            <button type="button" id="btnLimparFiltros" class="btn-report">Limpar Filtros</button>
+
+            <div class="dropdown">
+                <button type="button" class="btn-report dropbtn">Ações ▼</button>
+                <div class="dropdown-content">
+                    <button type="button" id="btnDetailedReport" class="btn-dropdown">📋 Relatório Detalhado</button>
+                    <button type="button" id="btnExportar" class="btn-dropdown">📥 Exportar CSV</button>
+                    <button type="button" id="btnImprimir" class="btn-dropdown">🖨️ Imprimir Relatório</button>
+                    <button type="button" id="btnBackup" class="btn-dropdown">💾 Backup JSON</button>
+                    <button type="button" id="btnRestaurar" class="btn-dropdown">📤 Restaurar Backup</button>
+                    <button type="button" id="btnChangePassword" class="btn-dropdown">🔑 Alterar Senha</button>
+                </div>
             </div>
 
-            <div class="filter-group">
-                <label for="filterAno">Ano:</label>
-                <select id="filterAno">
-                    <option value="">TODAS</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="filterTurma">Turma:</label>
-                <select id="filterTurma">
-                    <option value="">TODAS</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="filterTurno">Turno:</label>
-                <select id="filterTurno">
-                    <option value="">TODAS</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="search-footer">
             <div id="contador" class="contador-vagas">
                 Professores encontrados: 0
-            </div>
-            <div class="report-actions">
-                <button type="button" id="btnDetailedReport" class="btn-report">Relatório Detalhado</button>
-                <button type="button" id="btnToggleChart" class="btn-report">Ocultar Gráfico</button>
-                <button type="button" id="btnLimparFiltros" class="btn-report">Limpar Filtros</button>
-                <button type="button" id="btnExportar" class="btn-report">Exportar CSV</button>
-                <button type="button" id="btnImprimir" class="btn-report">Imprimir Relatório</button>
-                <button type="button" id="btnBackup" class="btn-report" style="background-color: #2980b9 !important;">Backup JSON</button>
-                <button type="button" id="btnRestaurar" class="btn-report" style="background-color: #8e44ad !important;">Restaurar Backup</button>
-                <button type="button" id="btnChangePassword" class="btn-report" style="background-color: #f39c12 !important;">Alterar Senha</button>
             </div>
         </div>
     </div>
@@ -212,21 +246,16 @@
 
     <!-- Tabela de Dados -->
     <table>
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Escola</th>
-                <th>Disciplina</th>
-                <th>Ano</th>
-                <th>Turma</th>
-                <th>Turno</th>
-                <th>Telefone</th>
-            </tr>
+        <thead id="tableHeader">
+            <!-- Gerado dinamicamente -->
         </thead>
         <tbody>
             <!-- Os dados aparecerão aqui dinamicamente via JavaScript -->
         </tbody>
     </table>
+
+    <!-- Botão de Voltar ao Topo -->
+    <button id="btnBackToTop" class="btn-back-to-top" title="Voltar ao Topo">↑</button>
 
     <script src="script.js"></script>
 </body>
