@@ -383,94 +383,47 @@ if (disciplineForm) {
 }
 
 // Função para popular os dropdowns de filtro
+// Função utilitária para preencher selects
+function fillSelect(selectElement, options, defaultText = "TODAS", isPlaceholder = false) {
+    if (!selectElement) return;
+    const currentVal = selectElement.value;
+    
+    selectElement.innerHTML = isPlaceholder 
+        ? `<option value="" disabled selected>${defaultText}</option>`
+        : `<option value="">${defaultText}</option>`;
+
+    options.forEach(opt => {
+        const option = document.createElement("option");
+        option.value = opt;
+        option.textContent = opt;
+        selectElement.appendChild(option);
+    });
+
+    // Mantém o valor se ele ainda for válido
+    if (options.includes(currentVal)) {
+        selectElement.value = currentVal;
+    }
+}
+
 function populateFilters() {
-    if (!filterEscolaSelect || !filterDisciplinaSelect || !filterTurmaSelect || !filterTurnoSelect || !filterAnoSelect) return;
+    const sortedEscolas = [...escolas].sort();
+    const sortedDisciplinas = [...disciplinas].sort();
+    
+    // Dropdowns de Filtro (Barra de ferramentas)
+    fillSelect(filterEscolaSelect, sortedEscolas);
+    fillSelect(filterDisciplinaSelect, sortedDisciplinas);
+    fillSelect(filterAnoSelect, [...new Set(professores.map(p => p.ano).filter(Boolean))].sort());
+    fillSelect(filterTurmaSelect, [...new Set(professores.map(p => p.turma).filter(Boolean))].sort());
+    fillSelect(filterTurnoSelect, [...new Set(professores.map(p => p.turno).filter(Boolean))].sort());
 
-    // Usa a lista oficial de escolas (ordenada)
-    const listaEscolas = [...escolas].sort();
-    const listaDisciplinas = [...disciplinas].sort();
-
-    if (filterEscolaSelect) {
-        filterEscolaSelect.innerHTML = '<option value="">TODAS</option>'; // Opção padrão
-        listaEscolas.forEach(escola => {
-            const option = document.createElement("option");
-            option.value = escola;
-            option.textContent = escola;
-            filterEscolaSelect.appendChild(option);
-        });
+    // Dropdowns do Formulário de Cadastro
+    fillSelect(escolaInput, sortedEscolas, "Selecione a Escola", true);
+    fillSelect(disciplinaInput, sortedDisciplinas, "Selecione a Disciplina", true);
+    
+    // Fallback específico para Disciplina EDM
+    if (!disciplinaInput.value && sortedDisciplinas.includes("EDM")) {
+        disciplinaInput.value = "EDM";
     }
-
-    // Popula o select de escola no cadastro de professores
-    if (escolaInput) {
-        const currentVal = escolaInput.value;
-        escolaInput.innerHTML = '<option value="" disabled selected>Selecione a Escola</option>';
-        listaEscolas.forEach(escola => {
-            const option = document.createElement("option");
-            option.value = escola;
-            option.textContent = escola;
-            escolaInput.appendChild(option);
-        });
-        // Mantém o valor selecionado se ele ainda existir na lista (importante durante a edição)
-        if (listaEscolas.includes(currentVal)) {
-            escolaInput.value = currentVal;
-        }
-    }
-
-    // Popula o select de disciplina no cadastro de professores
-    if (disciplinaInput) {
-        const currentVal = disciplinaInput.value;
-        disciplinaInput.innerHTML = '<option value="" disabled selected>Selecione a Disciplina</option>';
-        listaDisciplinas.forEach(disc => {
-            const option = document.createElement("option");
-            option.value = disc;
-            option.textContent = disc;
-            disciplinaInput.appendChild(option);
-        });
-        // Se for EDM ou valor anterior válido, mantém
-        if (currentVal && listaDisciplinas.includes(currentVal)) {
-            disciplinaInput.value = currentVal;
-        } else if (listaDisciplinas.includes("EDM")) {
-            disciplinaInput.value = "EDM";
-        }
-    }
-
-    filterDisciplinaSelect.innerHTML = '<option value="">TODAS</option>'; // Opção padrão
-    listaDisciplinas.forEach(disc => {
-        const option = document.createElement("option");
-        option.value = disc;
-        option.textContent = disc;
-        filterDisciplinaSelect.appendChild(option);
-    });
-
-    // Coleta anos únicos e ordena
-    const anos = [...new Set(professores.map(p => p.ano).filter(Boolean))].sort();
-    filterAnoSelect.innerHTML = '<option value="">TODAS</option>';
-    anos.forEach(ano => {
-        const option = document.createElement("option");
-        option.value = ano;
-        option.textContent = ano;
-        filterAnoSelect.appendChild(option);
-    });
-
-    // Coleta turmas únicas e ordena
-    const turmas = [...new Set(professores.map(p => p.turma).filter(Boolean))].sort();
-    filterTurmaSelect.innerHTML = '<option value="">TODAS</option>';
-    turmas.forEach(turma => {
-        const option = document.createElement("option");
-        option.value = turma;
-        option.textContent = turma;
-        filterTurmaSelect.appendChild(option);
-    });
-
-    // Coleta turnos únicos e ordena
-    const turnos = [...new Set(professores.map(p => p.turno).filter(Boolean))].sort();
-    filterTurnoSelect.innerHTML = '<option value="">TODAS</option>';
-    turnos.forEach(turno => {
-        const option = document.createElement("option");
-        option.value = turno;
-        option.textContent = turno;
-        filterTurnoSelect.appendChild(option);
-    });
 }
 
 // Função utilitária para gerenciar modais
