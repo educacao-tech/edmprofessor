@@ -52,13 +52,14 @@ const btnTheme = document.getElementById("btnTheme");
 const btnBackToTop = document.getElementById("btnBackToTop");
 
 // Estado da aplicação: carrega dados salvos ou inicia array vazio
-let dadosSalvos = JSON.parse(localStorage.getItem("professores"));
+const STORAGE_KEY = "professores";
+let dadosSalvos = JSON.parse(localStorage.getItem(STORAGE_KEY));
 
 // MIGRACAO AUTOMÁTICA: Detecta dados no formato antigo (ex: "5º B" no campo turma)
 // e separa automaticamente em 'ano' e 'turma' para manter a consistência do banco.
 if (dadosSalvos && dadosSalvos.length > 0) {
     let houveMigracao = false;
-    dadosSalvos = dadosSalvos.map(prof => {
+    const dadosMigrados = dadosSalvos.map(prof => {
         // Se a turma contém "º" (indicando o ano) e o campo ano está vazio ou N/A
         if (prof.turma && prof.turma.includes("º") && (!prof.ano || prof.ano === "N/A")) {
             const partes = prof.turma.trim().split(/\s+/);
@@ -69,13 +70,15 @@ if (dadosSalvos && dadosSalvos.length > 0) {
         }
         return prof;
     });
+
     if (houveMigracao) {
-        localStorage.setItem("professores", JSON.stringify(dadosSalvos));
+        dadosSalvos = dadosMigrados;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dadosSalvos));
     }
 }
 
 // Alteração: Garante que se houver uma lista salva (mesmo que vazia), ela seja respeitada.
-let professores = dadosSalvos || [
+let professores = (dadosSalvos !== null) ? dadosSalvos : [
     { nome: "ANA CAROLINA VENTUROSO BÉRGAMO CÂNDIDO", escola: "ALZIRA", disciplina: "EDM", ano: "4º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
     { nome: "ÁUREA APARECIDA SOUZA CARDOSO", escola: "ALZIRA", disciplina: "EDM", ano: "1º", turma: "E", turno: "TARDE", telefone: "(00) 00000-0000" },
     { nome: "CRISTIANE AUGUSTA COSTA", escola: "ALZIRA", disciplina: "EDM", ano: "3º", turma: "E", turno: "TARDE", telefone: "(00) 00000-0000" },
@@ -586,19 +589,12 @@ function getFilteredData() {
     return professores
         .map((prof, originalIndex) => ({ ...prof, originalIndex }))
         .filter(prof => {
-            // Normaliza os campos para comparação (Maiúsculas e Sem Acentos)
-            const nomeNorm = removerAcentos(prof.nome || "").toUpperCase();
-            const escolaNorm = removerAcentos(prof.escola || "").toUpperCase();
-            const anoNorm = removerAcentos(prof.ano || "").toUpperCase();
-            const turmaNorm = removerAcentos(prof.turma || "").toUpperCase();
-            const turnoNorm = removerAcentos(prof.turno || "").toUpperCase();
-
-            const matchesSearch = 
-                nomeNorm.includes(termoBusca) || 
-                escolaNorm.includes(termoBusca) ||
-                anoNorm.includes(termoBusca) ||
-                turmaNorm.includes(termoBusca) ||
-                turnoNorm.includes(termoBusca);
+            // Define quais campos participam da busca textual
+            const camposBusca = ['nome', 'escola', 'ano', 'turma', 'turno'];
+            
+            const matchesSearch = termoBusca === "" || camposBusca.some(campo => 
+                removerAcentos(prof[campo] || "").toUpperCase().includes(termoBusca)
+            );
 
             const matchesDropdowns = 
                 (selectedEscola === "" || prof.escola === selectedEscola) &&
@@ -743,10 +739,20 @@ function renderTable() {
 
 // Salva no localStorage e atualiza a tela
 function saveAndRender() {
-    ordenarProfessores();
-    populateFilters(); // Atualiza as opções de filtro caso uma nova escola/disciplina seja adicionada
-    localStorage.setItem("professores", JSON.stringify(professores));
-    renderTable();
+    try {
+        // 1. Persistência (Prioridade máxima)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(professores));
+        
+        // 2. Atualização da Interface
+        ordenarProfessores();
+        populateFilters();
+        renderTable();
+        
+        console.log("Dados salvos com sucesso. Total:", professores.length);
+    } catch (error) {
+        console.error("Erro ao salvar dados no localStorage:", error);
+        alert("Erro crítico: Não foi possível salvar as alterações. Verifique o espaço disponível no navegador.");
+    }
 }
 
 function removeProfessor(index) {
