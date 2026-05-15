@@ -20,6 +20,7 @@ const btnAbrirEscolas = document.getElementById("btnAbrirEscolas");
 const btnAbrirDisciplinas = document.getElementById("btnAbrirDisciplinas");
 const schoolModalSection = document.getElementById("schoolModalSection");
 const disciplineModalSection = document.getElementById("disciplineModalSection");
+const columnModalSection = document.getElementById("columnModalSection"); // Adicionado
 const attendanceModalSection = document.getElementById("attendanceModalSection");
 const closeSchoolModalBtn = document.getElementById("closeSchoolModalBtn");
 const attendanceFilterEscola = document.getElementById("attendanceFilterEscola");
@@ -50,6 +51,7 @@ const btnExportar = document.getElementById("btnExportar");
 const btnImprimir = document.getElementById("btnImprimir");
 const btnDetailedReport = document.getElementById("btnDetailedReport");
 const btnLimparFiltros = document.getElementById("btnLimparFiltros");
+const btnAbrirColunas = document.getElementById("btnAbrirColunas"); // Adicionado
 const headerSentinel = document.getElementById("header-sentinel");
 const btnBackup = document.getElementById("btnBackup");
 const btnRestaurar = document.getElementById("btnRestaurar");
@@ -60,6 +62,7 @@ const btnConfirmCancel = document.getElementById("btnConfirmCancel");
 const confirmTitle = document.getElementById("confirmTitle");
 const confirmMessage = document.getElementById("confirmMessage");
 const editModeIndicator = document.getElementById("editModeIndicator");
+const closeColumnModalBtn = document.getElementById("closeColumnModalBtn"); // Adicionado
 const btnTheme = document.getElementById("btnTheme");
 const btnBackToTop = document.getElementById("btnBackToTop");
 
@@ -163,8 +166,7 @@ let columnOrder = [
     { id: 'ano', label: 'Ano', searchable: true, visible: true },
     { id: 'turma', label: 'Turma', searchable: true, visible: true },
     { id: 'turno', label: 'Turno', searchable: true, visible: true },
-    { id: 'telefone', label: 'Telefone', searchable: false, visible: true },
-    { id: 'progresso', label: 'Progresso', searchable: false, visible: true }
+    { id: 'telefone', label: 'Telefone', searchable: false, visible: true }
 ];
 
 // Variável para persistir a seleção (Nome + Escola) mesmo após filtrar ou ordenar
@@ -267,6 +269,10 @@ function renderDisciplineList() {
     });
 }
 
+// Chave para a data específica da formação
+const DATA_FORMACAO_KEY_PREFIX = "presenca_";
+
+
 // Gerenciamento de Datas de Presença
 let historicoDatas = JSON.parse(localStorage.getItem("historicoDatas")) || ["2026_06_03", "2026_05_06"];
 let currentAttendanceKey = "presenca_" + historicoDatas[0];
@@ -281,12 +287,12 @@ function populateDateSelect() {
         option.textContent = displayDate;
         selectDataPresenca.appendChild(option);
     });
-    
-    const activeDate = currentAttendanceKey.replace("presenca_", "").split('_').reverse().join('/');
-    selectDataPresenca.value = currentAttendanceKey.replace("presenca_", "");
+
+    selectDataPresenca.value = currentAttendanceKey.replace(DATA_FORMACAO_KEY_PREFIX, "");
     
     // Atualiza o texto do botão no menu de ações dinamicamente
     if (btnAttendance) {
+        const activeDate = currentAttendanceKey.replace(DATA_FORMACAO_KEY_PREFIX, "").split('_').reverse().join('/');
         btnAttendance.textContent = `📅 Chamada (${activeDate})`;
     }
 }
@@ -326,7 +332,7 @@ if (btnUnmarkAll) {
 
 if (selectDataPresenca) {
     selectDataPresenca.onchange = (e) => {
-        currentAttendanceKey = "presenca_" + e.target.value;
+        currentAttendanceKey = DATA_FORMACAO_KEY_PREFIX + e.target.value;
         renderAttendanceList();
     };
 }
@@ -345,7 +351,7 @@ if (btnNovaData) {
                 // Adiciona a nova data e a torna a data ativa
                 historicoDatas.unshift(dataFormatada); // Adiciona no início da lista
                 localStorage.setItem("historicoDatas", JSON.stringify(historicoDatas));
-                currentAttendanceKey = "presenca_" + dataFormatada;
+                currentAttendanceKey = DATA_FORMACAO_KEY_PREFIX + dataFormatada;
                 populateDateSelect();
                 renderAttendanceList();
             } else {
@@ -591,18 +597,21 @@ function populateFilters() {
     }
 }
 
-// Função utilitária para gerenciar modais
-function toggleModal(modalElement, show = true) {
-    if (!modalElement) return;
-    if (show) {
+// Objeto para gerenciar modais de forma centralizada
+const ModalManager = {
+    open: function(modalElement, onOpenCallback = null) {
+        if (!modalElement) return;
         modalElement.classList.remove("hidden");
         document.body.style.overflow = "hidden";
-    } else {
+        if (onOpenCallback) onOpenCallback();
+    },
+    close: function(modalElement, onCloseCallback = null) {
+        if (!modalElement) return;
         modalElement.classList.add("hidden");
         document.body.style.overflow = "";
-        if (modalElement === registrationSection) resetForm();
+        if (onCloseCallback) onCloseCallback();
     }
-}
+};
 
 // Função para exibição de confirmação moderna utilizando Promises
 function showConfirm(title, message, confirmText = "Confirmar", cancelText = "Cancelar") {
@@ -611,8 +620,7 @@ function showConfirm(title, message, confirmText = "Confirmar", cancelText = "Ca
         confirmMessage.textContent = message;
         btnConfirmOk.textContent = confirmText;
         btnConfirmCancel.textContent = cancelText;
-
-        toggleModal(confirmModalSection, true);
+        ModalManager.open(confirmModalSection);
 
         const onConfirm = () => {
             cleanup();
@@ -627,7 +635,7 @@ function showConfirm(title, message, confirmText = "Confirmar", cancelText = "Ca
         const cleanup = () => {
             btnConfirmOk.removeEventListener("click", onConfirm);
             btnConfirmCancel.removeEventListener("click", onCancel);
-            toggleModal(confirmModalSection, false);
+            ModalManager.close(confirmModalSection);
         };
 
         btnConfirmOk.addEventListener("click", onConfirm);
@@ -678,10 +686,10 @@ function renderHeaders() {
     thead.innerHTML = "";
     const tr = document.createElement("tr");
 
-    columnOrder.forEach((col, index) => {
+    columnOrder.forEach((col, index) => { // Adicionado 'index' para os botões de mover
         if (!col.visible) return;
         const th = document.createElement("th");
-        // O th agora contém o texto centralizado e os controles absolutos por cima
+        // O th agora contém o texto centralizado e os controles absolutos por cima (se visíveis)
         th.innerHTML = `
             <span class="th-label">${col.label}</span>
             <div class="column-controls">
@@ -774,28 +782,11 @@ function getFilteredData() {
         });
 }
 
-// Função para criar os controles de paginação
-// Função para renderizar a tabela com base no array de professores
-function renderTable() {
-    if (!tableBody) return;
-    
-    renderHeaders(); // Desenha o cabeçalho baseado na ordem atual
-    tableBody.innerHTML = "";
-    selectedRowElement = null; // Limpa a referência da linha selecionada ao re-renderizar a tabela
-    const fragment = document.createDocumentFragment();
+// --- Funções de Renderização da Tabela (Refatoradas) ---
 
-    const listaFiltrada = getFilteredData();
-    const termoBusca = searchInput ? removerAcentos(searchInput.value).toUpperCase() : "";
+function updateTableCounters(listaFiltrada) {
+    if (!presentCountElement || !absentCountElement) return;
 
-    if (contadorElement) {
-        contadorElement.textContent = `Professores encontrados: ${listaFiltrada.length}`;
-        // Reinicia a animação de pulsação
-        contadorElement.classList.remove("pulse-animation");
-        void contadorElement.offsetWidth; // Força reflow para permitir reiniciar a animação CSS
-        contadorElement.classList.add("pulse-animation");
-    }
-    
-    // Calcula e atualiza os contadores de presença/falta
     let presentes = 0;
     let ausentes = 0;
     listaFiltrada.forEach(prof => {
@@ -805,8 +796,33 @@ function renderTable() {
             ausentes++;
         }
     });
-    if (presentCountElement) presentCountElement.textContent = `Presentes: ${presentes}`;
-    if (absentCountElement) absentCountElement.textContent = `Ausentes: ${ausentes}`;
+    presentCountElement.textContent = `Presentes: ${presentes}`;
+    absentCountElement.textContent = `Ausentes: ${ausentes}`;
+}
+
+function updateTableProgressBars(prof, cell) {
+    const fields = ['nome', 'escola', 'disciplina', 'ano', 'turma', 'turno', 'telefone'];
+    const filled = fields.filter(f => {
+        const val = prof[f];
+        return val && val !== "" && val !== "N/A" && val !== "(00) 00000-0000";
+    }).length;
+    const percent = Math.round((filled / fields.length) * 100);
+    
+    let color = 'var(--danger-color)'; // Vermelho para pouco preenchido
+    if (percent === 100) color = 'var(--primary-color)'; // Verde para completo
+    else if (percent >= 50) color = 'var(--warning-color)'; // Laranja para incompleto
+
+    cell.innerHTML = `
+        <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${percent}%; background-color: ${color}"></div></div>
+        <span class="progress-text">${percent}%</span>
+    `;
+}
+
+function renderTableBody(listaFiltrada, termoBusca) {
+    if (!tableBody) return;
+    tableBody.innerHTML = ""; // Limpa o corpo da tabela antes de preencher
+    selectedRowElement = null; // Limpa a referência da linha selecionada
+    const fragment = document.createDocumentFragment();
 
     listaFiltrada.forEach((prof, index) => {
         const newRow = document.createElement("tr");
@@ -831,26 +847,11 @@ function renderTable() {
             if (col.id === 'nome') {
                 const isPresente = prof[currentAttendanceKey] === true;
                 const statusClass = isPresente ? 'present' : 'absent';
-                const indicator = `<span class="presence-indicator ${statusClass}" title="Clique para abrir a chamada" onclick="event.stopPropagation(); abrirChamada()"></span>`;
-                cell.innerHTML = indicator + highlightText(value, termoBusca);
+                const formattedDate = currentAttendanceKey.replace(DATA_FORMACAO_KEY_PREFIX, "").split('_').reverse().join('/');
+                const indicator = `<span class="presence-indicator ${statusClass}" title="Status da chamada em ${formattedDate}. Clique para abrir." onclick="event.stopPropagation(); abrirChamada()"></span>`;
+                cell.innerHTML = indicator + highlightText(value, termoBusca); // Adicionado highlightText
             } else if (col.id === 'progresso') {
-                // Lógica de cálculo de preenchimento
-                const fields = ['nome', 'escola', 'disciplina', 'ano', 'turma', 'turno', 'telefone'];
-                const filled = fields.filter(f => {
-                    const val = prof[f];
-                    // Considera não preenchido se for vazio, "N/A" ou o telefone padrão de exemplo
-                    return val && val !== "" && val !== "N/A" && val !== "(00) 00000-0000";
-                }).length;
-                const percent = Math.round((filled / fields.length) * 100);
-                
-                let color = 'var(--danger-color)'; // Vermelho para pouco preenchido
-                if (percent === 100) color = 'var(--primary-color)'; // Verde para completo
-                else if (percent >= 50) color = 'var(--warning-color)'; // Laranja para incompleto
-
-                cell.innerHTML = `
-                    <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${percent}%; background-color: ${color}"></div></div>
-                    <span class="progress-text">${percent}%</span>
-                `;
+                updateTableProgressBars(prof, cell);
             } else if (col.searchable) {
                 cell.innerHTML = highlightText(value, termoBusca);
             } else {
@@ -890,6 +891,30 @@ function renderTable() {
             setTimeout(() => selectedRowElement.classList.remove("pulse-row"), 1800);
         }, 100);
     }
+}
+
+// Função principal para renderizar a tabela
+function renderTable() {
+    if (!tableBody) return;
+    
+    renderHeaders(); // Desenha o cabeçalho baseado na ordem atual
+    
+    const listaFiltrada = getFilteredData();
+    const termoBusca = searchInput ? removerAcentos(searchInput.value).toUpperCase() : "";
+
+    if (contadorElement) {
+        contadorElement.textContent = `Professores encontrados: ${listaFiltrada.length}`;
+        // Reinicia a animação de pulsação
+        contadorElement.classList.remove("pulse-animation");
+        void contadorElement.offsetWidth; // Força reflow para permitir reiniciar a animação CSS
+        contadorElement.classList.add("pulse-animation");
+    }
+    
+    updateTableCounters(listaFiltrada); // Atualiza os contadores de presença/falta
+    renderTableBody(listaFiltrada, termoBusca); // Renderiza o corpo da tabela
+
+    // Atualiza a posição sticky do cabeçalho da tabela
+    updateStickyHeaderTop();
 }
 
 // Salva no localStorage e atualiza a tela
@@ -1057,10 +1082,11 @@ if (nomeInput) {
 // Controle do Menu de Cadastro
 if (btnAbrirCadastro && registrationSection) {
     btnAbrirCadastro.onclick = () => {
-        const isHidden = registrationSection.classList.toggle("hidden");
-        if (!isHidden) {
-            setTimeout(() => document.getElementById("nome").focus(), 100);
-            document.body.style.overflow = "hidden"; // Trava o scroll ao abrir
+        const isHidden = registrationSection.classList.contains("hidden");
+        if (isHidden) {
+            ModalManager.open(registrationSection, () => setTimeout(() => document.getElementById("nome").focus(), 100));
+        } else {
+            ModalManager.close(registrationSection);
         }
         if (isHidden) resetForm();
     };
@@ -1069,97 +1095,61 @@ if (btnAbrirCadastro && registrationSection) {
 // Controle do Modal de Chamada
 
 function abrirChamada() {
-    if (!attendanceModalSection) return;
-    attendanceModalSection.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-    populateDateSelect();
-    populateAttendanceFilters(); // Popula o novo filtro de escolas
-    renderAttendanceList();
+    ModalManager.open(attendanceModalSection, () => {
+        populateDateSelect();
+        populateAttendanceFilters(); // Popula o novo filtro de escolas
+        renderAttendanceList();
+    });
 }
 
 if (btnAttendance) {
     btnAttendance.onclick = abrirChamada;
 }
 
-if (closeAttendanceModalBtn) {
-    closeAttendanceModalBtn.onclick = () => {
-        attendanceModalSection.classList.add("hidden");
-        document.body.style.overflow = "";
-    };
-}
+if (closeAttendanceModalBtn) closeAttendanceModalBtn.onclick = () => ModalManager.close(attendanceModalSection);
 
 // Controle do Modal de Escolas
 if (btnAbrirEscolas && schoolModalSection) {
     btnAbrirEscolas.onclick = () => {
-        schoolModalSection.classList.remove("hidden");
-        document.body.style.overflow = "hidden";
-        renderSchoolList();
+        ModalManager.open(schoolModalSection, renderSchoolList);
     };
 }
 
-if (closeSchoolModalBtn) {
-    closeSchoolModalBtn.onclick = () => {
-        schoolModalSection.classList.add("hidden");
-        document.body.style.overflow = "";
-    };
-}
+if (closeSchoolModalBtn) closeSchoolModalBtn.onclick = () => ModalManager.close(schoolModalSection);
 
 if (schoolModalSection) {
     schoolModalSection.addEventListener("click", (e) => {
-        if (e.target === schoolModalSection) {
-            schoolModalSection.classList.add("hidden");
-            document.body.style.overflow = "";
-        }
+        if (e.target === schoolModalSection) ModalManager.close(schoolModalSection);
     });
 }
 
 // Controle do Modal de Disciplinas
 if (btnAbrirDisciplinas && disciplineModalSection) {
     btnAbrirDisciplinas.onclick = () => {
-        disciplineModalSection.classList.remove("hidden");
-        document.body.style.overflow = "hidden";
-        renderDisciplineList();
+        ModalManager.open(disciplineModalSection, renderDisciplineList);
     };
 }
 
-if (closeDisciplineModalBtn) {
-    closeDisciplineModalBtn.onclick = () => {
-        disciplineModalSection.classList.add("hidden");
-        document.body.style.overflow = "";
-    };
-}
+if (closeDisciplineModalBtn) closeDisciplineModalBtn.onclick = () => ModalManager.close(disciplineModalSection);
 
 if (disciplineModalSection) {
     disciplineModalSection.addEventListener("click", (e) => {
-        if (e.target === disciplineModalSection) {
-            disciplineModalSection.classList.add("hidden");
-            document.body.style.overflow = "";
-        }
+        if (e.target === disciplineModalSection) ModalManager.close(disciplineModalSection);
     });
 }
 
 // Controle do Modal de Colunas
 if (btnAbrirColunas && columnModalSection) {
     btnAbrirColunas.onclick = () => {
-        columnModalSection.classList.remove("hidden");
-        document.body.style.overflow = "hidden";
-        renderColumnToggleList();
+        ModalManager.open(columnModalSection, renderColumnToggleList);
     };
 }
 
-if (closeColumnModalBtn) {
-    closeColumnModalBtn.onclick = () => {
-        columnModalSection.classList.add("hidden");
-        document.body.style.overflow = "";
-    };
-}
+if (closeColumnModalBtn) closeColumnModalBtn.onclick = () => ModalManager.close(columnModalSection);
 
 if (columnModalSection) {
     columnModalSection.addEventListener("click", (e) => {
-        if (e.target === columnModalSection) {
-            columnModalSection.classList.add("hidden");
-            document.body.style.overflow = "";
-        }
+        if (e.target === columnModalSection) ModalManager.close(columnModalSection);
     });
 }
 
@@ -1171,49 +1161,20 @@ if (closeModalBtn) {
 // Fechar modal ao clicar no fundo escurecido
 if (registrationSection) {
     registrationSection.addEventListener("click", (e) => {
-        if (e.target === registrationSection) {
-            resetForm();
-        }
+        if (e.target === registrationSection) resetForm();
     });
 }
 
 // Fechar modal de confirmação ao clicar no fundo escurecido
 if (confirmModalSection) {
     confirmModalSection.addEventListener("click", (e) => {
-        if (e.target === confirmModalSection) {
-            const modalBox = confirmModalSection.querySelector(".modal-content");
-            if (modalBox) {
-                modalBox.classList.add("shake");
-                setTimeout(() => modalBox.classList.remove("shake"), 400);
-            }
-        }
+        if (e.target === confirmModalSection) ModalManager.close(confirmModalSection);
     });
 }
 
 // Atalho de teclado para fechar o modal com a tecla 'Esc'
 document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && registrationSection && !registrationSection.classList.contains("hidden")) {
-        resetForm();
-    }
-    if (e.key === "Escape" && attendanceModalSection && !attendanceModalSection.classList.contains("hidden")) {
-        attendanceModalSection.classList.add("hidden");
-        document.body.style.overflow = "";
-    }
-    if (e.key === "Escape" && schoolModalSection && !schoolModalSection.classList.contains("hidden")) {
-        schoolModalSection.classList.add("hidden");
-        document.body.style.overflow = "";
-    }
-    if (e.key === "Escape" && disciplineModalSection && !disciplineModalSection.classList.contains("hidden")) {
-        disciplineModalSection.classList.add("hidden");
-        document.body.style.overflow = "";
-    }
-    if (e.key === "Escape" && confirmModalSection && !confirmModalSection.classList.contains("hidden")) {
-        btnConfirmCancel.click(); // Simula o cancelamento
-    }
-    if (e.key === "Escape" && columnModalSection && !columnModalSection.classList.contains("hidden")) {
-        columnModalSection.classList.add("hidden");
-        document.body.style.overflow = "";
-    }
+    if (e.key === "Escape") ModalManager.closeAll();
 });
 
 // Event listeners para os novos filtros
@@ -1266,6 +1227,26 @@ if (btnLimparFiltros) {
         if (filterAbsentsCheck) filterAbsentsCheck.checked = false;
         renderTable();
     };
+}
+
+// Função para calcular e atualizar o 'top' da tabela sticky
+function updateStickyHeaderTop() {
+    const mainHeader = document.querySelector(".main-header");
+    const searchContainer = document.querySelector(".search-container");
+    if (!mainHeader || !searchContainer || !document.documentElement) return;
+
+    const mainHeaderHeight = mainHeader.offsetHeight;
+    const searchContainerHeight = searchContainer.offsetHeight;
+    const searchContainerMarginBottom = parseFloat(window.getComputedStyle(searchContainer).marginBottom);
+
+    // Calcula o top para o estado normal (não compactado)
+    const normalTop = mainHeaderHeight + searchContainerHeight + searchContainerMarginBottom;
+    document.documentElement.style.setProperty('--th-sticky-top', `${normalTop}px`);
+
+    // Calcula o top para o estado compactado (se houver)
+    const isCompact = document.body.classList.contains("scrolled-compact");
+    const compactTop = mainHeaderHeight + (isCompact ? searchContainer.offsetHeight : searchContainerHeight) + (isCompact ? 10 : searchContainerMarginBottom); // 10px é a margin-bottom compacta
+    document.documentElement.style.setProperty('--th-sticky-top-compact', `${compactTop}px`);
 }
 
 // Função para Exportar CSV
@@ -1658,6 +1639,7 @@ window.addEventListener("scroll", () => {
 
     // Compactar barra de ferramentas após 50px de rolagem
     document.body.classList.toggle("scrolled-compact", scrollY > 50);
+    updateStickyHeaderTop(); // Atualiza o sticky top ao compactar/descompactar
 
     // Mostrar/Ocultar botão voltar ao topo
     if (btnBackToTop) {

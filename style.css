@@ -238,10 +238,10 @@ table {
 }
 
 /* Cabeçalho da tabela */
-th {
+th { /* Ajustado para ser dinâmico via JS */
     position: sticky;
-    top: 131px; /* Ajustado para ficar abaixo do header (70px) + barra de busca (~61px) */
-    z-index: 1000; /* Mantém o cabeçalho da tabela acima das linhas */
+    top: var(--th-sticky-top, 131px); /* Valor padrão, será sobrescrito por JS */
+    z-index: 1000; /* Mantém o cabeçalho da tabela acima das linhas e outros elementos */
     /* position: relative; /* Contexto para posicionamento absoluto dos controles - REMOVIDO, sticky já cria contexto */
     background-clip: padding-box; /* Garante que as bordas apareçam corretamente com sticky */
     background-color: var(--primary-color);
@@ -257,7 +257,7 @@ th {
 }
 
 /* Estilo quando o cabeçalho da tabela está fixo (stuck) */
-.stuck-header th {
+.stuck-header thead th { /* Aplica a thead th para maior especificidade */
     background-color: var(--secondary-color) !important; /* Muda de verde para azul */
     color: #fff;
     box-shadow: 0 4px 6px -2px rgba(0,0,0,0.2);
@@ -588,7 +588,7 @@ button.btn-delete:hover {
 }
 
 .scrolled-compact th {
-    top: 112px; /* Ajusta a posição sticky (70px header + ~42px barra compacta) */
+    top: var(--th-sticky-top-compact, 112px); /* Ajusta a posição sticky */
 }
 
 /* Grade de Filtros Horizontais */
@@ -667,6 +667,18 @@ button.btn-delete:hover {
     color: var(--text-color);
     text-transform: uppercase;
 }
+
+/* Filtro de Faltas */
+.filter-absents-label {
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 5px; 
+    margin: 0; 
+    font-size: 0.75rem; 
+    white-space: nowrap;
+}
+.filter-absents-checkbox { width: auto; margin: 0; }
 
 .search-footer {
     display: flex;
@@ -816,6 +828,17 @@ button.btn-delete:hover {
         box-shadow: none;
         margin: 0;
     }
+}
+
+/* Estilos para formulários compactos dentro de modais */
+.form-compact {
+    box-shadow: none !important; 
+    width: 100% !important; 
+    border: none !important; 
+    padding: 0 !important;
+}
+.btn-form-submit {
+    width: 100%; margin-bottom: 20px;
 }
 
 /* Estilo da lista de escolas no modal */

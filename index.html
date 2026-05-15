@@ -104,15 +104,15 @@
         <div class="modal-content">
             <button type="button" class="close-modal" id="closeSchoolModalBtn">&times;</button>
             <h3>Gerenciar Escolas</h3>
-            <form id="schoolForm" class="form-compact">
+            <form id="schoolForm" class="form-compact" style="box-shadow: none; width: 100%; border: none; padding: 0;">
                 <label for="novaEscola">Nome da Escola:</label>
                 <div class="field-container">
                     <input type="text" id="novaEscola" placeholder="Ex: EMEB ALZIRA" required>
                 </div>
-                <button type="submit" style="width: 100%; margin-bottom: 20px;">Cadastrar Escola</button>
+                <button type="submit" class="btn-form-submit">Cadastrar Escola</button>
             </form>
             
-            <div style="max-height: 300px; overflow-y: auto; border-top: 1px solid #eee; pt-10">
+            <div class="modal-list-container" style="max-height: 300px; border-top: 1px solid #eee; pt-10">
                 <ul id="listaEscolasCadastradas" style="list-style: none; padding: 0; margin-top: 15px;">
                     <!-- Escolas aparecerão aqui -->
                 </ul>
@@ -127,21 +127,21 @@
             <h3>Histórico de Chamadas</h3>
             
             <div class="attendance-modal-controls">
-                <div style="flex-grow: 1;">
-                    <label for="selectDataPresenca" style="font-size: 0.8rem;">Selecionar Data:</label>
-                    <select id="selectDataPresenca" style="width: 100%; padding: 8px;"></select>
+                <div class="attendance-modal-control-group">
+                    <label for="selectDataPresenca" class="modal-label">Selecionar Data:</label>
+                    <select id="selectDataPresenca" class="modal-select"></select>
                 </div>
-                <div style="flex-grow: 1;">
-                    <label for="attendanceFilterEscola" style="font-size: 0.8rem;">Filtrar por Escola:</label>
-                    <select id="attendanceFilterEscola" style="width: 100%; padding: 8px;">
+                <div class="attendance-modal-control-group">
+                    <label for="attendanceFilterEscola" class="modal-label">Filtrar por Escola:</label>
+                    <select id="attendanceFilterEscola" class="modal-select">
                     </select>
                 </div>
-                <button type="button" id="btnNovaData" class="btn-menu btn-blue" style="margin: 0; padding: 8px 15px;" title="Adicionar Nova Data">+</button>
+                <button type="button" id="btnNovaData" class="btn-menu btn-blue btn-add-date" title="Adicionar Nova Data">+</button>
             </div>
             
-            <div style="margin-bottom: 15px; display: flex; gap: 10px;">
-                <button type="button" id="btnMarkAllPresent" class="btn-report" style="flex: 1; background-color: var(--primary-color) !important; color: white;">✓ Todos Presentes</button>
-                <button type="button" id="btnUnmarkAll" class="btn-report" style="flex: 1; background-color: var(--danger-color) !important; color: white;">✗ Desmarcar Todos</button>
+            <div class="attendance-action-buttons">
+                <button type="button" id="btnMarkAllPresent" class="btn-report btn-mark-all-present">✓ Todos Presentes</button>
+                <button type="button" id="btnUnmarkAll" class="btn-report btn-unmark-all">✗ Desmarcar Todos</button>
             </div>
 
             <div class="attendance-list-container">
@@ -149,7 +149,7 @@
                     <!-- Lista gerada via JS -->
                 </ul>
             </div>
-            <button type="button" id="btnSalvarPresenca" class="btn-green" style="width: 100%; margin-top: 20px; padding: 12px;">Concluir Chamada</button>
+            <button type="button" id="btnSalvarPresenca" class="btn-green btn-save-attendance">Concluir Chamada</button>
         </div>
     </section>
 
@@ -158,15 +158,15 @@
         <div class="modal-content">
             <button type="button" class="close-modal" id="closeDisciplineModalBtn">&times;</button>
             <h3>Gerenciar Disciplinas</h3>
-            <form id="disciplineForm" style="box-shadow: none; width: 100%; border: none; padding: 0;">
+            <form id="disciplineForm" class="form-compact" style="box-shadow: none; width: 100%; border: none; padding: 0;">
                 <label for="novaDisciplina">Nome da Disciplina:</label>
                 <div class="field-container">
                     <input type="text" id="novaDisciplina" placeholder="Ex: MATEMÁTICA" required>
                 </div>
-                <button type="submit" style="width: 100%; margin-bottom: 20px;">Cadastrar Disciplina</button>
+                <button type="submit" class="btn-form-submit">Cadastrar Disciplina</button>
             </form>
             
-            <div style="max-height: 300px; overflow-y: auto; border-top: 1px solid #eee; pt-10">
+            <div class="modal-list-container" style="max-height: 300px; border-top: 1px solid #eee; pt-10">
                 <ul id="listaDisciplinasCadastradas" style="list-style: none; padding: 0; margin-top: 15px;">
                     <!-- Disciplinas aparecerão aqui -->
                 </ul>
@@ -248,8 +248,8 @@
             </div>
 
             <div class="filter-group filter-attendance-group">
-                <label for="filterAbsents" style="cursor: pointer; display: flex; align-items: center; gap: 5px; margin: 0; font-size: 0.75rem; white-space: nowrap;">
-                    <input type="checkbox" id="filterAbsents" style="width: auto; margin: 0;"> 🚩 Apenas Faltas
+                <label for="filterAbsents" class="filter-absents-label">
+                    <input type="checkbox" id="filterAbsents" class="filter-absents-checkbox"> 🚩 Apenas Faltas
                 </label>
             </div>
 
@@ -258,7 +258,7 @@
             <div class="dropdown">
                 <button type="button" class="btn-report dropbtn">Ações <span class="drop-arrow">▼</span></button>
                 <div class="dropdown-content">
-                    <button type="button" id="btnAttendance" class="btn-dropdown">📅 Chamada</button>
+                    <button type="button" id="btnAttendance" class="btn-dropdown">📅 Chamada (Carregando...)</button>
                     <button type="button" id="btnDetailedReport" class="btn-dropdown">📋 Relatório Detalhado</button>
                     <button type="button" id="btnExportar" class="btn-dropdown">📥 Exportar CSV</button>
                     <button type="button" id="btnImprimir" class="btn-dropdown">🖨️ Imprimir Relatório</button>
