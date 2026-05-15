@@ -126,7 +126,7 @@
             <button type="button" class="close-modal" id="closeAttendanceModalBtn">&times;</button>
             <h3>Histórico de Chamadas</h3>
             
-            <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: flex-end;">
+            <div class="attendance-modal-controls">
                 <div style="flex-grow: 1;">
                     <label for="selectDataPresenca" style="font-size: 0.8rem;">Selecionar Data:</label>
                     <select id="selectDataPresenca" style="width: 100%; padding: 8px;"></select>
@@ -144,7 +144,7 @@
                 <button type="button" id="btnUnmarkAll" class="btn-report" style="flex: 1; background-color: var(--danger-color) !important; color: white;">✗ Desmarcar Todos</button>
             </div>
 
-            <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px;">
+            <div class="attendance-list-container">
                 <ul id="listaChamadaProfessores" style="list-style: none; padding: 0; margin: 0;">
                     <!-- Lista gerada via JS -->
                 </ul>
@@ -247,7 +247,7 @@
                 </div>
             </div>
 
-            <div class="filter-group" style="display: flex; align-items: center; height: 38px;">
+            <div class="filter-group filter-attendance-group">
                 <label for="filterAbsents" style="cursor: pointer; display: flex; align-items: center; gap: 5px; margin: 0; font-size: 0.75rem; white-space: nowrap;">
                     <input type="checkbox" id="filterAbsents" style="width: auto; margin: 0;"> 🚩 Apenas Faltas
                 </label>
@@ -259,7 +259,7 @@
             <div class="dropdown">
                 <button type="button" class="btn-report dropbtn">Ações <span class="drop-arrow">▼</span></button>
                 <div class="dropdown-content">
-                    <button type="button" id="btnAttendance" class="btn-dropdown">📅 Chamada (03/06/2026)</button>
+                    <button type="button" id="btnAttendance" class="btn-dropdown">📅 Chamada</button>
                     <button type="button" id="btnDetailedReport" class="btn-dropdown">📋 Relatório Detalhado</button>
                     <button type="button" id="btnExportar" class="btn-dropdown">📥 Exportar CSV</button>
                     <button type="button" id="btnImprimir" class="btn-dropdown">🖨️ Imprimir Relatório</button>

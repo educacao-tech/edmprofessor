@@ -277,11 +277,18 @@ function populateDateSelect() {
     historicoDatas.forEach(data => {
         const option = document.createElement("option");
         option.value = data;
-        // Formata a data de AAAA_MM_DD para DD/MM/AAAA para exibição
-        option.textContent = data.split('_').reverse().join('/');
+        const displayDate = data.split('_').reverse().join('/');
+        option.textContent = displayDate;
         selectDataPresenca.appendChild(option);
     });
+    
+    const activeDate = currentAttendanceKey.replace("presenca_", "").split('_').reverse().join('/');
     selectDataPresenca.value = currentAttendanceKey.replace("presenca_", "");
+    
+    // Atualiza o texto do botão no menu de ações dinamicamente
+    if (btnAttendance) {
+        btnAttendance.textContent = `📅 Chamada (${activeDate})`;
+    }
 }
 
 // Nova função para popular o filtro de escolas dentro do modal de chamada

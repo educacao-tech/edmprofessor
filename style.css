@@ -104,6 +104,20 @@ body {
     position: relative;
 }
 
+.attendance-modal-controls {
+    margin-bottom: 15px; 
+    display: flex; 
+    gap: 10px; 
+    align-items: flex-end;
+}
+
+.attendance-list-container {
+    max-height: 400px; 
+    overflow-y: auto; 
+    border: 1px solid var(--border-color); 
+    border-radius: 4px;
+}
+
 /* Menu Superior */
 .main-header {
     position: sticky;
