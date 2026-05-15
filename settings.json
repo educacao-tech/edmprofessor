@@ -1,0 +1,15 @@
+{
+    "liveServer.settings.port": 5500,
+    "liveServer.settings.CustomBrowser": "chrome",
+    "liveServer.settings.root": "/",
+    "liveServer.settings.donotShowInfoMsg": true,
+    "liveServer.settings.donotVerifyTags": false,
+    "liveServer.settings.useLocalIp": true,
+    "liveServer.settings.fullReload": false,
+    "liveServer.settings.https": {
+        "enable": true,
+        "cert": "c:\\Users\\server\\OneDrive\\Documentos\\edmprofessor\\.ssl\\localhost.crt",
+        "key": "c:\\Users\\server\\OneDrive\\Documentos\\edmprofessor\\.ssl\\localhost.key",
+        "passphrase": ""
+    }
+}

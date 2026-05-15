@@ -37,7 +37,6 @@ const btnExportar = document.getElementById("btnExportar");
 const btnImprimir = document.getElementById("btnImprimir");
 const btnDetailedReport = document.getElementById("btnDetailedReport");
 const btnToggleChart = document.getElementById("btnToggleChart");
-const btnChangePassword = document.getElementById("btnChangePassword"); // Novo botão para alterar senha
 const btnLimparFiltros = document.getElementById("btnLimparFiltros");
 const headerSentinel = document.getElementById("header-sentinel");
 const btnBackup = document.getElementById("btnBackup");
@@ -547,25 +546,9 @@ function ordenarProfessores() {
         return valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' }) * factor;
     });
 }
-
-// Função para obter a senha de segurança. Se não existir, solicita ao usuário para definir uma.
+// Função para obter a senha de segurança interna definida no código.
 function getSecurityPassword() {
-    let securityPassword = localStorage.getItem("adminDeletionPassword");
-    if (!securityPassword) {
-        let newPassword = prompt("Nenhuma senha de segurança definida. Por favor, defina uma senha para ações administrativas (cadastrar, editar, excluir):");
-        if (newPassword === null) { // Usuário clicou em cancelar
-            alert("Ação cancelada. Nenhuma senha foi definida.");
-            return null;
-        }
-        if (newPassword.trim() === "") { // Usuário digitou uma senha vazia
-            alert("A senha não pode ser vazia. Ação cancelada.");
-            return null;
-        }
-        localStorage.setItem("adminDeletionPassword", newPassword);
-        securityPassword = newPassword;
-        alert("Senha de segurança definida com sucesso!");
-    }
-    return securityPassword;
+    return "qwe123";
 }
 
 // Função para verificar se o usuário já autenticou nesta sessão
@@ -581,37 +564,14 @@ function verificarAutenticacao(contextoMensagem) {
     
     if (senhaDigitada === expectedPassword) {
         usuarioAutenticado = true;
+        if (editModeIndicator) {
+            editModeIndicator.classList.remove("hidden");
+        }
         return true;
     } else if (senhaDigitada !== null) {
         alert("Senha incorreta!");
     }
     return false;
-}
-
-// Função para alterar a senha de segurança
-function changeSecurityPassword() {
-    const currentPassword = localStorage.getItem("adminDeletionPassword");
-
-    if (!currentPassword) {
-        alert("Nenhuma senha de segurança foi definida ainda. Por favor, defina uma ao tentar editar ou excluir um professor.");
-        return;
-    }
-    
-    const oldPasswordAttempt = prompt("Digite sua senha atual:");
-    if (oldPasswordAttempt === null) return;
-    if (oldPasswordAttempt !== currentPassword) {
-        alert("Senha incorreta!");
-        return;
-    }
-
-    let newPassword = prompt("Digite a nova senha:");
-    if (newPassword && newPassword.trim() !== "") {
-        localStorage.setItem("adminDeletionPassword", newPassword);
-        usuarioAutenticado = false; // Obriga a reautenticar com a nova senha
-        alert("Senha alterada com sucesso!");
-    } else {
-        alert("Alteração cancelada ou senha inválida.");
-    }
 }
 
 // Função centralizada para obter os dados filtrados com base na busca e dropdowns
@@ -814,7 +774,9 @@ function resetForm() {
     if (submitButton) submitButton.textContent = "Adicionar Professor";
     if (cancelBtn) cancelBtn.classList.add("hidden");
     if (deleteBtnModal) deleteBtnModal.classList.add("hidden");
-    if (editModeIndicator) editModeIndicator.classList.add("hidden");
+    if (editModeIndicator && !usuarioAutenticado) {
+        editModeIndicator.classList.add("hidden");
+    }
     if (registrationSection) registrationSection.classList.add("hidden");
 
     // Remove classes de erro e sucesso de todos os campos
@@ -845,7 +807,6 @@ function editProfessor(index) {
         registrationSection.classList.remove("hidden");
         document.body.style.overflow = "hidden"; // Trava o scroll da página
         setTimeout(() => document.getElementById("nome").focus(), 100);
-        if (editModeIndicator) editModeIndicator.classList.remove("hidden");
 
         // Dispara a validação visual ao carregar os dados para edição
         [nomeInput, escolaInput, disciplinaInput, anoInput, turmaInput, turnoInput, telefoneInput].forEach(input => {
@@ -938,7 +899,6 @@ if (btnAbrirCadastro && registrationSection) {
         const isHidden = registrationSection.classList.toggle("hidden");
         if (!isHidden) {
             setTimeout(() => document.getElementById("nome").focus(), 100);
-            if (editModeIndicator) editModeIndicator.classList.remove("hidden");
             document.body.style.overflow = "hidden"; // Trava o scroll ao abrir
         }
         if (isHidden) resetForm();
@@ -1030,6 +990,19 @@ if (registrationSection) {
     registrationSection.addEventListener("click", (e) => {
         if (e.target === registrationSection) {
             resetForm();
+        }
+    });
+}
+
+// Fechar modal de confirmação ao clicar no fundo escurecido
+if (confirmModalSection) {
+    confirmModalSection.addEventListener("click", (e) => {
+        if (e.target === confirmModalSection) {
+            const modalBox = confirmModalSection.querySelector(".modal-content");
+            if (modalBox) {
+                modalBox.classList.add("shake");
+                setTimeout(() => modalBox.classList.remove("shake"), 400);
+            }
         }
     });
 }
@@ -1330,11 +1303,6 @@ if (btnRestaurar) {
     };
 }
 
-// Evento para o botão de alterar senha
-if (btnChangePassword) {
-    btnChangePassword.onclick = changeSecurityPassword;
-}
-
 // Função para Imprimir
 if (btnImprimir) {
     btnImprimir.onclick = () => window.print();
@@ -1391,13 +1359,15 @@ if (form) {
         campos.forEach(campo => {
             if (!campo.val) {
                 campo.el.classList.add("invalid");
-                campo.el.classList.add("shake");
-                setTimeout(() => campo.el.classList.remove("shake"), 400);
                 formValido = false;
             } else {
                 campo.el.classList.remove("invalid");
             }
         });
+        if (!formValido && registrationSection) {
+            registrationSection.classList.add("shake");
+            setTimeout(() => registrationSection.classList.remove("shake"), 400);
+        }
 
         if (!formValido) {
             alert("Por favor, preencha todos os campos obrigatórios.");
@@ -1408,8 +1378,10 @@ if (form) {
         const nameRegex = /^[A-ZÀ-Ÿ\s]+$/;
         if (nome.length < 3 || !nameRegex.test(nome)) {
             nomeInput.classList.add("invalid");
-            nomeInput.classList.add("shake");
-            setTimeout(() => nomeInput.classList.remove("shake"), 400);
+            if (registrationSection) {
+                registrationSection.classList.add("shake");
+                setTimeout(() => registrationSection.classList.remove("shake"), 400);
+            }
             alert("O campo Nome deve conter pelo menos 3 letras e apenas caracteres alfabéticos.");
             return;
         }
@@ -1419,8 +1391,10 @@ if (form) {
 
         if (telefone === "" || !phoneRegex.test(telefone)) {
             telefoneInput.classList.add("invalid");
-            telefoneInput.classList.add("shake");
-            setTimeout(() => telefoneInput.classList.remove("shake"), 400);
+            if (registrationSection) {
+                registrationSection.classList.add("shake");
+                setTimeout(() => registrationSection.classList.remove("shake"), 400);
+            }
             alert("O campo Telefone é obrigatório e deve seguir o padrão (00) 00000-0000.");
             return;
         }
@@ -1438,8 +1412,10 @@ if (form) {
         if (jaExiste) {
             alert(`O(A) professor(a) "${nome}" já está cadastrado(a) na escola "${escola}".`);
             nomeInput.classList.add("invalid");
-            nomeInput.classList.add("shake");
-            setTimeout(() => nomeInput.classList.remove("shake"), 400);
+            if (registrationSection) {
+                registrationSection.classList.add("shake");
+                setTimeout(() => registrationSection.classList.remove("shake"), 400);
+            }
             return;
         }
 
