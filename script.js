@@ -20,8 +20,21 @@ const btnAbrirEscolas = document.getElementById("btnAbrirEscolas");
 const btnAbrirDisciplinas = document.getElementById("btnAbrirDisciplinas");
 const schoolModalSection = document.getElementById("schoolModalSection");
 const disciplineModalSection = document.getElementById("disciplineModalSection");
+const attendanceModalSection = document.getElementById("attendanceModalSection");
 const closeSchoolModalBtn = document.getElementById("closeSchoolModalBtn");
+const attendanceFilterEscola = document.getElementById("attendanceFilterEscola");
 const closeDisciplineModalBtn = document.getElementById("closeDisciplineModalBtn");
+const closeAttendanceModalBtn = document.getElementById("closeAttendanceModalBtn");
+const btnAttendance = document.getElementById("btnAttendance");
+const presentCountElement = document.getElementById("presentCount");
+const absentCountElement = document.getElementById("absentCount");
+const btnMarkAllPresent = document.getElementById("btnMarkAllPresent");
+const btnUnmarkAll = document.getElementById("btnUnmarkAll");
+const filterAbsentsCheck = document.getElementById("filterAbsents");
+const btnSalvarPresenca = document.getElementById("btnSalvarPresenca");
+const btnNovaData = document.getElementById("btnNovaData");
+const selectDataPresenca = document.getElementById("selectDataPresenca");
+const listaChamadaProfessores = document.getElementById("listaChamadaProfessores");
 const schoolForm = document.getElementById("schoolForm");
 const disciplineForm = document.getElementById("disciplineForm");
 const listaEscolasCadastradas = document.getElementById("listaEscolasCadastradas");
@@ -252,6 +265,149 @@ function renderDisciplineList() {
             saveDisciplines();
         }
     });
+}
+
+// Gerenciamento de Datas de Presença
+let historicoDatas = JSON.parse(localStorage.getItem("historicoDatas")) || ["2026_06_03", "2026_05_06"];
+let currentAttendanceKey = "presenca_" + historicoDatas[0];
+
+function populateDateSelect() {
+    if (!selectDataPresenca) return;
+    selectDataPresenca.innerHTML = "";
+    historicoDatas.forEach(data => {
+        const option = document.createElement("option");
+        option.value = data;
+        // Formata a data de AAAA_MM_DD para DD/MM/AAAA para exibição
+        option.textContent = data.split('_').reverse().join('/');
+        selectDataPresenca.appendChild(option);
+    });
+    selectDataPresenca.value = currentAttendanceKey.replace("presenca_", "");
+}
+
+// Nova função para popular o filtro de escolas dentro do modal de chamada
+function populateAttendanceFilters() {
+    if (!attendanceFilterEscola) return;
+    const sortedEscolas = [...escolas].sort(); // Reutiliza a lista global de escolas
+    fillSelect(attendanceFilterEscola, sortedEscolas, "TODAS AS ESCOLAS"); // Reutiliza a função fillSelect
+}
+
+// Lógica para marcar todos como presente (apenas os visíveis no modal)
+if (btnMarkAllPresent) {
+    btnMarkAllPresent.onclick = () => {
+        const checks = listaChamadaProfessores.querySelectorAll('input[type="checkbox"]');
+        checks.forEach(chk => {
+            chk.checked = true;
+            const index = chk.id.split('-').pop();
+            professores[index][currentAttendanceKey] = true;
+        });
+        saveAndRender();
+    };
+}
+
+// Lógica para desmarcar todos (apenas os visíveis no modal)
+if (btnUnmarkAll) {
+    btnUnmarkAll.onclick = () => {
+        const checks = listaChamadaProfessores.querySelectorAll('input[type="checkbox"]');
+        checks.forEach(chk => {
+            chk.checked = false;
+            const index = chk.id.split('-').pop();
+            professores[index][currentAttendanceKey] = false;
+        });
+        saveAndRender();
+    };
+}
+
+if (selectDataPresenca) {
+    selectDataPresenca.onchange = (e) => {
+        currentAttendanceKey = "presenca_" + e.target.value;
+        renderAttendanceList();
+    };
+}
+
+// Evento para o novo filtro de escolas no modal de chamada
+if (attendanceFilterEscola) {
+    attendanceFilterEscola.addEventListener("change", () => renderAttendanceList());
+}
+
+if (btnNovaData) {
+    btnNovaData.onclick = () => {
+        const novaData = prompt("Digite a nova data da formação (formato DD/MM/AAAA):");
+        if (novaData && /^\d{2}\/\d{2}\/\d{4}$/.test(novaData)) {
+            const dataFormatada = novaData.split('/').reverse().join('_');
+            if (!historicoDatas.includes(dataFormatada)) {
+                // Adiciona a nova data e a torna a data ativa
+                historicoDatas.unshift(dataFormatada); // Adiciona no início da lista
+                localStorage.setItem("historicoDatas", JSON.stringify(historicoDatas));
+                currentAttendanceKey = "presenca_" + dataFormatada;
+                populateDateSelect();
+                renderAttendanceList();
+            } else {
+                alert("Esta data já existe no histórico.");
+            }
+        } else if (novaData) {
+            alert("Formato de data inválido. Use DD/MM/AAAA.");
+        }
+    };
+}
+
+function renderAttendanceList() {
+    if (!listaChamadaProfessores) return;
+    listaChamadaProfessores.innerHTML = "";
+    
+    // Obtém o valor do filtro de escola dentro do modal de chamada
+    const selectedAttendanceSchool = attendanceFilterEscola ? attendanceFilterEscola.value : "";
+
+    // Filtra a lista de professores com base na escola selecionada no modal
+    const professoresParaChamada = professores
+        .map((prof, originalIndex) => ({ ...prof, originalIndex })) // Adiciona o originalIndex
+        .filter(prof => selectedAttendanceSchool === "" || prof.escola === selectedAttendanceSchool);
+
+
+    professoresParaChamada.forEach((prof) => {
+        const isPresente = prof[currentAttendanceKey] === true;
+        const li = document.createElement("li");
+        li.style.display = "flex";
+        li.style.alignItems = "center";
+        li.style.padding = "10px 15px";
+        li.style.borderBottom = "1px solid var(--border-color)";
+        li.style.cursor = "pointer";
+        
+        li.innerHTML = `
+            <input type="checkbox" id="chk-presenca-${prof.originalIndex}" ${isPresente ? 'checked' : ''} style="margin-right: 15px; transform: scale(1.3);">
+            <div style="flex-grow: 1;">
+                <div style="font-weight: bold; font-size: 0.9rem;">${prof.nome}</div>
+                <div style="font-size: 0.75rem; color: #666;">${prof.escola} | ${prof.turno}</div>
+            </div>
+        `;
+
+        const chk = li.querySelector('input');
+
+        // Função interna para salvar a alteração individual
+        const handleToggle = () => {
+            professores[prof.originalIndex][currentAttendanceKey] = chk.checked;
+            saveAndRender(); // Salva e atualiza os contadores/bolinhas na tabela principal
+        };
+
+        chk.onchange = handleToggle;
+
+        // Facilita marcar clicando na linha inteira
+        li.onclick = (e) => {
+            if (e.target.tagName !== 'INPUT') {
+                chk.checked = !chk.checked;
+                handleToggle();
+            }
+        };
+
+        listaChamadaProfessores.appendChild(li);
+    });
+}
+
+if (btnSalvarPresenca) {
+    btnSalvarPresenca.onclick = () => {
+        // Como o salvamento já é automático, o botão apenas fecha o modal
+        attendanceModalSection.classList.add("hidden");
+        document.body.style.overflow = "";
+    };
 }
 
 // Função para editar o nome de uma escola e atualizar os professores vinculados
@@ -596,6 +752,10 @@ function getFilteredData() {
                 removerAcentos(prof[campo] || "").toUpperCase().includes(termoBusca)
             );
 
+            // Filtro de faltas: se o checkbox estiver marcado, só mostra quem NÃO tem presença marcada (true)
+            const showOnlyAbsents = filterAbsentsCheck ? filterAbsentsCheck.checked : false;
+            const matchesAttendance = !showOnlyAbsents || prof[currentAttendanceKey] !== true;
+
             const matchesDropdowns = 
                 (selectedEscola === "" || prof.escola === selectedEscola) &&
                 (selectedDisciplina === "" || prof.disciplina === selectedDisciplina) &&
@@ -603,7 +763,7 @@ function getFilteredData() {
                 (selectedTurma === "" || prof.turma === selectedTurma) &&
                 (selectedTurno === "" || prof.turno === selectedTurno);
 
-            return matchesSearch && matchesDropdowns;
+            return matchesSearch && matchesDropdowns && matchesAttendance;
         });
 }
 
@@ -676,6 +836,19 @@ function renderTable() {
     }
 
     updateChart(listaFiltrada);
+    
+    // Calcula e atualiza os contadores de presença/falta
+    let presentes = 0;
+    let ausentes = 0;
+    listaFiltrada.forEach(prof => {
+        if (prof[currentAttendanceKey] === true) {
+            presentes++;
+        } else {
+            ausentes++;
+        }
+    });
+    if (presentCountElement) presentCountElement.textContent = `Presentes: ${presentes}`;
+    if (absentCountElement) absentCountElement.textContent = `Ausentes: ${ausentes}`;
 
     listaFiltrada.forEach((prof, index) => {
         const newRow = document.createElement("tr");
@@ -696,7 +869,13 @@ function renderTable() {
             if (!col.visible) return;
             const cell = newRow.insertCell(cellIdx++);
             const value = prof[col.id] || "";
-            if (col.searchable) {
+            
+            if (col.id === 'nome') {
+                const isPresente = prof[currentAttendanceKey] === true;
+                const statusClass = isPresente ? 'present' : 'absent';
+                const indicator = `<span class="presence-indicator ${statusClass}" title="Clique para abrir a chamada" onclick="event.stopPropagation(); abrirChamada()"></span>`;
+                cell.innerHTML = indicator + highlightText(value, termoBusca);
+            } else if (col.searchable) {
                 cell.innerHTML = highlightText(value, termoBusca);
             } else {
                 cell.textContent = value;
@@ -911,6 +1090,28 @@ if (btnAbrirCadastro && registrationSection) {
     };
 }
 
+// Controle do Modal de Chamada
+
+function abrirChamada() {
+    if (!attendanceModalSection) return;
+    attendanceModalSection.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    populateDateSelect();
+    populateAttendanceFilters(); // Popula o novo filtro de escolas
+    renderAttendanceList();
+}
+
+if (btnAttendance) {
+    btnAttendance.onclick = abrirChamada;
+}
+
+if (closeAttendanceModalBtn) {
+    closeAttendanceModalBtn.onclick = () => {
+        attendanceModalSection.classList.add("hidden");
+        document.body.style.overflow = "";
+    };
+}
+
 // Controle do Modal de Escolas
 if (btnAbrirEscolas && schoolModalSection) {
     btnAbrirEscolas.onclick = () => {
@@ -1018,6 +1219,10 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && registrationSection && !registrationSection.classList.contains("hidden")) {
         resetForm();
     }
+    if (e.key === "Escape" && attendanceModalSection && !attendanceModalSection.classList.contains("hidden")) {
+        attendanceModalSection.classList.add("hidden");
+        document.body.style.overflow = "";
+    }
     if (e.key === "Escape" && schoolModalSection && !schoolModalSection.classList.contains("hidden")) {
         schoolModalSection.classList.add("hidden");
         document.body.style.overflow = "";
@@ -1057,6 +1262,11 @@ if (searchInput) {
     searchInput.addEventListener("input", () => renderTable());
 }
 
+// Evento para o filtro de faltas
+if (filterAbsentsCheck) {
+    filterAbsentsCheck.addEventListener("change", () => renderTable());
+}
+
 // Função auxiliar para tratar a ordenação (chamada pelos headers dinâmicos)
 function handleSort(columnId) {
     if (currentSort.column === columnId) {
@@ -1077,6 +1287,7 @@ if (btnLimparFiltros) {
         if (filterAnoSelect) filterAnoSelect.value = "";
         if (filterTurmaSelect) filterTurmaSelect.value = "";
         if (filterTurnoSelect) filterTurnoSelect.value = "";
+        if (filterAbsentsCheck) filterAbsentsCheck.checked = false;
         renderTable();
     };
 }

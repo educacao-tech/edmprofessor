@@ -120,6 +120,39 @@
         </div>
     </section>
 
+    <!-- Modal de Lista de Chamada (Presença) -->
+    <section id="attendanceModalSection" class="hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <button type="button" class="close-modal" id="closeAttendanceModalBtn">&times;</button>
+            <h3>Histórico de Chamadas</h3>
+            
+            <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: flex-end;">
+                <div style="flex-grow: 1;">
+                    <label for="selectDataPresenca" style="font-size: 0.8rem;">Selecionar Data:</label>
+                    <select id="selectDataPresenca" style="width: 100%; padding: 8px;"></select>
+                </div>
+                <div style="flex-grow: 1;">
+                    <label for="attendanceFilterEscola" style="font-size: 0.8rem;">Filtrar por Escola:</label>
+                    <select id="attendanceFilterEscola" style="width: 100%; padding: 8px;">
+                    </select>
+                </div>
+                <button type="button" id="btnNovaData" class="btn-menu btn-blue" style="margin: 0; padding: 8px 15px;" title="Adicionar Nova Data">+</button>
+            </div>
+            
+            <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+                <button type="button" id="btnMarkAllPresent" class="btn-report" style="flex: 1; background-color: var(--primary-color) !important; color: white;">✓ Todos Presentes</button>
+                <button type="button" id="btnUnmarkAll" class="btn-report" style="flex: 1; background-color: var(--danger-color) !important; color: white;">✗ Desmarcar Todos</button>
+            </div>
+
+            <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px;">
+                <ul id="listaChamadaProfessores" style="list-style: none; padding: 0; margin: 0;">
+                    <!-- Lista gerada via JS -->
+                </ul>
+            </div>
+            <button type="button" id="btnSalvarPresenca" class="btn-green" style="width: 100%; margin-top: 20px; padding: 12px;">Concluir Chamada</button>
+        </div>
+    </section>
+
     <!-- Modal de Cadastro de Disciplinas -->
     <section id="disciplineModalSection" class="hidden">
         <div class="modal-content">
@@ -214,18 +247,30 @@
                 </div>
             </div>
 
+            <div class="filter-group" style="display: flex; align-items: center; height: 38px;">
+                <label for="filterAbsents" style="cursor: pointer; display: flex; align-items: center; gap: 5px; margin: 0; font-size: 0.75rem; white-space: nowrap;">
+                    <input type="checkbox" id="filterAbsents" style="width: auto; margin: 0;"> 🚩 Apenas Faltas
+                </label>
+            </div>
+
             <button type="button" id="btnToggleChart" class="btn-report">Ocultar Gráfico</button>
             <button type="button" id="btnLimparFiltros" class="btn-report">Limpar Filtros</button>
 
             <div class="dropdown">
                 <button type="button" class="btn-report dropbtn">Ações <span class="drop-arrow">▼</span></button>
                 <div class="dropdown-content">
+                    <button type="button" id="btnAttendance" class="btn-dropdown">📅 Chamada (03/06/2026)</button>
                     <button type="button" id="btnDetailedReport" class="btn-dropdown">📋 Relatório Detalhado</button>
                     <button type="button" id="btnExportar" class="btn-dropdown">📥 Exportar CSV</button>
                     <button type="button" id="btnImprimir" class="btn-dropdown">🖨️ Imprimir Relatório</button>
                     <button type="button" id="btnBackup" class="btn-dropdown">💾 Backup JSON</button>
                     <button type="button" id="btnRestaurar" class="btn-dropdown">📤 Restaurar Backup</button>
                 </div>
+            </div>
+
+            <div class="presence-legend">
+                <span class="legend-item"><span class="presence-indicator present"></span> Presente</span>
+                <span class="legend-item"><span class="presence-indicator absent"></span> Falta</span>
             </div>
 
             <div id="contador" class="contador-vagas">

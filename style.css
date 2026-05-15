@@ -69,7 +69,8 @@ body {
 #schoolModalSection,
 #disciplineModalSection,
 #columnModalSection,
-#confirmModalSection {
+#confirmModalSection,
+#attendanceModalSection {
     position: fixed;
     top: 0;
     left: 0;
@@ -1026,4 +1027,49 @@ button:hover {
         transform: scale(4);
         opacity: 0;
     }
+}
+
+/* Indicadores de Presença na Tabela */
+.presence-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.presence-indicator:hover {
+    transform: scale(1.3);
+}
+
+.presence-indicator.present {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.4);
+}
+
+.presence-indicator.absent {
+    background-color: var(--danger-color);
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.4);
+}
+
+/* Estilo da Legenda */
+.presence-legend {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--text-color);
+    white-space: nowrap;
+}
 }
