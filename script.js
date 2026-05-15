@@ -49,7 +49,6 @@ const filterTurnoSelect = document.getElementById("filterTurno");
 const btnExportar = document.getElementById("btnExportar");
 const btnImprimir = document.getElementById("btnImprimir");
 const btnDetailedReport = document.getElementById("btnDetailedReport");
-const btnToggleChart = document.getElementById("btnToggleChart");
 const btnLimparFiltros = document.getElementById("btnLimparFiltros");
 const headerSentinel = document.getElementById("header-sentinel");
 const btnBackup = document.getElementById("btnBackup");
@@ -164,7 +163,8 @@ let columnOrder = [
     { id: 'ano', label: 'Ano', searchable: true, visible: true },
     { id: 'turma', label: 'Turma', searchable: true, visible: true },
     { id: 'turno', label: 'Turno', searchable: true, visible: true },
-    { id: 'telefone', label: 'Telefone', searchable: false, visible: true }
+    { id: 'telefone', label: 'Telefone', searchable: false, visible: true },
+    { id: 'progresso', label: 'Progresso', searchable: false, visible: true }
 ];
 
 // Variável para persistir a seleção (Nome + Escola) mesmo após filtrar ou ordenar
@@ -774,53 +774,6 @@ function getFilteredData() {
         });
 }
 
-// Função para atualizar o gráfico de distribuição
-function updateChart(lista) {
-    const statsSection = document.getElementById("statsSection");
-    const chartContainer = document.getElementById("chartContainer");
-    if (!statsSection || !chartContainer) return;
-
-    if (lista.length === 0) {
-        statsSection.classList.add("hidden");
-        if (btnToggleChart) btnToggleChart.textContent = "Mostrar Gráfico";
-        return;
-    }
-
-    // Se o gráfico estiver oculto (estado inicial ou via botão), respeitamos esse estado e não o forçamos a abrir
-    if (statsSection.classList.contains("hidden")) {
-        if (btnToggleChart) btnToggleChart.textContent = "Mostrar Gráfico";
-        return;
-    }
-
-    if (btnToggleChart) btnToggleChart.textContent = "Ocultar Gráfico";
-
-    // Conta professores por escola
-    const contagem = lista.reduce((acc, prof) => {
-        acc[prof.escola] = (acc[prof.escola] || 0) + 1;
-        return acc;
-    }, {});
-
-    const total = lista.length;
-    chartContainer.innerHTML = "";
-
-    // Ordena escolas por quantidade e cria as barras
-    Object.entries(contagem)
-        .sort((a, b) => b[1] - a[1])
-        .forEach(([escola, qtd]) => {
-            const porcentagem = (qtd / total) * 100;
-            const row = document.createElement("div");
-            row.className = "chart-row";
-            row.innerHTML = `
-                <div class="chart-label" title="${escola}">${escola}</div>
-                <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" style="width: ${porcentagem}%"></div>
-                </div>
-                <div class="chart-count">${qtd}</div>
-            `;
-            chartContainer.appendChild(row);
-        });
-}
-
 // Função para criar os controles de paginação
 // Função para renderizar a tabela com base no array de professores
 function renderTable() {
@@ -841,8 +794,6 @@ function renderTable() {
         void contadorElement.offsetWidth; // Força reflow para permitir reiniciar a animação CSS
         contadorElement.classList.add("pulse-animation");
     }
-
-    updateChart(listaFiltrada);
     
     // Calcula e atualiza os contadores de presença/falta
     let presentes = 0;
@@ -882,6 +833,24 @@ function renderTable() {
                 const statusClass = isPresente ? 'present' : 'absent';
                 const indicator = `<span class="presence-indicator ${statusClass}" title="Clique para abrir a chamada" onclick="event.stopPropagation(); abrirChamada()"></span>`;
                 cell.innerHTML = indicator + highlightText(value, termoBusca);
+            } else if (col.id === 'progresso') {
+                // Lógica de cálculo de preenchimento
+                const fields = ['nome', 'escola', 'disciplina', 'ano', 'turma', 'turno', 'telefone'];
+                const filled = fields.filter(f => {
+                    const val = prof[f];
+                    // Considera não preenchido se for vazio, "N/A" ou o telefone padrão de exemplo
+                    return val && val !== "" && val !== "N/A" && val !== "(00) 00000-0000";
+                }).length;
+                const percent = Math.round((filled / fields.length) * 100);
+                
+                let color = 'var(--danger-color)'; // Vermelho para pouco preenchido
+                if (percent === 100) color = 'var(--primary-color)'; // Verde para completo
+                else if (percent >= 50) color = 'var(--warning-color)'; // Laranja para incompleto
+
+                cell.innerHTML = `
+                    <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${percent}%; background-color: ${color}"></div></div>
+                    <span class="progress-text">${percent}%</span>
+                `;
             } else if (col.searchable) {
                 cell.innerHTML = highlightText(value, termoBusca);
             } else {
@@ -1299,20 +1268,6 @@ if (btnLimparFiltros) {
     };
 }
 
-// Função para mostrar/ocultar o gráfico
-if (btnToggleChart && statsSection) {
-    btnToggleChart.onclick = () => {
-        statsSection.classList.toggle("hidden");
-        if (statsSection.classList.contains("hidden")) {
-            btnToggleChart.textContent = "Mostrar Gráfico";
-        } else {
-            btnToggleChart.textContent = "Ocultar Gráfico";
-            // Se o gráfico for mostrado, garanta que ele esteja atualizado com os dados atuais
-            renderTable(); 
-        }
-    };
-}
-
 // Função para Exportar CSV
 if (btnExportar) {
     btnExportar.onclick = () => {
@@ -1675,11 +1630,6 @@ ordenarProfessores(); // Ordena a lista inicial
 populateFilters();    // Popula os filtros com as escolas/disciplinas existentes
 renderTable();        // Renderiza a tabela e atualiza o gráfico
 updateLastBackupDisplay(); // Inicializa a exibição do último backup no rodapé
-
-// Define o texto inicial do botão de alternar gráfico com base na visibilidade real
-if (btnToggleChart && statsSection) {
-    btnToggleChart.textContent = statsSection.classList.contains("hidden") ? "Mostrar Gráfico" : "Ocultar Gráfico";
-}
 
 // Lógica de Tema Escuro
 const currentTheme = localStorage.getItem("theme");
