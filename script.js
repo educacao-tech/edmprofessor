@@ -1,6 +1,6 @@
 // script.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
 
 // Configuração do Firebase
@@ -18,6 +18,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const dbCloud = getFirestore(app);
 const analytics = getAnalytics(app);
+
+// Ativa persistência offline nativa do Firebase
+enableIndexedDbPersistence(dbCloud).catch((err) => {
+    if (err.code === 'failed-precondition') {
+        console.warn("[Firebase] Persistência falhou: Múltiplas abas abertas.");
+    } else if (err.code === 'unimplemented') {
+        console.warn("[Firebase] Persistência não suportada pelo navegador.");
+    }
+});
 
 // Seleciona o formulário e a tabela
 const form = document.querySelector("form");
@@ -223,6 +232,13 @@ const ApiService = {
                     }
                 } catch (cloudErr) {
                     console.error(`[Firebase] ❌ Erro de permissão ou conexão para ${endpoint}:`, cloudErr);
+                    console.error(`[Firebase] Falha no carregamento (${endpoint}):`, cloudErr);
+                    
+                    if (cloudErr.code === 'unavailable' || cloudErr.message.includes('offline')) {
+                        this._updateUIStatus('error', 'Trabalhando offline. Usando dados locais.');
+                    } else {
+                        this._updateUIStatus('error', 'Erro de permissão no Firebase.');
+                    }
                 }
             }
 
