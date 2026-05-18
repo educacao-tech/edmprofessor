@@ -66,16 +66,128 @@ const closeColumnModalBtn = document.getElementById("closeColumnModalBtn"); // A
 const btnTheme = document.getElementById("btnTheme");
 const btnBackToTop = document.getElementById("btnBackToTop");
 
-// Estado da aplicação: carrega dados salvos ou inicia array vazio
-const STORAGE_KEY = "professores";
-let dadosSalvos = JSON.parse(localStorage.getItem(STORAGE_KEY));
+// --- Camada de Serviço de Dados (Abstração para API) ---
+const ApiService = {
+    dbName: "GestaoProfessoresDB",
+    storeName: "keyValueStore",
 
-// MIGRACAO AUTOMÁTICA: Detecta dados no formato antigo (ex: "5º B" no campo turma)
-// e separa automaticamente em 'ano' e 'turma' para manter a consistência do banco.
-if (dadosSalvos && dadosSalvos.length > 0) {
+    // Abre a conexão com o IndexedDB
+    async _getDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, 1);
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                    db.createObjectStore(this.storeName);
+                }
+            };
+            request.onsuccess = (e) => resolve(e.target.result);
+            request.onerror = (e) => reject("Erro ao abrir IndexedDB");
+        });
+    },
+
+    // Helper para compactar dados usando GZIP (Nativo)
+    async _compress(data) {
+        if (typeof CompressionStream === "undefined") return data; // Fallback para contextos não seguros ou navegadores antigos
+        const string = JSON.stringify(data);
+        const bytes = new TextEncoder().encode(string);
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.enqueue(bytes);
+                controller.close();
+            }
+        });
+        const compressedStream = stream.pipeThrough(new CompressionStream("gzip"));
+        return await new Response(compressedStream).blob();
+    },
+
+    // Helper para descompactar dados GZIP
+    async _decompress(data) {
+        if (!data || !(data instanceof Blob)) return data; // Retorna como está se for dado antigo/descompactado
+        try {
+            const decompressedStream = data.stream().pipeThrough(new DecompressionStream("gzip"));
+            const text = await new Response(decompressedStream).text();
+            return JSON.parse(text);
+        } catch (e) {
+            console.warn("Falha na descompactação, retornando dado bruto:", e);
+            return data;
+        }
+    },
+
+    async save(endpoint, data) {
+        try {
+            const processedData = await this._compress(data);
+            const db = await this._getDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([this.storeName], "readwrite");
+                const store = transaction.objectStore(this.storeName);
+                
+                // Se não comprimiu, salva o objeto direto. O IndexedDB aceita.
+                const request = store.put(processedData, endpoint);
+
+                request.onsuccess = () => resolve(true);
+                request.onerror = () => reject(false);
+            });
+        } catch (error) {
+            console.error(`Erro ao salvar no IndexedDB (${endpoint}):`, error);
+            return false;
+        }
+    },
+
+    async load(endpoint) {
+        try {
+            const db = await this._getDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([this.storeName], "readonly");
+                const store = transaction.objectStore(this.storeName);
+                const request = store.get(endpoint);
+
+                request.onsuccess = async () => {
+                    const result = await this._decompress(request.result);
+                    resolve(result || null);
+                };
+                request.onerror = () => reject(null);
+            });
+        } catch (error) {
+            console.error(`Erro ao carregar do IndexedDB (${endpoint}):`, error);
+            return null;
+        }
+    },
+
+    // Método para migrar dados do localStorage para o IndexedDB (usar apenas uma vez)
+    async migrateFromLocalStorage(keys) {
+        for (const key of keys) {
+            const data = localStorage.getItem(key);
+            if (data) {
+                await this.save(key, JSON.parse(data));
+                localStorage.removeItem(key); // Removido para evitar sobreposição em cada load
+            }
+        }
+    }
+};
+
+const STORAGE_KEY = "professores";
+const SCHOOLS_KEY = "escolas";
+const DISCIPLINES_KEY = "disciplinas";
+const HISTORY_KEY = "historicoDatas";
+
+let professores = [];
+let escolas = [];
+let disciplinas = [];
+let historicoDatas = [];
+let currentAttendanceKey = "";
+
+// Flag para rastrear se houve alterações desde o último backup manual
+let temAlteracoesSemBackup = false;
+
+// Configuração para sugestão de backup
+let contadorAlteracoesSemBackup = 0;
+const BACKUP_THRESHOLD = 10; // X = 10 alterações
+
+async function processMigration(dados) {
+    if (!dados || dados.length === 0) return dados;
     let houveMigracao = false;
-    const dadosMigrados = dadosSalvos.map(prof => {
-        // Se a turma contém "º" (indicando o ano) e o campo ano está vazio ou N/A
+    const dadosMigrados = dados.map(prof => {
         if (prof.turma && prof.turma.includes("º") && (!prof.ano || prof.ano === "N/A")) {
             const partes = prof.turma.trim().split(/\s+/);
             if (partes.length >= 2) {
@@ -87,73 +199,96 @@ if (dadosSalvos && dadosSalvos.length > 0) {
     });
 
     if (houveMigracao) {
-        dadosSalvos = dadosMigrados;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(dadosSalvos));
+        await ApiService.save(STORAGE_KEY, dadosMigrados);
+    }
+    return dadosMigrados;
+}
+
+// Inicialização Assíncrona do Sistema
+async function initSystem() {
+    const loader = document.getElementById("initialLoader");
+    const progressBar = document.getElementById("loaderProgressBar");
+    const progressText = document.getElementById("loaderProgressText");
+
+    const updateProgress = (percent, colorVar = '--progress-color-start') => {
+        if (progressBar) {
+            progressBar.style.width = `${percent}%`;
+            progressBar.style.backgroundColor = `var(${colorVar})`;
+        }
+        if (progressText) progressText.textContent = `${percent}%`;
+    };
+
+    try {
+        updateProgress(10, '--progress-color-start');
+        // Migra dados antigos se existirem
+        await ApiService.migrateFromLocalStorage([STORAGE_KEY, SCHOOLS_KEY, DISCIPLINES_KEY, HISTORY_KEY]);
+
+        updateProgress(30, '--progress-color-start');
+        const dadosSalvos = await ApiService.load(STORAGE_KEY);
+        professores = await processMigration(dadosSalvos || []);
+
+        updateProgress(50, '--progress-color-mid');
+        escolas = await ApiService.load(SCHOOLS_KEY) || 
+                  [...new Set(professores.map(p => p.escola))].sort();
+
+        updateProgress(70, '--progress-color-mid');
+        disciplinas = await ApiService.load(DISCIPLINES_KEY) || ["EDM"];
+        
+        updateProgress(85, '--progress-color-end');
+        historicoDatas = await ApiService.load(HISTORY_KEY) || ["2026_06_03", "2026_05_06"];
+        currentAttendanceKey = "presenca_" + (historicoDatas[0] || "");
+
+        updateProgress(95, '--progress-color-end');
+        ordenarProfessores();
+        populateFilters();
+        renderTable();
+        updateLastBackupDisplay();
+        populateDateSelect();
+        
+        updateProgress(100, '--progress-color-end');
+    } catch (error) {
+        console.error("Erro na inicialização:", error);
+    } finally {
+        // Pequeno atraso para o usuário perceber a conclusão
+        setTimeout(() => {
+            if (loader) {
+                loader.style.opacity = "0";
+                setTimeout(() => loader.classList.add("hidden"), 1000); // Corresponde à duração da transição CSS
+            }
+        }, 500);
     }
 }
 
-// Alteração: Garante que se houver uma lista salva (mesmo que vazia), ela seja respeitada.
-let professores = (dadosSalvos !== null) ? dadosSalvos : [
-    { nome: "ANA CAROLINA VENTUROSO BÉRGAMO CÂNDIDO", escola: "ALZIRA", disciplina: "EDM", ano: "4º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "ÁUREA APARECIDA SOUZA CARDOSO", escola: "ALZIRA", disciplina: "EDM", ano: "1º", turma: "E", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "CRISTIANE AUGUSTA COSTA", escola: "ALZIRA", disciplina: "EDM", ano: "3º", turma: "E", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ELIZÂNGELA CERCE CONUNCHUC", escola: "ALZIRA", disciplina: "EDM", ano: "1º", turma: "C", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "FABIANA CÁSSIA DOS SANTOS", escola: "ALZIRA", disciplina: "EDM", ano: "2º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "FABIANA KARINA DE OLIVEIRA", escola: "ALZIRA", disciplina: "EDM", ano: "2º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "GABRIELA BOLOGNA BÉRGAMO VENDRUSCOLO", escola: "ALZIRA", disciplina: "EDM", ano: "1º", turma: "D", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ISABEL CRISTINA MANIERI DANIEL", escola: "ALZIRA", disciplina: "EDM", ano: "1º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "JACKELINE SILVA RODRIGUES", escola: "ALZIRA", disciplina: "EDM", ano: "N/A", turma: "N/A", turno: "N/A", telefone: "(00) 00000-0000" },
-    { nome: "LARISSA DANIELE DIAS", escola: "ALZIRA", disciplina: "EDM", ano: "N/A", turma: "N/A", turno: "N/A", telefone: "(00) 00000-0000" },
-    { nome: "LOURDES RAYMUNDINI DA SILVA", escola: "ALZIRA", disciplina: "EDM", ano: "2º", turma: "D", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "LUCIANA PAULA LEMES", escola: "ALZIRA", disciplina: "EDM", ano: "3º", turma: "C", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "MARTA LUZIA PACHETI", escola: "ALZIRA", disciplina: "EDM", ano: "5º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "NEUSA HELENA DE CASTRO GALANTI", escola: "ALZIRA", disciplina: "EDM", ano: "4º", turma: "E", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "PATRÍCIA ALEIXO SILVA de OLIVEIRA", escola: "ALZIRA", disciplina: "EDM", ano: "N/A", turma: "N/A", turno: "N/A", telefone: "(00) 00000-0000" },
-    { nome: "PATRÍCIA CORSINI COSTA", escola: "ALZIRA", disciplina: "EDM", ano: "3º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "VIVIANE TOMAZ BANACO", escola: "ALZIRA", disciplina: "EDM", ano: "4º", turma: "D", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "JESILDA BATISTA DA SILVA DOMINGOS", escola: "ANNA", disciplina: "EDM", ano: "2º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "LEILA APARECIDA MILAN BARBOZA", escola: "ANNA", disciplina: "EDM", ano: "1º", turma: "D", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "LETÍCIA NARA PIRES", escola: "ANNA", disciplina: "EDM", ano: "N/A", turma: "N/A", turno: "N/A", telefone: "(00) 00000-0000" },
-    { nome: "LÚCIA HELENA SAQUETO G. GONÇALVES", escola: "ANNA", disciplina: "EDM", ano: "3º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "MARCELA YARA V. L. RAYMUNDO A. CARNEIRO", escola: "ANNA", disciplina: "EDM", ano: "5º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "NAYRA RODRIGUES OLIVÉRIO CAMPI", escola: "ANNA", disciplina: "EDM", ano: "3º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "SUELLEN FRANCINE DA SILVA e SILVA", escola: "ANNA", disciplina: "EDM", ano: "1º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "DEILANE FRANZONI", escola: "BRAGA", disciplina: "EDM", ano: "1º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "ELISÂNGELA ALMINDA OLIVEIRA BIBIANO", escola: "BRAGA", disciplina: "EDM", ano: "3º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "MARIANA R. DE FARIA EVANGELISTA", escola: "BRAGA", disciplina: "EDM", ano: "4º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "PRISCILA BRONDI ANHEZINI IVAN", escola: "BRAGA", disciplina: "EDM", ano: "1º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "ROSANA APARECIDA DA SILVA", escola: "BRAGA", disciplina: "EDM", ano: "4º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "TALUANA BARBOSA PEREIRA", escola: "BRAGA", disciplina: "EDM", ano: "2º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "MARLENE APARECIDA BARBOSA DUARTE", escola: "CAIC", disciplina: "EDM", ano: "N/A", turma: "N/A", turno: "INTEGRAL", telefone: "(00) 00000-0000" },
-    { nome: "ADMILDE GABRIEL DE SOUSA", escola: "CÉLIA", disciplina: "EDM", ano: "5º", turma: "B", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ALINE SANTOS DA COSTA", escola: "CÉLIA", disciplina: "EDM", ano: "5º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "EDNILSA GABRIEL DE SOUSA", escola: "CÉLIA", disciplina: "EDM", ano: "1º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "JAQUELINE ARANTES RIBEIRO", escola: "CÉLIA", disciplina: "EDM", ano: "1º", turma: "B", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ADRIANA APARECIDA VITAL DA SILVA", escola: "ESTHER", disciplina: "EDM", ano: "5º", turma: "B", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ALEXANDRE SILVA PEDROSO", escola: "ESTHER", disciplina: "EDM", ano: "3º", turma: "A", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "DAIANE ROBERTA DE SOUSA", escola: "ESTHER", disciplina: "EDM", ano: "1º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "DOUGLAS WILLIAM DA SILVA", escola: "ESTHER", disciplina: "EDM", ano: "4º", turma: "B", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "JULIANA MENDES FERREIRA FUKUDA", escola: "ESTHER", disciplina: "EDM", ano: "1º", turma: "A", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "MARTA VIEIRA ALVES", escola: "ESTHER", disciplina: "EDM", ano: "2º", turma: "B", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "MICHELLE CRISTINA SILVA", escola: "ESTHER", disciplina: "EDM", ano: "2º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ANDRÉA LÚCIA STOPPA DE O. BAVIERA", escola: "PADRE", disciplina: "EDM", ano: "5º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "ARETA FIGUEIREDO ROSA", escola: "PADRE", disciplina: "EDM", ano: "2º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "DANIELA PARADA FERREIRA", escola: "PADRE", disciplina: "EDM", ano: "3º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "ELAINE CRISTINA DE SOUSA GOULART", escola: "PADRE", disciplina: "EDM", ano: "5º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "FABIANA MEIRE NAZAR", escola: "PADRE", disciplina: "EDM", ano: "4º", turma: "B", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "GIOVANA TAIS DE OLIVEIRA BAGIO", escola: "PADRE", disciplina: "EDM", ano: "4º", turma: "C", turno: "TARDE", telefone: "(00) 00000-0000" },
-    { nome: "LANA MARA FIOCO DOS SANTOS", escola: "PADRE", disciplina: "EDM", ano: "4º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "MARIA HELOÍSA DE ARAÚJO CRUZ", escola: "PADRE", disciplina: "EDM", ano: "1º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" },
-    { nome: "VERENA DE FÁTIMA CARVALHO", escola: "PADRE", disciplina: "EDM", ano: "2º", turma: "A", turno: "MANHÃ", telefone: "(00) 00000-0000" }
-];
+// Função para emitir alerta sonoro e visual
+function showNotification(message, type = 'success') {
+    // 1. Feedback Sonoro (Sintetizado para ser leve)
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(type === 'success' ? 880 : 440, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+    } catch (e) { console.warn("Áudio não suportado"); }
 
-// Estado das Escolas: carrega do localStorage ou inicia com as escolas padrão dos professores
-let escolas = JSON.parse(localStorage.getItem("escolas")) || 
-              [...new Set(professores.map(p => p.escola))].sort();
-
-// Estado das Disciplinas
-let disciplinas = JSON.parse(localStorage.getItem("disciplinas")) || 
-                 ["EDM"];
+    // 2. Feedback Visual (Toast)
+    let container = document.querySelector(".toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.className = "toast-container";
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+}
 
 // Variável global para rastrear se estamos editando e qual índice
 let editingIndex = -1; // -1 significa que nenhum professor está sendo editado
@@ -247,10 +382,10 @@ function renderMetadataList(list, container, typeLabel, onEdit, onDelete) {
     });
 }
 
-function renderSchoolList() {
-    renderMetadataList(escolas, listaEscolasCadastradas, 'escola', editSchool, (idx) => {
+async function renderSchoolList() {
+    renderMetadataList(escolas, listaEscolasCadastradas, 'escola', editSchool, async (idx) => {
         escolas.splice(idx, 1);
-        saveSchools();
+        await saveSchools();
     });
 }
 
@@ -264,18 +399,13 @@ function renderDisciplineList() {
         );
         if (confirmed) {
             disciplinas.splice(idx, 1);
-            saveDisciplines();
+            await saveDisciplines();
         }
     });
 }
 
 // Chave para a data específica da formação
 const DATA_FORMACAO_KEY_PREFIX = "presenca_";
-
-
-// Gerenciamento de Datas de Presença
-let historicoDatas = JSON.parse(localStorage.getItem("historicoDatas")) || ["2026_06_03", "2026_05_06"];
-let currentAttendanceKey = "presenca_" + historicoDatas[0];
 
 function populateDateSelect() {
     if (!selectDataPresenca) return;
@@ -306,34 +436,45 @@ function populateAttendanceFilters() {
 
 // Lógica para marcar todos como presente (apenas os visíveis no modal)
 if (btnMarkAllPresent) {
-    btnMarkAllPresent.onclick = () => {
+    btnMarkAllPresent.onclick = async () => {
         const checks = listaChamadaProfessores.querySelectorAll('input[type="checkbox"]');
         checks.forEach(chk => {
             chk.checked = true;
             const index = chk.id.split('-').pop();
-            professores[index][currentAttendanceKey] = true;
+            professores[Number(index)][currentAttendanceKey] = true;
         });
-        saveAndRender();
+        await saveAndRender();
     };
 }
 
 // Lógica para desmarcar todos (apenas os visíveis no modal)
 if (btnUnmarkAll) {
-    btnUnmarkAll.onclick = () => {
+    btnUnmarkAll.onclick = async () => {
         const checks = listaChamadaProfessores.querySelectorAll('input[type="checkbox"]');
         checks.forEach(chk => {
             chk.checked = false;
             const index = chk.id.split('-').pop();
-            professores[index][currentAttendanceKey] = false;
+            professores[Number(index)][currentAttendanceKey] = false;
         });
-        saveAndRender();
+        await saveAndRender();
     };
 }
 
 if (selectDataPresenca) {
-    selectDataPresenca.onchange = (e) => {
-        currentAttendanceKey = DATA_FORMACAO_KEY_PREFIX + e.target.value;
+    selectDataPresenca.onchange = async (e) => {
+        const selectedDate = e.target.value;
+        currentAttendanceKey = DATA_FORMACAO_KEY_PREFIX + selectedDate;
+        
+        // Persiste a escolha: move a data selecionada para o topo do histórico para ser o padrão no próximo load
+        const idx = historicoDatas.indexOf(selectedDate);
+        if (idx > -1) {
+            historicoDatas.splice(idx, 1);
+            historicoDatas.unshift(selectedDate);
+            await ApiService.save(HISTORY_KEY, historicoDatas);
+        }
+        
         renderAttendanceList();
+        renderTable(); // Atualiza os indicadores visuais na tabela principal imediatamente
     };
 }
 
@@ -343,14 +484,14 @@ if (attendanceFilterEscola) {
 }
 
 if (btnNovaData) {
-    btnNovaData.onclick = () => {
+    btnNovaData.onclick = async () => {
         const novaData = prompt("Digite a nova data da formação (formato DD/MM/AAAA):");
         if (novaData && /^\d{2}\/\d{2}\/\d{4}$/.test(novaData)) {
             const dataFormatada = novaData.split('/').reverse().join('_');
             if (!historicoDatas.includes(dataFormatada)) {
                 // Adiciona a nova data e a torna a data ativa
                 historicoDatas.unshift(dataFormatada); // Adiciona no início da lista
-                localStorage.setItem("historicoDatas", JSON.stringify(historicoDatas));
+                await ApiService.save(HISTORY_KEY, historicoDatas);
                 currentAttendanceKey = DATA_FORMACAO_KEY_PREFIX + dataFormatada;
                 populateDateSelect();
                 renderAttendanceList();
@@ -396,18 +537,18 @@ function renderAttendanceList() {
         const chk = li.querySelector('input');
 
         // Função interna para salvar a alteração individual
-        const handleToggle = () => {
+        const handleToggle = async () => {
             professores[prof.originalIndex][currentAttendanceKey] = chk.checked;
-            saveAndRender(); // Salva e atualiza os contadores/bolinhas na tabela principal
+            await saveAndRender(); // Garante que o salvamento terminou antes de liberar a UI
         };
 
         chk.onchange = handleToggle;
 
         // Facilita marcar clicando na linha inteira
-        li.onclick = (e) => {
+        li.onclick = async (e) => {
             if (e.target.tagName !== 'INPUT') {
                 chk.checked = !chk.checked;
-                handleToggle();
+                await handleToggle();
             }
         };
 
@@ -416,15 +557,16 @@ function renderAttendanceList() {
 }
 
 if (btnSalvarPresenca) {
-    btnSalvarPresenca.onclick = () => {
-        // Como o salvamento já é automático, o botão apenas fecha o modal
+    btnSalvarPresenca.onclick = async () => {
+        // Salvamento final de reforço antes de fechar
+        await saveAndRender();
         attendanceModalSection.classList.add("hidden");
         document.body.style.overflow = "";
     };
 }
 
 // Função para editar o nome de uma escola e atualizar os professores vinculados
-function editSchool(index) {
+async function editSchool(index) {
     if (!verificarAutenticacao(`Para editar a escola "${escolas[index]}"`)) return;
 
     const oldName = escolas[index];
@@ -449,14 +591,14 @@ function editSchool(index) {
     );
 
     // Salva as alterações de ambos (escolas e professores)
-    localStorage.setItem("escolas", JSON.stringify(escolas));
-    saveAndRender(); // Salva professores, ordena, popula filtros e renderiza tabela
+    await ApiService.save(SCHOOLS_KEY, escolas);
+    await saveAndRender(); // Salva professores, ordena, popula filtros e renderiza tabela
     renderSchoolList(); // Atualiza a lista visual no modal
     alert("Escola e registros de professores atualizados com sucesso!");
 }
 
 // Função para editar o nome de uma disciplina e atualizar os professores vinculados
-function editDiscipline(index) {
+async function editDiscipline(index) {
     if (!verificarAutenticacao(`Para editar a disciplina "${disciplinas[index]}"`)) return;
 
     const oldName = disciplinas[index];
@@ -481,29 +623,29 @@ function editDiscipline(index) {
     );
 
     // Salva as alterações
-    localStorage.setItem("disciplinas", JSON.stringify(disciplinas));
-    saveAndRender();
+    await ApiService.save(DISCIPLINES_KEY, disciplinas);
+    await saveAndRender();
     renderDisciplineList();
     alert("Disciplina e registros de professores atualizados com sucesso!");
 }
 
 // Salva escolas e atualiza componentes
-function saveSchools() {
-    localStorage.setItem("escolas", JSON.stringify(escolas));
+async function saveSchools() {
+    await ApiService.save(SCHOOLS_KEY, escolas);
     renderSchoolList();
     populateFilters();
 }
 
 // Salva disciplinas e atualiza componentes
-function saveDisciplines() {
-    localStorage.setItem("disciplinas", JSON.stringify(disciplinas));
+async function saveDisciplines() {
+    await ApiService.save(DISCIPLINES_KEY, disciplinas);
     renderDisciplineList();
     populateFilters();
 }
 
 // Evento de cadastro de nova escola
 if (schoolForm) {
-    schoolForm.onsubmit = (e) => {
+    schoolForm.onsubmit = async (e) => {
         e.preventDefault();
         
         const expectedPassword = getSecurityPassword();
@@ -519,7 +661,7 @@ if (schoolForm) {
                 return;
             }
             escolas.push(nomeNovaEscola);
-            saveSchools();
+            await saveSchools();
             schoolForm.reset();
         } else {
             alert("Senha incorreta! O cadastro foi cancelado.");
@@ -529,7 +671,7 @@ if (schoolForm) {
 
 // Evento de cadastro de nova disciplina
 if (disciplineForm) {
-    disciplineForm.onsubmit = (e) => {
+    disciplineForm.onsubmit = async (e) => {
         e.preventDefault();
 
         const expectedPassword = getSecurityPassword();
@@ -545,7 +687,7 @@ if (disciplineForm) {
                 return;
             }
             disciplinas.push(nomeNovaDisciplina);
-            saveDisciplines();
+            await saveDisciplines();
             disciplineForm.reset();
         } else {
             alert("Senha incorreta! O cadastro foi cancelado.");
@@ -918,20 +1060,43 @@ function renderTable() {
 }
 
 // Salva no localStorage e atualiza a tela
-function saveAndRender() {
+async function saveAndRender() {
     try {
         // 1. Persistência (Prioridade máxima)
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(professores));
+        await ApiService.save(STORAGE_KEY, professores);
+        
+        // Marca que houve alteração que ainda não foi exportada para backup manual
+        temAlteracoesSemBackup = true;
+        contadorAlteracoesSemBackup++;
         
         // 2. Atualização da Interface
         ordenarProfessores();
         populateFilters();
         renderTable();
         
-        console.log("Dados salvos com sucesso. Total:", professores.length);
+        showNotification("Dados salvos!");
+
+        // Sugere o backup se atingir o limite
+        if (contadorAlteracoesSemBackup >= BACKUP_THRESHOLD) {
+            setTimeout(sugerirBackup, 1500); // Pequeno atraso para não sobrepor o toast de salvo
+        }
+
+        console.log("Sincronização concluída. Total:", professores.length);
     } catch (error) {
-        console.error("Erro ao salvar dados no localStorage:", error);
-        alert("Erro crítico: Não foi possível salvar as alterações. Verifique o espaço disponível no navegador.");
+        console.error("Erro na sincronização:", error);
+        alert("Erro crítico: Não foi possível salvar as alterações.");
+    }
+}
+
+async function sugerirBackup() {
+    const confirmou = await showConfirm(
+        "Sugestão de Backup",
+        `Você já realizou ${contadorAlteracoesSemBackup} alterações. Deseja exportar um backup de segurança agora?`,
+        "Fazer Backup",
+        "Lembrar depois"
+    );
+    if (confirmou) {
+        btnBackup.click();
     }
 }
 
@@ -1388,7 +1553,8 @@ if (btnBackup) {
         const fullBackup = {
             professores: professores,
             escolas: escolas,
-            disciplinas: disciplinas
+            disciplinas: disciplinas,
+            historicoDatas: historicoDatas
         };
         const dataStr = JSON.stringify(fullBackup, null, 2);
         const blob = new Blob([dataStr], { type: "application/json" });
@@ -1399,6 +1565,9 @@ if (btnBackup) {
         link.click();
 
         // Salva e exibe a data do último backup
+        temAlteracoesSemBackup = false;
+        contadorAlteracoesSemBackup = 0; // Reseta o contador
+
         const now = new Date();
         const backupDateStr = now.toLocaleDateString() + " às " + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         localStorage.setItem("lastBackupDate", backupDateStr);
@@ -1446,10 +1615,17 @@ if (btnRestaurar) {
                             professores = dataToRestore;
                             if (content.escolas) escolas = content.escolas;
                             if (content.disciplinas) disciplinas = content.disciplinas;
+                            if (content.historicoDatas) historicoDatas = content.historicoDatas;
                             
-                            saveSchools();
-                            saveDisciplines();
+                            await saveSchools();
+                            await saveDisciplines();
+                            if (content.historicoDatas) {
+                                await ApiService.save(HISTORY_KEY, historicoDatas);
+                                populateDateSelect();
+                            }
                             saveAndRender();
+                            temAlteracoesSemBackup = false; // Resetar após restaurar backup completo
+                            contadorAlteracoesSemBackup = 0;
                             alert("Dados restaurados com sucesso!");
                         }
                     }
@@ -1491,7 +1667,7 @@ if (deleteBtnModal) {
     };
 }
 if (form) {
-    form.addEventListener("submit", function(event) {
+    form.addEventListener("submit", async function(event) {
         event.preventDefault(); // impede o recarregamento da página
 
         if (!verificarAutenticacao("Para salvar os dados do professor")) return;
@@ -1590,7 +1766,7 @@ if (form) {
             // Adiciona um novo professor
             professores.push({ nome, escola, disciplina, ano, turma, turno, telefone });
         }
-        saveAndRender();
+        await saveAndRender();
         resetForm();
     });
 }
@@ -1606,11 +1782,8 @@ if (headerSentinel && table) {
     observer.observe(headerSentinel);
 }
 
-// Renderização inicial
-ordenarProfessores(); // Ordena a lista inicial
-populateFilters();    // Popula os filtros com as escolas/disciplinas existentes
-renderTable();        // Renderiza a tabela e atualiza o gráfico
-updateLastBackupDisplay(); // Inicializa a exibição do último backup no rodapé
+// Ponto de entrada do Script
+initSystem();
 
 // Lógica de Tema Escuro
 const currentTheme = localStorage.getItem("theme");
@@ -1694,4 +1867,13 @@ document.addEventListener("click", function (e) {
 
     // Remove o elemento após a animação terminar
     setTimeout(() => circle.remove(), 600);
+});
+
+// Verificação de segurança ao sair da página
+window.addEventListener("beforeunload", (e) => {
+    if (temAlteracoesSemBackup) {
+        // Aciona o diálogo padrão do navegador para prevenir perda de dados não exportados
+        e.preventDefault();
+        e.returnValue = "";
+    }
 });
