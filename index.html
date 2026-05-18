@@ -24,7 +24,7 @@
             <img src="https://raw.githubusercontent.com/educacao-tech/edmprofessor/main/secretaria.png" alt="Logo Secretaria" class="header-logo">
             <img src="https://raw.githubusercontent.com/educacao-tech/edmprofessor/main/edm.png" alt="Logo EDM" class="header-logo">
         </div>
-        <h1>Gestão de Professores</h1>
+        <h1>Gestão de Professores <span id="syncStatus" class="sync-status synced" title="Sincronizado com a nuvem">☁️</span></h1>
         <button id="btnAbrirEscolas" class="btn-menu btn-blue">🏫 Escolas</button>
         <button id="btnAbrirDisciplinas" class="btn-menu btn-purple">📚 Disciplinas</button>
         <button id="btnAbrirColunas" class="btn-menu btn-orange">📊 Colunas</button>
@@ -274,6 +274,7 @@
                     <button type="button" id="btnDetailedReport" class="btn-dropdown">📋 Relatório Detalhado</button>
                     <button type="button" id="btnExportar" class="btn-dropdown">📥 Exportar CSV</button>
                     <button type="button" id="btnImprimir" class="btn-dropdown">🖨️ Imprimir Relatório</button>
+                    <button type="button" id="btnForceSync" class="btn-dropdown">🔄 Forçar Sincronização</button>
                     <button type="button" id="btnBackup" class="btn-dropdown">💾 Backup JSON</button>
                     <button type="button" id="btnRestaurar" class="btn-dropdown">📤 Restaurar Backup</button>
                 </div>

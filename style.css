@@ -1135,3 +1135,21 @@ button:hover {
     85% { opacity: 1; transform: translateY(0); }
     100% { opacity: 0; transform: translateY(-20px); }
 }
+
+/* Indicador de Sincronização Cloud */
+.sync-status {
+    font-size: 1.2rem;
+    margin-left: 10px;
+    cursor: help;
+    transition: color 0.3s ease, filter 0.3s ease;
+}
+
+.sync-status.synced { color: var(--primary-color); filter: drop-shadow(0 0 2px rgba(76, 175, 80, 0.5)); }
+.sync-status.syncing { color: var(--secondary-color); animation: pulse-sync 1s infinite; }
+.sync-status.error { color: var(--danger-color); filter: drop-shadow(0 0 5px var(--danger-color)); }
+
+@keyframes pulse-sync {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}

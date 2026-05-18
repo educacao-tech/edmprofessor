@@ -1,6 +1,6 @@
 // script.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
 
 // Configuração do Firebase
@@ -76,6 +76,7 @@ const btnBackup = document.getElementById("btnBackup");
 const btnRestaurar = document.getElementById("btnRestaurar");
 const deleteBtnModal = document.getElementById("deleteBtnModal");
 const confirmModalSection = document.getElementById("confirmModalSection");
+const btnForceSync = document.getElementById("btnForceSync");
 const btnConfirmOk = document.getElementById("btnConfirmOk");
 const btnConfirmCancel = document.getElementById("btnConfirmCancel");
 const confirmTitle = document.getElementById("confirmTitle");
@@ -127,9 +128,24 @@ const ApiService = {
 
     // Helper para descompactar dados GZIP
     async _decompress(data) {
-        if (!data || !(data instanceof Blob)) return data;
+        if (!data) return data;
+
+        // Converte para Blob se for binário (IndexedDB retorna Blob, Firestore retorna Bytes/Uint8Array)
+        let blob;
+        if (data instanceof Blob) {
+            blob = data;
+        } else {
+            try {
+                // Tenta converter Bytes do Firestore ou Uint8Array para Blob
+                const uint8 = data.toUint8Array ? data.toUint8Array() : new Uint8Array(data);
+                blob = new Blob([uint8]);
+            } catch (e) {
+                return data; // Retorna como está se não for binário reconhecido
+            }
+        }
+
         try {
-            const decompressedStream = data.stream().pipeThrough(new DecompressionStream("gzip"));
+            const decompressedStream = blob.stream().pipeThrough(new DecompressionStream("gzip"));
             const text = await new Response(decompressedStream).text();
             return JSON.parse(text);
         } catch (e) {
@@ -138,20 +154,40 @@ const ApiService = {
         }
     },
 
+    _updateUIStatus(status, title) {
+        const icon = document.getElementById("syncStatus");
+        if (!icon) return;
+        icon.className = `sync-status ${status}`;
+        icon.title = title;
+    },
+
     async save(endpoint, data) {
         try {
             const processedData = await this._compress(data);
             
             // 1. Salva na Nuvem (Firebase) para sincronizar entre máquinas
             if (dbCloud) {
+                this._updateUIStatus('syncing', 'Sincronizando com a nuvem...');
+                
+                // Firestore v9+ prefere Uint8Array para dados binários dentro de documentos
+                const buffer = (processedData instanceof Blob) 
+                    ? new Uint8Array(await processedData.arrayBuffer()) 
+                    : processedData;
+
                 await setDoc(doc(dbCloud, "configuracoes", endpoint), { 
-                    content: processedData,
+                    content: buffer,
                     timestamp: serverTimestamp()
                 });
+                this._updateUIStatus('synced', 'Sincronizado com a nuvem');
                 console.log(`[Firebase] Dados salvos com sucesso em: ${endpoint}`);
             }
+        } catch (cloudError) {
+            console.error(`[Firebase] Erro ao salvar na nuvem (${endpoint}):`, cloudError);
+            this._updateUIStatus('error', 'Erro na nuvem. Verifique as Regras de Segurança.');
+        }
 
-            // 2. Salva no Cache Local (IndexedDB) para velocidade
+        // 2. Salva no Cache Local (IndexedDB) - Independente da nuvem
+        try {
             const db = await this._getDB();
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction([this.storeName], "readwrite");
@@ -161,7 +197,7 @@ const ApiService = {
                 request.onerror = () => reject(false);
             });
         } catch (error) {
-            console.error(`Erro ao salvar no IndexedDB (${endpoint}):`, error);
+            console.error(`[Local] Erro ao salvar no IndexedDB (${endpoint}):`, error);
             return false;
         }
     },
@@ -170,15 +206,18 @@ const ApiService = {
         try {
             // 1. Tenta carregar da Nuvem primeiro
             if (dbCloud) {
+                console.log(`[Firebase] Tentando baixar dados de: ${endpoint}...`);
                 try {
                     const docSnap = await getDoc(doc(dbCloud, "configuracoes", endpoint));
                     if (docSnap.exists()) {
                         const result = await this._decompress(docSnap.data().content);
-                        console.log(`[Firebase] Dados carregados da nuvem: ${endpoint}`);
+                        console.log(`[Firebase] ✅ Sucesso! ${endpoint} carregado da nuvem.`);
                         return result;
+                    } else {
+                        console.warn(`[Firebase] ⚠️ Documento ${endpoint} não existe na nuvem.`);
                     }
                 } catch (cloudErr) {
-                    console.warn(`[Firebase] Falha ao acessar nuvem para ${endpoint}, tentando cache local...`);
+                    console.error(`[Firebase] ❌ Erro de permissão ou conexão para ${endpoint}:`, cloudErr);
                 }
             }
 
@@ -198,6 +237,19 @@ const ApiService = {
             console.error(`Erro ao carregar do IndexedDB (${endpoint}):`, error);
             return null;
         }
+    },
+
+    // Novo método para escutar mudanças em tempo real
+    subscribe(endpoint, callback) {
+        if (!dbCloud) return null;
+        return onSnapshot(doc(dbCloud, "configuracoes", endpoint), async (docSnap) => {
+            // metadata.hasPendingWrites garante que não vamos sobrescrever o estado local 
+            // se a mudança veio de um salvamento que nós mesmos acabamos de fazer.
+            if (docSnap.exists() && !docSnap.metadata.hasPendingWrites) {
+                const data = await this._decompress(docSnap.data().content);
+                if (data) callback(data);
+            }
+        });
     },
 
     // Método para migrar dados do localStorage para o IndexedDB (usar apenas uma vez)
@@ -290,6 +342,14 @@ async function initSystem() {
         updateLastBackupDisplay();
         populateDateSelect();
         
+        // Ativa sincronização em tempo real após o carregamento inicial
+        setupRealtimeListeners();
+
+        // Sincroniza dados locais com a nuvem se o Firebase estiver vazio (Migração)
+        if (dbCloud && professores.length > 0) {
+            await syncLocalToCloudIfEmpty();
+        }
+
         updateProgress(100, '--progress-color-end');
     } catch (error) {
         console.error("Erro na inicialização:", error);
@@ -302,6 +362,69 @@ async function initSystem() {
             }
         }, 500);
     }
+}
+
+// Configura os escutadores em tempo real para as principais coleções
+function setupRealtimeListeners() {
+    if (!dbCloud) return;
+
+    // Sincroniza Professores
+    ApiService.subscribe(STORAGE_KEY, (data) => {
+        professores = data;
+        ordenarProfessores();
+        renderTable();
+    });
+
+    // Sincroniza Escolas
+    ApiService.subscribe(SCHOOLS_KEY, (data) => {
+        escolas = data;
+        populateFilters();
+        renderSchoolList();
+    });
+
+    // Sincroniza Disciplinas
+    ApiService.subscribe(DISCIPLINES_KEY, (data) => {
+        disciplinas = data;
+        populateFilters();
+        renderDisciplineList();
+    });
+
+    // Sincroniza Histórico de Datas
+    ApiService.subscribe(HISTORY_KEY, (data) => {
+        historicoDatas = data;
+        populateDateSelect();
+    });
+}
+
+// Função para sincronizar dados locais com a nuvem caso a nuvem esteja vazia
+async function syncLocalToCloudIfEmpty() {
+    try {
+        const docSnap = await getDoc(doc(dbCloud, "configuracoes", STORAGE_KEY));
+        // Se não houver dados no Firebase mas houver localmente, faz o upload
+        if (!docSnap.exists()) {
+            console.log("[Firebase] Nuvem vazia detectada. Iniciando migração automática...");
+            await ApiService.save(STORAGE_KEY, professores);
+            await ApiService.save(SCHOOLS_KEY, escolas);
+            await ApiService.save(DISCIPLINES_KEY, disciplinas);
+            await ApiService.save(HISTORY_KEY, historicoDatas);
+            console.log("[Firebase] Migração para nuvem concluída.");
+            showNotification("Dados migrados para a nuvem!");
+        } else {
+            console.log("[Firebase] Documento já existe na nuvem. Migração ignorada.");
+        }
+    } catch (err) {
+        console.warn("[Firebase] Erro ao verificar sincronização inicial:", err);
+    }
+}
+
+// Função para forçar o upload de todos os dados atuais para a nuvem
+async function forcarSincronizacao() {
+    this._updateUIStatus('syncing', 'Forçando upload total...');
+    await ApiService.save(STORAGE_KEY, professores);
+    await ApiService.save(SCHOOLS_KEY, escolas);
+    await ApiService.save(DISCIPLINES_KEY, disciplinas);
+    await ApiService.save(HISTORY_KEY, historicoDatas);
+    showNotification("Upload forçado concluído!");
 }
 
 // Função para emitir alerta sonoro e visual
@@ -1709,6 +1832,17 @@ if (btnImprimir) {
     btnImprimir.onclick = () => window.print();
 }
 
+// Evento para forçar sincronização
+if (btnForceSync) {
+    btnForceSync.onclick = async () => {
+        const confirm = await showConfirm("Forçar Sincronização", "Isso enviará todos os dados desta máquina para o Firebase, sobrescrevendo o que estiver lá. Continuar?", "Sim, enviar", "Cancelar");
+        if (confirm) {
+            await forcarSincronizacao.call(ApiService);
+            renderTable();
+        }
+    };
+}
+
 // Evento do botão cancelar
 if (cancelBtn) {
     cancelBtn.onclick = () => resetForm();
@@ -1946,18 +2080,6 @@ window.addEventListener("beforeunload", (e) => {
 // Expõe funções necessárias para o escopo global (HTML onclick)
 window.moveColumn = moveColumn;
 window.abrirChamada = abrirChamada;
-if (btnBackToTop) {
-    btnBackToTop.onclick = () => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    };
-}
-
-// Lógica do Efeito de Onda (Ripple Effect)
-document.addEventListener("click", function (e) {
-    const button = e.target.closest("button");
-    
-    // Ignora se não for um botão ou se o botão estiver desativado
-    if (!button || button.disabled) return;
 
     const circle = document.createElement("span");
     const diameter = Math.max(button.clientWidth, button.clientHeight);
