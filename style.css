@@ -1153,3 +1153,15 @@ button:hover {
     50% { opacity: 0.5; transform: scale(1.2); }
     100% { opacity: 1; transform: scale(1); }
 }
+
+/* Animação de destaque para atualização via nuvem */
+@keyframes cloud-flash {
+    0% { background-color: rgba(52, 152, 219, 0.4); } /* Azul claro semi-transparente */
+    100% { background-color: transparent; }
+}
+
+.cloud-flash-row {
+    animation: cloud-flash 2s ease-out;
+    /* Garante que a animação seja visível sobre as cores de linhas alternadas */
+    z-index: 1;
+}

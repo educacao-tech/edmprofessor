@@ -182,8 +182,13 @@ const ApiService = {
                 console.log(`[Firebase] Dados salvos com sucesso em: ${endpoint}`);
             }
         } catch (cloudError) {
-            console.error(`[Firebase] Erro ao salvar na nuvem (${endpoint}):`, cloudError);
-            this._updateUIStatus('error', 'Erro na nuvem. Verifique as Regras de Segurança.');
+            console.error(`[Firebase] Falha na comunicação (${endpoint}):`, cloudError);
+            
+            if (cloudError.code === 'unavailable' || !navigator.onLine) {
+                this._updateUIStatus('error', 'Você está offline. As alterações serão salvas localmente.');
+            } else {
+                this._updateUIStatus('error', 'Erro de permissão ou configuração no Firebase.');
+            }
         }
 
         // 2. Salva no Cache Local (IndexedDB) - Independente da nuvem
@@ -248,6 +253,11 @@ const ApiService = {
             if (docSnap.exists() && !docSnap.metadata.hasPendingWrites) {
                 const data = await this._decompress(docSnap.data().content);
                 if (data) callback(data);
+            }
+        }, (error) => {
+            console.error(`[Firebase] ❌ Erro no escutador (Snapshot) para ${endpoint}:`, error);
+            if (error.code === 'permission-denied') {
+                this._updateUIStatus('error', 'Permissão negada no Firebase. Verifique as Regras de Segurança.');
             }
         });
     },
@@ -370,9 +380,17 @@ function setupRealtimeListeners() {
 
     // Sincroniza Professores
     ApiService.subscribe(STORAGE_KEY, (data) => {
+        // Identifica qual professor foi especificamente alterado na nuvem
+        const professorAlterado = data.find(novo => {
+            const antigo = professores.find(p => p.nome === novo.nome && p.escola === novo.escola);
+            return !antigo || JSON.stringify(antigo) !== JSON.stringify(novo);
+        });
+
+        const cloudUpdatedKey = professorAlterado ? `${professorAlterado.nome}|${professorAlterado.escola}` : null;
+
         professores = data;
         ordenarProfessores();
-        renderTable();
+        renderTable(cloudUpdatedKey); // Passa a chave do professor alterado para a animação
     });
 
     // Sincroniza Escolas
@@ -1136,7 +1154,7 @@ function updateTableProgressBars(prof, cell) {
     `;
 }
 
-function renderTableBody(listaFiltrada, termoBusca) {
+function renderTableBody(listaFiltrada, termoBusca, isCloudUpdate = false) {
     if (!tableBody) return;
     tableBody.innerHTML = ""; // Limpa o corpo da tabela antes de preencher
     selectedRowElement = null; // Limpa a referência da linha selecionada
@@ -1150,6 +1168,11 @@ function renderTableBody(listaFiltrada, termoBusca) {
         if (profKey === selectedProfessorKey) {
             newRow.classList.add("selected-row");
             selectedRowElement = newRow;
+        }
+
+        // Aplica a animação de nuvem se solicitado
+        if (cloudUpdatedKey && cloudUpdatedKey === profKey) {
+            newRow.classList.add("cloud-flash-row");
         }
 
         newRow.classList.add("animated-row");
@@ -1212,7 +1235,7 @@ function renderTableBody(listaFiltrada, termoBusca) {
 }
 
 // Função principal para renderizar a tabela
-function renderTable() {
+function renderTable(cloudUpdatedKey = null) {
     if (!tableBody) return;
     
     renderHeaders(); // Desenha o cabeçalho baseado na ordem atual
@@ -1229,7 +1252,7 @@ function renderTable() {
     }
     
     updateTableCounters(listaFiltrada); // Atualiza os contadores de presença/falta
-    renderTableBody(listaFiltrada, termoBusca); // Renderiza o corpo da tabela
+    renderTableBody(listaFiltrada, termoBusca, cloudUpdatedKey); // Renderiza o corpo da tabela
 
     // Atualiza a posição sticky do cabeçalho da tabela
     updateStickyHeaderTop();
@@ -2075,6 +2098,16 @@ window.addEventListener("beforeunload", (e) => {
         e.preventDefault();
         e.returnValue = "";
     }
+});
+
+// Monitoramento automático de status da conexão
+window.addEventListener('online', () => {
+    ApiService._updateUIStatus('synced', 'Conexão restaurada!');
+    showNotification("Conexão com a internet restaurada.", "success");
+});
+window.addEventListener('offline', () => {
+    ApiService._updateUIStatus('error', 'Trabalhando offline...');
+    showNotification("Você está sem internet. O sistema salvará tudo localmente.", "warning");
 });
 
 // Expõe funções necessárias para o escopo global (HTML onclick)
