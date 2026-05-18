@@ -1,4 +1,23 @@
 // script.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
+
+// Configuração do Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCwWtrJSuwx_wwXRIie2KVq-5USYTQBM2g",
+  authDomain: "edmprofessor-1542b.firebaseapp.com",
+  projectId: "edmprofessor-1542b",
+  storageBucket: "edmprofessor-1542b.firebasestorage.app",
+  messagingSenderId: "225511245642",
+  appId: "1:225511245642:web:c021e0760fde3d51f6e3b3",
+  measurementId: "G-MT07NMRYXJ"
+};
+
+// Inicializa o Firebase
+const app = initializeApp(firebaseConfig);
+const dbCloud = getFirestore(app);
+const analytics = getAnalytics(app);
 
 // Seleciona o formulário e a tabela
 const form = document.querySelector("form");
@@ -70,9 +89,11 @@ const btnBackToTop = document.getElementById("btnBackToTop");
 const ApiService = {
     dbName: "GestaoProfessoresDB",
     storeName: "keyValueStore",
+    _db: null,
 
-    // Abre a conexão com o IndexedDB
+    // Abre a conexão com o IndexedDB e mantém o cache da conexão
     async _getDB() {
+        if (this._db) return this._db;
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(this.dbName, 1);
             request.onupgradeneeded = (e) => {
@@ -81,14 +102,17 @@ const ApiService = {
                     db.createObjectStore(this.storeName);
                 }
             };
-            request.onsuccess = (e) => resolve(e.target.result);
-            request.onerror = (e) => reject("Erro ao abrir IndexedDB");
+            request.onsuccess = (e) => {
+                this._db = e.target.result;
+                resolve(this._db);
+            };
+            request.onerror = () => reject("Erro ao abrir IndexedDB");
         });
     },
 
     // Helper para compactar dados usando GZIP (Nativo)
     async _compress(data) {
-        if (typeof CompressionStream === "undefined") return data; // Fallback para contextos não seguros ou navegadores antigos
+        if (typeof CompressionStream === "undefined") return data;
         const string = JSON.stringify(data);
         const bytes = new TextEncoder().encode(string);
         const stream = new ReadableStream({
@@ -103,7 +127,7 @@ const ApiService = {
 
     // Helper para descompactar dados GZIP
     async _decompress(data) {
-        if (!data || !(data instanceof Blob)) return data; // Retorna como está se for dado antigo/descompactado
+        if (!data || !(data instanceof Blob)) return data;
         try {
             const decompressedStream = data.stream().pipeThrough(new DecompressionStream("gzip"));
             const text = await new Response(decompressedStream).text();
@@ -117,14 +141,22 @@ const ApiService = {
     async save(endpoint, data) {
         try {
             const processedData = await this._compress(data);
+            
+            // 1. Salva na Nuvem (Firebase) para sincronizar entre máquinas
+            if (dbCloud) {
+                await setDoc(doc(dbCloud, "configuracoes", endpoint), { 
+                    content: processedData,
+                    timestamp: serverTimestamp()
+                });
+                console.log(`[Firebase] Dados salvos com sucesso em: ${endpoint}`);
+            }
+
+            // 2. Salva no Cache Local (IndexedDB) para velocidade
             const db = await this._getDB();
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction([this.storeName], "readwrite");
                 const store = transaction.objectStore(this.storeName);
-                
-                // Se não comprimiu, salva o objeto direto. O IndexedDB aceita.
                 const request = store.put(processedData, endpoint);
-
                 request.onsuccess = () => resolve(true);
                 request.onerror = () => reject(false);
             });
@@ -136,12 +168,26 @@ const ApiService = {
 
     async load(endpoint) {
         try {
+            // 1. Tenta carregar da Nuvem primeiro
+            if (dbCloud) {
+                try {
+                    const docSnap = await getDoc(doc(dbCloud, "configuracoes", endpoint));
+                    if (docSnap.exists()) {
+                        const result = await this._decompress(docSnap.data().content);
+                        console.log(`[Firebase] Dados carregados da nuvem: ${endpoint}`);
+                        return result;
+                    }
+                } catch (cloudErr) {
+                    console.warn(`[Firebase] Falha ao acessar nuvem para ${endpoint}, tentando cache local...`);
+                }
+            }
+
+            // 2. Fallback para o Cache Local
             const db = await this._getDB();
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction([this.storeName], "readonly");
                 const store = transaction.objectStore(this.storeName);
                 const request = store.get(endpoint);
-
                 request.onsuccess = async () => {
                     const result = await this._decompress(request.result);
                     resolve(result || null);
@@ -165,7 +211,6 @@ const ApiService = {
         }
     }
 };
-
 const STORAGE_KEY = "professores";
 const SCHOOLS_KEY = "escolas";
 const DISCIPLINES_KEY = "disciplinas";
@@ -752,6 +797,14 @@ const ModalManager = {
         modalElement.classList.add("hidden");
         document.body.style.overflow = "";
         if (onCloseCallback) onCloseCallback();
+    },
+    closeAll: function() {
+        const modals = [
+            registrationSection, schoolModalSection, disciplineModalSection, 
+            columnModalSection, confirmModalSection, attendanceModalSection
+        ];
+        modals.forEach(m => this.close(m));
+        if (typeof resetForm === 'function') resetForm();
     }
 };
 
@@ -1359,9 +1412,19 @@ if (filterTurnoSelect) {
     filterTurnoSelect.addEventListener("change", () => renderTable());
 }
 
+// Função de Debounce para melhorar performance da busca
+function debounce(func, wait = 300) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
 // Evento de busca
 if (searchInput) {
-    searchInput.addEventListener("input", () => renderTable());
+    const debouncedRender = debounce(() => renderTable(), 300);
+    searchInput.addEventListener("input", debouncedRender);
 }
 
 // Evento para o filtro de faltas
@@ -1607,25 +1670,27 @@ if (btnRestaurar) {
                     if (Array.isArray(dataToRestore)) {
                         const confirmed = await showConfirm(
                             "Restaurar Backup",
-                            "Isso substituirá todos os dados atuais por este backup. Esta ação não pode ser desfeita. Continuar?",
-                            "Restaurar",
+                            "Isso substituirá os dados locais e sincronizará com o Firebase. Continuar?",
+                            "Migrar para Nuvem",
                             "Cancelar"
                         );
                         if (confirmed) {
                             professores = dataToRestore;
+                            
+                            // Atualiza variáveis globais
                             if (content.escolas) escolas = content.escolas;
                             if (content.disciplinas) disciplinas = content.disciplinas;
                             if (content.historicoDatas) historicoDatas = content.historicoDatas;
                             
-                            await saveSchools();
-                            await saveDisciplines();
-                            if (content.historicoDatas) {
-                                await ApiService.save(HISTORY_KEY, historicoDatas);
-                                populateDateSelect();
-                            }
-                            saveAndRender();
+                            // Salva tudo via ApiService (isso dispara o upload para o Firebase)
+                            await ApiService.save(SCHOOLS_KEY, escolas);
+                            await ApiService.save(DISCIPLINES_KEY, disciplinas);
+                            await ApiService.save(HISTORY_KEY, historicoDatas);
+                            await saveAndRender(); // Salva os professores e atualiza a UI
+                            
                             temAlteracoesSemBackup = false; // Resetar após restaurar backup completo
                             contadorAlteracoesSemBackup = 0;
+                            populateDateSelect();
                             alert("Dados restaurados com sucesso!");
                         }
                     }
@@ -1877,3 +1942,68 @@ window.addEventListener("beforeunload", (e) => {
         e.returnValue = "";
     }
 });
+
+// Expõe funções necessárias para o escopo global (HTML onclick)
+window.moveColumn = moveColumn;
+window.abrirChamada = abrirChamada;
+if (btnBackToTop) {
+    btnBackToTop.onclick = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+}
+
+// Lógica do Efeito de Onda (Ripple Effect)
+document.addEventListener("click", function (e) {
+    const button = e.target.closest("button");
+    
+    // Ignora se não for um botão ou se o botão estiver desativado
+    if (!button || button.disabled) return;
+
+    const circle = document.createElement("span");
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const radius = diameter / 2;
+    const rect = button.getBoundingClientRect();
+
+    // Calcula a cor da onda baseada no brilho do fundo do botão
+    const style = window.getComputedStyle(button);
+    const bgColor = style.backgroundColor;
+    const rgb = bgColor.match(/\d+/g);
+    let rippleColor = "rgba(255, 255, 255, 0.4)"; // Onda clara padrão
+
+    if (rgb) {
+        const [r, g, b] = rgb.map(Number);
+        // Fórmula YIQ para determinar brilho: (R*299 + G*587 + B*114) / 1000
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        if (brightness > 180) { // Se o fundo for muito claro
+            rippleColor = "rgba(0, 0, 0, 0.2)"; // Onda escura sutil
+        }
+    }
+
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${e.clientX - rect.left - radius}px`;
+    circle.style.top = `${e.clientY - rect.top - radius}px`;
+    circle.style.backgroundColor = rippleColor;
+    circle.classList.add("ripple-effect");
+
+    // Remove ripples antigos antes de adicionar um novo
+    const oldRipple = button.querySelector(".ripple-effect");
+    if (oldRipple) oldRipple.remove();
+
+    button.appendChild(circle);
+
+    // Remove o elemento após a animação terminar
+    setTimeout(() => circle.remove(), 600);
+});
+
+// Verificação de segurança ao sair da página
+window.addEventListener("beforeunload", (e) => {
+    if (temAlteracoesSemBackup) {
+        // Aciona o diálogo padrão do navegador para prevenir perda de dados não exportados
+        e.preventDefault();
+        e.returnValue = "";
+    }
+});
+
+// Expõe funções necessárias para o escopo global (HTML onclick)
+window.moveColumn = moveColumn;
+window.abrirChamada = abrirChamada;
