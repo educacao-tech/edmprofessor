@@ -1,0 +1,7 @@
+# Firebase/Google Cloud secrets
+serviceAccountKey.json
+
+# Python build and cache
+__pycache__/
+*.py[cod]
+professores_processados_*.json

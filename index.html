@@ -39,16 +39,16 @@
         h1 {
             color: var(--text-color);
             text-align: left;
-            margin-bottom: 8px;
+            margin-bottom: 0px; /* Reduzido para economizar espaço */
             font-weight: 700;
             font-size: 1.875rem;
             letter-spacing: -0.025em;
         }
 
         .header-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem; /* Reduzido para economizar espaço */
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
+            padding-bottom: 0.75rem; /* Reduzido para economizar espaço */
         }
 
         .container {
@@ -68,6 +68,7 @@
             right: 30px;
         }
 
+        #auth-toggle,
         #theme-toggle {
             background: var(--bg-color);
             border: 1px solid var(--border-color);
@@ -78,8 +79,10 @@
             font-size: 0.85em;
             font-weight: 600;
             transition: all 0.2s;
+            z-index: 20;
         }
 
+        #auth-toggle:hover,
         #theme-toggle:hover {
             background-color: var(--primary-color);
             color: white;
@@ -112,6 +115,23 @@
         .filters > div {
             flex: 1;
             min-width: 220px;
+        }
+
+        .btn-clear {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .btn-clear:hover {
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .filters input[type="text"],
@@ -148,13 +168,16 @@
         .table-responsive {
             max-height: 650px; /* Altura máxima para a tabela com scroll */
             overflow-x: auto;
+            overflow-y: auto;
             border-radius: 8px;
             border: 1px solid var(--border-color);
+            position: relative; /* Necessário para o sticky header */
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate; /* Necessário para sticky header */
+            border-spacing: 0;
             background-color: var(--card-bg);
         }
 
@@ -165,8 +188,14 @@
         }
 
         th {
-            background-color: var(--primary-color);
-            color: white;
+            background-color: var(--card-bg); /* Fundo do cabeçalho da tabela, para que fique fixo e consistente */
+            color: var(--text-color);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
             font-weight: 500;
             cursor: pointer;
             user-select: none;
@@ -175,7 +204,8 @@
         }
 
         th:hover {
-            background-color: var(--border-color);
+            background-color: var(--border-color); /* Um pouco mais escuro no hover */
+            color: var(--text-color);
         }
 
         tr:nth-child(even) {
@@ -185,13 +215,21 @@
         table tbody tr:hover {
             background-color: rgba(0, 0, 0, 0.05);
         }
+        
+        /* Ajustes para o modo escuro */
+        html[data-theme="dark"] th {
+            background-color: #2a2a2a; /* Fundo escuro para o cabeçalho no dark mode */
+        }
+        html[data-theme="dark"] th:hover {
+            background-color: #3a3a3a; /* Hover mais escuro no dark mode */
+        }
 
         .badge {
             padding: 4px 8px;
             border-radius: 20px;
             font-size: 0.7em;
-            font-weight: 600;
-            text-transform: uppercase;
+            font-weight: 500; /* Um pouco mais leve */
+            /* text-transform: uppercase; Removido, pois o texto já é maiúsculo */
             color: white;
             display: inline-flex;
             align-items: center;
@@ -229,6 +267,90 @@
             border-color: var(--primary-color);
         }
 
+        /* Authentication Protection */
+        .admin-only {
+            display: none !important;
+        }
+        body.is-admin .admin-only {
+            display: inline-block !important;
+        }
+        body.is-admin th.admin-only, body.is-admin td.admin-only {
+            display: table-cell !important;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            border: none;
+            transition: 0.2s;
+        }
+
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-secondary { background: var(--border-color); color: var(--text-color); }
+        .btn-danger { background: var(--danger-color); color: white; }
+        
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .action-btn:hover { color: var(--primary-color); }
+        .action-btn.delete:hover { color: var(--danger-color); }
+
         .pagination button.active {
             background-color: var(--primary-color);
             color: white;
@@ -243,13 +365,18 @@
 </head>
 <body>
     <div class="container">
-        <div class="theme-switch-wrapper">
-            <button id="theme-toggle" title="Alternar Modo Escuro/Claro"><i class="fas fa-moon"></i></button>
+        <div class="theme-switch-wrapper" style="display: flex; gap: 10px;">
+            <button id="auth-toggle" onclick="handleAuthClick()" title="Login Administrativo"><i class="fas fa-sign-in-alt"></i> Login</button>
+            <button id="theme-toggle" title="Alternar Modo Escuro/Claro" aria-label="Alternar Tema"><i class="fas fa-moon"></i></button>
         </div>
         <div class="header-section">
             <h1>Lista de Professores</h1>
-            <p style="color: var(--text-secondary); margin: 0;">Sistema de Gestão e Monitoramento de Frequência Acadêmica</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <p style="color: var(--text-secondary); margin: 0;">Sistema de Gestão e Monitoramento de Frequência Acadêmica</p>
+                <button class="btn btn-primary admin-only" onclick="openProfessorModal()"><i class="fas fa-plus"></i> Novo Professor</button>
+            </div>
         </div>
+
         <div class="filters">
             <div>
                 <label for="search-input">Pesquisa Geral</label>
@@ -257,15 +384,25 @@
             </div>
             <div>
                 <label for="school-filter">Escola</label>
-                <select id="school-filter">
-                    <option value="">Todas as Escolas</option>
-                </select>
+                <div style="display: flex; gap: 8px;">
+                    <select id="school-filter">
+                        <option value="">Todas as Escolas</option>
+                    </select>
+                    <button class="btn-clear admin-only" onclick="manageMetadata('escolas')" title="Adicionar Escola"><i class="fas fa-plus"></i></button>
+                </div>
             </div>
             <div>
                 <label for="discipline-filter">Disciplina</label>
-                <select id="discipline-filter">
-                    <option value="">Todas as Disciplinas</option>
-                </select>
+                <div style="display: flex; gap: 8px;">
+                    <select id="discipline-filter">
+                        <option value="">Todas as Disciplinas</option>
+                    </select>
+                    <button class="btn-clear admin-only" onclick="manageMetadata('disciplinas')" title="Adicionar Disciplina"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+            <div style="flex: 0; min-width: auto;">
+                <label>&nbsp;</label>
+                <button class="btn-clear" id="btn-clear-filters" title="Limpar todos os filtros"><i class="fas fa-filter-circle-xmark"></i></button>
             </div>
         </div>
         <div class="results-info">
@@ -278,7 +415,123 @@
         <div id="pagination" class="pagination"></div>
     </div>
 
-    <script>
+    <!-- Modal Professor -->
+    <div id="professorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Novo Professor</h2>
+                <span style="cursor:pointer" onclick="closeProfessorModal()">&times;</span>
+            </div>
+            <form id="professorForm">
+                <input type="hidden" id="prof-id">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="prof-nome" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Escola</label>
+                        <select id="prof-escola" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Disciplina</label>
+                        <select id="prof-disciplina" required></select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <input type="text" id="prof-ano">
+                    </div>
+                    <div class="form-group">
+                        <label>Turma</label>
+                        <input type="text" id="prof-turma">
+                    </div>
+                    <div class="form-group">
+                        <label>Turno</label>
+                        <select id="prof-turno">
+                            <option value="MANHÃ">MANHÃ</option>
+                            <option value="TARDE">TARDE</option>
+                            <option value="INTEGRAL">INTEGRAL</option>
+                            <option value="NOITE">NOITE</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="text" id="prof-telefone" placeholder="(00) 00000-0000">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeProfessorModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Acesso Administrativo</h2>
+                <span style="cursor:pointer" onclick="closeLoginModal()">&times;</span>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, getDoc, addDoc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
+
+        // Cole aqui as configurações do seu projeto Firebase Console
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwWtrJSuwx_wwXRIie2KVq-5USYTQBM2g",
+            authDomain: "edmprofessor-1542b.firebaseapp.com",
+            projectId: "edmprofessor-1542b",
+            storageBucket: "edmprofessor-1542b.firebasestorage.app",
+            messagingSenderId: "225511245642",
+            appId: "1:225511245642:web:c021e0760fde3d51f6e3b3",
+            measurementId: "G-MT07NMRYXJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        try {
+            const analytics = getAnalytics(app);
+        } catch (e) {
+            console.warn("Firebase Analytics não pôde ser carregado (possível bloqueador de anúncios).");
+        }
+
+        // Helper para evitar XSS (Cross-Site Scripting)
+        function escapeHTML(str) {
+            if (!str) return "";
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         // Lógica de Dark Mode
         const themeToggle = document.getElementById('theme-toggle');
         const themeIcon = themeToggle.querySelector('i');
@@ -304,7 +557,60 @@
             updateThemeIcon(newTheme);
         });
 
-        let jsonData = { professores: [] };
+        // Lógica de Autenticação
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+
+        window.handleAuthClick = () => {
+            console.log("Status Auth:", auth.currentUser ? "Logado" : "Deslogado");
+            if (auth.currentUser) {
+                if(confirm("Deseja encerrar a sessão administrativa?")) signOut(auth);
+            } else {
+                openLoginModal();
+            }
+        };
+
+        window.openLoginModal = () => {
+            loginForm.reset();
+            loginModal.style.display = 'block';
+        };
+
+        window.closeLoginModal = () => {
+            loginModal.style.display = 'none';
+        };
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+            
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                closeLoginModal();
+            } catch (error) {
+                console.error("Erro Técnico Firebase:", error.code); // Isso aparecerá no F12
+                alert(`Falha no login: ${error.code}\nVerifique se o e-mail/senha estão corretos e se o provedor está ativo no console.`);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Entrar';
+            }
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.body.classList.add('is-admin');
+                document.getElementById('auth-toggle').innerHTML = '<i class="fas fa-sign-out-alt"></i> Sair';
+            } else {
+                document.body.classList.remove('is-admin');
+                document.getElementById('auth-toggle').innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            }
+        });
+
+        let jsonData = { professores: [], escolas: [], disciplinas: [] };
         let presencaKey = ''; // Chave dinâmica para a presença (ex: presenca_2026_05_06)
         let presencaDateFormatted = ''; // Data formatada para o cabeçalho da tabela
 
@@ -323,25 +629,140 @@
             }
         }
 
-        async function loadData() {
-            professoresListDiv.innerHTML = '<p class="loading-message"><i class="fas fa-spinner fa-spin"></i> Carregando dados dos professores...</p>';
-            try {
-                const response = await fetch('backup_professores_2026-05-18.json');
-                jsonData = await response.json();
-                extractPresenceInfo(jsonData.professores); // Extrai a chave de presença e formata a data
-                initFilters();
+        function loadData() {
+            professoresListDiv.innerHTML = '<p class="loading-message" id="loading-state"><i class="fas fa-spinner fa-spin"></i> Conectando ao banco de dados...</p>';
+            
+            // 1. Ouvinte em tempo real para Professores
+            onSnapshot(collection(db, "professores"), (snapshot) => {
+                if (snapshot.empty) {
+                    professoresListDiv.innerHTML = '<p class="no-results-message"><i class="fas fa-database"></i> O banco de dados está vazio. Execute o script de migração.</p>';
+                    return;
+                }
+
+                jsonData.professores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Atualizar metadados de presença baseado nos dados novos
+                extractPresenceInfo(jsonData.professores);
+                
+                // Re-inicializar filtros apenas se estiverem vazios
+                if (schoolFilter.options.length <= 1) initFilters();
+                
                 renderTable();
-            } catch (error) {
-                console.error("Erro ao carregar dados:", error);
-                professoresListDiv.innerHTML = '<p>Erro ao carregar a lista de professores.</p>';
-            }
+            }, (error) => {
+                console.error("Erro no Real-time:", error);
+                professoresListDiv.innerHTML = `<p class="no-results-message"><i class="fas fa-shield-alt"></i> Erro de Permissão: Verifique as Regras do Firestore.<br><small>${error.message}</small></p>`;
+            });
+
+            // 2. Carregar Configurações (Uma única vez ou Snapshot)
+            getDoc(doc(db, "configuracoes", "geral")).then(configSnap => {
+                if (configSnap.exists()) {
+                    const configData = configSnap.data();
+                    jsonData.escolas = configData.escolas;
+                    jsonData.disciplinas = configData.disciplinas;
+                }
+            });
         }
+
+        // --- Funções CRUD ---
+
+        const professorModal = document.getElementById('professorModal');
+        const professorForm = document.getElementById('professorForm');
+
+        window.openProfessorModal = (profId = null) => {
+            professorForm.reset();
+            document.getElementById('prof-id').value = profId || '';
+            document.getElementById('modalTitle').textContent = profId ? 'Editar Professor' : 'Novo Professor';
+            
+            // Popular selects do modal
+            const schoolSelect = document.getElementById('prof-escola');
+            const discSelect = document.getElementById('prof-disciplina');
+            schoolSelect.innerHTML = jsonData.escolas.map(s => `<option value="${s}">${s}</option>`).join('');
+            discSelect.innerHTML = jsonData.disciplinas.map(d => `<option value="${d}">${d}</option>`).join('');
+
+            if (profId) {
+                const prof = jsonData.professores.find(p => p.id === profId);
+                if (prof) {
+                    document.getElementById('prof-nome').value = prof.nome;
+                    document.getElementById('prof-escola').value = prof.escola;
+                    document.getElementById('prof-disciplina').value = prof.disciplina;
+                    document.getElementById('prof-ano').value = prof.ano;
+                    document.getElementById('prof-turma').value = prof.turma;
+                    document.getElementById('prof-turno').value = prof.turno;
+                    document.getElementById('prof-telefone').value = prof.telefone;
+                }
+            }
+            professorModal.style.display = 'block';
+        };
+
+        window.closeProfessorModal = () => {
+            professorModal.style.display = 'none';
+        };
+
+        professorForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('prof-id').value;
+            
+            const profData = {
+                nome: document.getElementById('prof-nome').value,
+                escola: document.getElementById('prof-escola').value,
+                disciplina: document.getElementById('prof-disciplina').value,
+                ano: document.getElementById('prof-ano').value,
+                turma: document.getElementById('prof-turma').value,
+                turno: document.getElementById('prof-turno').value,
+                telefone: document.getElementById('prof-telefone').value,
+                ultima_alteracao: new Date().toISOString()
+            };
+
+            try {
+                if (id) {
+                    await updateDoc(doc(db, "professores", id), profData);
+                } else {
+                    // Adicionar nova chave de presença padrão para novos cadastros
+                    if (presencaKey) profData[presencaKey] = false;
+                    await addDoc(collection(db, "professores"), profData);
+                }
+                closeProfessorModal();
+            } catch (error) {
+                alert("Erro ao salvar: " + error.message);
+            }
+        });
+
+        window.deleteProfessor = async (id, nome) => {
+            if (confirm(`Tem certeza que deseja excluir o(a) professor(a) ${nome}?`)) {
+                try {
+                    await deleteDoc(doc(db, "professores", id));
+                } catch (error) {
+                    alert("Erro ao excluir: " + error.message);
+                }
+            }
+        };
+
+        // Gerenciamento de Escolas/Disciplinas (Metadados)
+        window.manageMetadata = async (type) => {
+            const newValue = prompt(`Digite o nome da nova ${type === 'escolas' ? 'Escola' : 'Disciplina'}:`);
+            if (!newValue) return;
+
+            const updatedList = [...jsonData[type], newValue.toUpperCase()].sort();
+            const updateObj = {};
+            updateObj[type] = updatedList;
+
+            try {
+                await updateDoc(doc(db, "configuracoes", "geral"), updateObj);
+                // Recarregar dados locais
+                jsonData[type] = updatedList;
+                // Atualizar UI dos filtros
+                initFilters();
+            } catch (error) {
+                alert("Erro ao atualizar lista: " + error.message);
+            }
+        };
 
         const professoresListDiv = document.getElementById('professores-list');
         const searchInput = document.getElementById('search-input');
         const schoolFilter = document.getElementById('school-filter');
         const disciplineFilter = document.getElementById('discipline-filter');
         const paginationDiv = document.getElementById('pagination');
+        const btnClearFilters = document.getElementById('btn-clear-filters');
         const resultsCountSpan = document.getElementById('results-count');
 
         // Configuração de ordenação inicial
@@ -355,21 +776,25 @@
         const rowsPerPage = 10;
 
         function initFilters() {
-            const allSchools = [...new Set(jsonData.professores.map(p => p.escola))].sort();
-            const allDisciplines = [...new Set(jsonData.professores.map(p => p.disciplina))].sort();
+            // Limpa as opções atuais para evitar duplicatas
+            schoolFilter.innerHTML = '<option value="">Todas as Escolas</option>';
+            disciplineFilter.innerHTML = '<option value="">Todas as Disciplinas</option>';
 
-            allSchools.forEach(school => {
-                const option = document.createElement('option');
-                option.value = school;
-                option.textContent = school;
-                schoolFilter.appendChild(option);
+            // Prioriza as listas de metadados do Firebase, caso existam
+            const schools = (jsonData.escolas && jsonData.escolas.length > 0) 
+                ? jsonData.escolas 
+                : [...new Set(jsonData.professores.map(p => p.escola))].sort();
+                
+            const disciplines = (jsonData.disciplinas && jsonData.disciplinas.length > 0)
+                ? jsonData.disciplinas
+                : [...new Set(jsonData.professores.map(p => p.disciplina))].sort();
+
+            schools.forEach(school => {
+                schoolFilter.add(new Option(school, school));
             });
 
-            allDisciplines.forEach(discipline => {
-                const option = document.createElement('option');
-                option.value = discipline;
-                option.textContent = discipline;
-                disciplineFilter.appendChild(option);
+            disciplines.forEach(discipline => {
+                disciplineFilter.add(new Option(discipline, discipline));
             });
         }
 
@@ -469,7 +894,8 @@
                         { label: 'Ano', key: 'ano' },
                         { label: 'Turma', key: 'turma' },
                         { label: 'Turno', key: 'turno' },
-                        { label: 'Telefone', key: 'telefone' }
+                        { label: 'Telefone', key: 'telefone' },
+                        { label: 'Ações', key: 'actions' }
                         // A chave de presença será adicionada dinamicamente
                     ];
                     if (presencaKey && presencaDateFormatted) {
@@ -479,31 +905,38 @@
                     let tableHTML = '<table>';
                     tableHTML += '<thead><tr>';
                     headers.forEach(h => {
-                        let icon = '<i class="fas fa-sort" style="opacity: 0.2; margin-left: 5px;"></i>';
+                        let icon = (h.key !== 'actions' && h.key !== 'presenca') ? '<i class="fas fa-sort" style="opacity: 0.2; margin-left: 5px;"></i>' : '';
                         if (sortConfig.key === h.key) {
                             icon = sortConfig.direction === 'asc' 
                                 ? ' <i class="fas fa-sort-up" style="margin-left: 5px;"></i>' 
                                 : ' <i class="fas fa-sort-down" style="margin-left: 5px;"></i>';
                         }
-                        tableHTML += `<th onclick="setSort('${h.key}')">${h.label}${icon}</th>`;
+                        let adminClass = h.key === 'actions' ? 'admin-only' : '';
+                        tableHTML += `<th onclick="setSort('${h.key}')" class="${adminClass}">${h.label}${icon}</th>`;
                     });
                     tableHTML += '</tr></thead><tbody>';
 
                     paginatedItems.forEach(professor => {
                         tableHTML += '<tr>';
-                        tableHTML += `<td><strong>${professor.nome}</strong></td>`;
-                        tableHTML += `<td>${professor.escola}</td>`;
-                        tableHTML += `<td>${professor.disciplina}</td>`;
-                        tableHTML += `<td>${professor.ano}</td>`;
-                        tableHTML += `<td>${professor.turma}</td>`;
-                        tableHTML += `<td>${professor.turno}</td>`;
-                        tableHTML += `<td>${professor.telefone}</td>`;
+                        tableHTML += `<td><strong>${escapeHTML(professor.nome)}</strong></td>`;
+                        tableHTML += `<td>${escapeHTML(professor.escola)}</td>`;
+                        tableHTML += `<td>${escapeHTML(professor.disciplina)}</td>`;
+                        tableHTML += `<td>${escapeHTML(professor.ano)}</td>`;
+                        tableHTML += `<td>${escapeHTML(professor.turma)}</td>`;
+                        tableHTML += `<td>${escapeHTML(professor.turno)}</td>`;
+                        tableHTML += `<td>${escapeHTML(professor.telefone)}</td>`;
                         if (presencaKey && professor[presencaKey] !== undefined) {
                             const presencaClass = professor[presencaKey] ? 'badge-presente' : 'badge-ausente';
                             const presencaText = professor[presencaKey] ? 'Presente' : 'Ausente';
                             const presencaIcon = professor[presencaKey] ? 'fa-circle-check' : 'fa-circle-xmark';
-                            tableHTML += `<td><span class="badge ${presencaClass}"><i class="fas ${presencaIcon}"></i> ${presencaText}</span></td>`;
+                            tableHTML += `<td><span class="badge ${presencaClass}"><i class="fas ${presencaIcon}"></i> ${escapeHTML(presencaText)}</span></td>`;
                         }
+                        tableHTML += `<td class="admin-only">
+                            <div class="action-btns">
+                                <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>`;
                         tableHTML += '</tr>';
                     });
                     tableHTML += '</tbody></table>';
@@ -515,6 +948,13 @@
 
             renderPagination(filteredProfessores.length);
         }
+
+        btnClearFilters.addEventListener('click', () => {
+            searchInput.value = '';
+            schoolFilter.value = '';
+            disciplineFilter.value = '';
+            resetAndRender();
+        });
 
         const resetAndRender = () => {
             currentPage = 1;

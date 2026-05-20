@@ -7,9 +7,10 @@ import argparse
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field, ValidationError
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
 
-# --- Pydantic Models para Validação de Dados ---
+# --- Modelos Pydantic para Validação de Dados ---
 class ProfessorModel(BaseModel):
     nome: str
     escola: str
@@ -17,7 +18,7 @@ class ProfessorModel(BaseModel):
     ano: str
     turma: str
     turno: str
-    telefone: str = Field(pattern=r"^\(\d{2}\) \d{5}-\d{4}$", description="Formato: (XX) XXXXX-XXXX")
+    telefone: Optional[str] = Field(default=None, pattern=r"^\(\d{2}\) \d{5}-\d{4}$") # Telefone pode ser None, e o padrão só se aplica se não for None
 
     # Pydantic v2: Permite campos dinâmicos (como as chaves de presença)
     model_config = {
@@ -31,23 +32,23 @@ def processar_professor(professor_data: Dict[str, Any]) -> Optional[Dict[str, An
         
         # Simulação de carga de trabalho
         nome_processado = professor.nome.upper()
-        time.sleep(0.05) 
+        # Em um ambiente de produção, remova o time.sleep
+        # time.sleep(0.05) 
         
         # Converte o modelo Pydantic de volta para um dicionário para modificação
-        processed_professor_data = professor.model_dump() if hasattr(professor, 'model_dump') else professor.dict()
+        # Usar model_dump() é a forma recomendada para Pydantic v2
+        processed_professor_data = professor.model_dump()
         processed_professor_data['nome_processado'] = nome_processado
 
-        for key, value in processed_professor_data.items():
-            if key.startswith('presenca_') and isinstance(value, bool):
-                # Aqui você poderia implementar regras de negócio para a presença
-                pass 
+        # Metadados de processamento
+        processed_professor_data['_timestamp_processamento'] = time.time()
 
         return processed_professor_data
     except ValidationError as e:
-        logging.error(f"Erro de validação para professor '{professor_data.get('nome', 'Nome Desconhecido')}': {e}")
+        logger.error(f"Erro de validação: {professor_data.get('nome')} - {e.errors()[0]['msg']}")
         return None # Retorna None para professores com dados inválidos
     except Exception as e:
-        logging.error(f"Erro inesperado ao processar professor '{professor_data.get('nome', 'Nome Desconhecido')}': {e}")
+        logger.error(f"Erro crítico no registro {professor_data.get('nome')}: {e}")
         return None
 
 def main():
@@ -63,18 +64,18 @@ def main():
     caminho_arquivo = Path(args.input_file)
     
     if not caminho_arquivo.exists():
-        logging.error(f"Arquivo de entrada não encontrado: {caminho_arquivo}")
+        logger.error(f"Arquivo não encontrado: {caminho_arquivo}")
         return
 
     try:
         with open(caminho_arquivo, 'r', encoding='utf-8') as f:
             dados = json.load(f)
     except json.JSONDecodeError as e:
-        logging.error(f"Erro ao ler JSON: {e}")
+        logger.error(f"O arquivo JSON está corrompido: {e}")
         return
     
     professores = dados['professores']
-    logging.info(f"Iniciando processamento de {len(professores)} registros...")
+    logger.info(f"Iniciando processamento de {len(professores)} registros...")
     
     inicio = time.time()
     with multiprocessing.Pool() as pool:
@@ -82,8 +83,8 @@ def main():
         resultados = [res for res in resultados_brutos if res is not None]
     
     fim = time.time()
-    logging.info(f"Tempo com Multiprocessing: {fim - inicio:.2f} segundos")
-    logging.info(f"{len(resultados_brutos) - len(resultados)} professores falharam no processamento/validação.")
+    logger.info(f"Processamento concluído em {fim - inicio:.2f}s")
+    logger.info(f"Sucesso: {len(resultados)} | Falhas: {len(resultados_brutos) - len(resultados)}")
 
     # Salvar os dados processados para o frontend
     output_data = {
@@ -97,7 +98,7 @@ def main():
     caminho_output = caminho_arquivo.parent / f'professores_processados_{timestamp}.json'
     with open(caminho_output, 'w', encoding='utf-8') as f:
         json.dump(output_data, f, indent=2, ensure_ascii=False)
-    logging.info(f"Dados salvos em: {caminho_output}")
+    logger.info(f"Dados salvos em: {caminho_output}")
 
 if __name__ == "__main__":
     main()
