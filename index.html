@@ -107,7 +107,7 @@
             background-color: #fafafa;
         }
 
-        tr:hover {
+        table tbody tr:hover {
             background-color: #f1f3f5;
         }
 
@@ -350,51 +350,49 @@
             });
 
             if (filteredProfessores.length > 0) {
-            // Lógica de Paginação: fatiar os resultados
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const paginatedItems = filteredProfessores.slice(start, end);
+                // Lógica de Paginação: fatiar os resultados
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                const paginatedItems = filteredProfessores.slice(start, end);
 
-            if (paginatedItems.length > 0) {
-                const headers = [
-                    { label: 'Nome', key: 'nome' },
-                    { label: 'Escola', key: 'escola' },
-                    { label: 'Disciplina', key: 'disciplina' },
-                    { label: 'Ano', key: 'ano' },
-                    { label: 'Turma', key: 'turma' },
-                    { label: 'Turno', key: 'turno' },
-                    { label: 'Telefone', key: 'telefone' },
-                    { label: 'Presença (06/05/2026)', key: 'presenca_2026_05_06' }
-                ];
+                if (paginatedItems.length > 0) {
+                    const headers = [
+                        { label: 'Nome', key: 'nome' },
+                        { label: 'Escola', key: 'escola' },
+                        { label: 'Disciplina', key: 'disciplina' },
+                        { label: 'Ano', key: 'ano' },
+                        { label: 'Turma', key: 'turma' },
+                        { label: 'Turno', key: 'turno' },
+                        { label: 'Telefone', key: 'telefone' },
+                        { label: 'Presença (06/05/2026)', key: 'presenca_2026_05_06' }
+                    ];
 
-                let tableHTML = '<table>';
-                tableHTML += '<thead><tr>';
-                headers.forEach(h => {
-                    const icon = sortConfig.key === h.key ? (sortConfig.direction === 'asc' ? ' ▴' : ' ▾') : '';
-                    tableHTML += `<th onclick="setSort('${h.key}')">${h.label}${icon}</th>`;
-                });
-                tableHTML += '</tr></thead>';
-                tableHTML += '<tbody>';
+                    let tableHTML = '<table>';
+                    tableHTML += '<thead><tr>';
+                    headers.forEach(h => {
+                        const icon = sortConfig.key === h.key ? (sortConfig.direction === 'asc' ? ' ▴' : ' ▾') : '';
+                        tableHTML += `<th onclick="setSort('${h.key}')">${h.label}${icon}</th>`;
+                    });
+                    tableHTML += '</tr></thead><tbody>';
 
-                filteredProfessores.forEach(professor => {
-                paginatedItems.forEach(professor => {
-                    const presencaClass = professor.presenca_2026_05_06 ? 'badge-presente' : 'badge-ausente';
-                    const presencaText = professor.presenca_2026_05_06 ? 'Presente' : 'Ausente';
+                    paginatedItems.forEach(professor => {
+                        const presencaClass = professor.presenca_2026_05_06 ? 'badge-presente' : 'badge-ausente';
+                        const presencaText = professor.presenca_2026_05_06 ? 'Presente' : 'Ausente';
 
-                    tableHTML += '<tr>';
-                    tableHTML += `<td><strong>${professor.nome}</strong></td>`;
-                    tableHTML += `<td>${professor.escola}</td>`;
-                    tableHTML += `<td>${professor.disciplina}</td>`;
-                    tableHTML += `<td>${professor.ano}</td>`;
-                    tableHTML += `<td>${professor.turma}</td>`;
-                    tableHTML += `<td>${professor.turno}</td>`;
-                    tableHTML += `<td>${professor.telefone}</td>`;
-                    tableHTML += `<td><span class="badge ${presencaClass}">${presencaText}</span></td>`;
-                    tableHTML += '</tr>';
-                });
-
-                tableHTML += '</tbody></table>';
-                professoresListDiv.innerHTML = tableHTML;
+                        tableHTML += '<tr>';
+                        tableHTML += `<td><strong>${professor.nome}</strong></td>`;
+                        tableHTML += `<td>${professor.escola}</td>`;
+                        tableHTML += `<td>${professor.disciplina}</td>`;
+                        tableHTML += `<td>${professor.ano}</td>`;
+                        tableHTML += `<td>${professor.turma}</td>`;
+                        tableHTML += `<td>${professor.turno}</td>`;
+                        tableHTML += `<td>${professor.telefone}</td>`;
+                        tableHTML += `<td><span class="badge ${presencaClass}">${presencaText}</span></td>`;
+                        tableHTML += '</tr>';
+                    });
+                    tableHTML += '</tbody></table>';
+                    professoresListDiv.innerHTML = tableHTML;
+                }
             } else {
                 professoresListDiv.innerHTML = '<p>Nenhum professor encontrado com os critérios de busca e filtro.</p>';
             }
@@ -408,9 +406,7 @@
         };
 
         // Adicionar event listeners para os filtros
-        searchInput.addEventListener('input', renderTable);
-        schoolFilter.addEventListener('change', renderTable);
-        disciplineFilter.addEventListener('change', renderTable);
+        // Using resetAndRender to ensure pagination resets on filter/search changes
         searchInput.addEventListener('input', resetAndRender);
         schoolFilter.addEventListener('change', resetAndRender);
         disciplineFilter.addEventListener('change', resetAndRender);
