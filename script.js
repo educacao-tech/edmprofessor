@@ -329,39 +329,21 @@ async function processMigration(dados) {
 
 // Inicialização Assíncrona do Sistema
 async function initSystem() {
-    const loader = document.getElementById("initialLoader");
-    const progressBar = document.getElementById("loaderProgressBar");
-    const progressText = document.getElementById("loaderProgressText");
-
-    const updateProgress = (percent, colorVar = '--progress-color-start') => {
-        if (progressBar) {
-            progressBar.style.width = `${percent}%`;
-            progressBar.style.backgroundColor = `var(${colorVar})`;
-        }
-        if (progressText) progressText.textContent = `${percent}%`;
-    };
-
     try {
-        updateProgress(10, '--progress-color-start');
         // Migra dados antigos se existirem
         await ApiService.migrateFromLocalStorage([STORAGE_KEY, SCHOOLS_KEY, DISCIPLINES_KEY, HISTORY_KEY]);
 
-        updateProgress(30, '--progress-color-start');
         const dadosSalvos = await ApiService.load(STORAGE_KEY);
         professores = await processMigration(dadosSalvos || []);
 
-        updateProgress(50, '--progress-color-mid');
         escolas = await ApiService.load(SCHOOLS_KEY) || 
                   [...new Set(professores.map(p => p.escola))].sort();
 
-        updateProgress(70, '--progress-color-mid');
         disciplinas = await ApiService.load(DISCIPLINES_KEY) || ["EDM"];
         
-        updateProgress(85, '--progress-color-end');
         historicoDatas = await ApiService.load(HISTORY_KEY) || ["2026_06_03", "2026_05_06"];
         currentAttendanceKey = "presenca_" + (historicoDatas[0] || "");
 
-        updateProgress(95, '--progress-color-end');
         ordenarProfessores();
         populateFilters();
         renderTable();
@@ -376,17 +358,9 @@ async function initSystem() {
             await syncLocalToCloudIfEmpty();
         }
 
-        updateProgress(100, '--progress-color-end');
     } catch (error) {
         console.error("Erro na inicialização:", error);
     } finally {
-        // Pequeno atraso para o usuário perceber a conclusão
-        setTimeout(() => {
-            if (loader) {
-                loader.style.opacity = "0";
-                setTimeout(() => loader.classList.add("hidden"), 1000); // Corresponde à duração da transição CSS
-            }
-        }, 500);
     }
 }
 
