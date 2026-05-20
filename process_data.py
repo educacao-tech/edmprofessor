@@ -32,8 +32,8 @@ def processar_professor(professor_data: Dict[str, Any]) -> Optional[Dict[str, An
         
         # Simulação de carga de trabalho
         nome_processado = professor.nome.upper()
-        # Em um ambiente de produção, remova o time.sleep
-        # time.sleep(0.05) 
+        # Em um ambiente de produção, remova ou comente a linha abaixo
+        # time.sleep(0.05)
         
         # Converte o modelo Pydantic de volta para um dicionário para modificação
         # Usar model_dump() é a forma recomendada para Pydantic v2

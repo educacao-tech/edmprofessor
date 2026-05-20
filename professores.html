@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Professores</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #2d3436;
+            --border-color: #dfe6e9;
+            --success-color: #27ae60;
+            --danger-color: #d63031;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        h1 {
+            color: var(--primary-hover);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .filters {
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            padding: 20px;
+            background-color: #f1f3f5;
+            border-radius: 8px;
+        }
+
+        .filters label {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .filters input[type="text"],
+        .filters select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .filters input[type="text"]:focus,
+        .filters select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-bg);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            background-color: var(--primary-hover);
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: white;
+            display: inline-block;
+        }
+
+        .badge-presente {
+            background-color: var(--success-color);
+        }
+
+        .badge-ausente {
+            background-color: var(--danger-color);
+        }
+
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background-color: #f1f3f5;
+            border-color: var(--primary-color);
+        }
+
+        .pagination button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Professores</h1>
+        <div class="filters">
+            <label for="search-input">Buscar:</label>
+            <input type="text" id="search-input" placeholder="Nome, escola, disciplina...">
+
+            <label for="school-filter">Escola:</label>
+            <select id="school-filter">
+                <option value="">Todas</option>
+            </select>
+
+            <label for="discipline-filter">Disciplina:</label>
+            <select id="discipline-filter">
+                <option value="">Todas</option>
+            </select>
+        </div>
+        <div id="professores-list" class="table-responsive">
+            <!-- A lista de professores será carregada aqui pelo JavaScript -->
+        </div>
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <script>
+        const jsonData = {
+            "professores": [
+                { "nome": "ADMILDE GABRIEL DE SOUSA", "escola": "CÉLIA", "disciplina": "EDM", "ano": "5º", "turma": "B", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ADRIANA APARECIDA VITAL DA SILVA", "escola": "ESTHER", "disciplina": "EDM", "ano": "5º", "turma": "B", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ALEXANDRE SILVA PEDROSO", "escola": "ESTHER", "disciplina": "EDM", "ano": "3º", "turma": "A", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ALINE SANTOS DA COSTA", "escola": "CÉLIA", "disciplina": "EDM", "ano": "5º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ANA CAROLINA VENTUROSO BÉRGAMO CÂNDIDO", "escola": "ALZIRA", "disciplina": "EDM", "ano": "4º", "turma": "B", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ANDRÉA LÚCIA STOPPA DE O. BAVIERA", "escola": "PADRE", "disciplina": "EDM", "ano": "5º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ARETA FIGUEIREDO ROSA", "escola": "PADRE", "disciplina": "EDM", "ano": "2º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ÁUREA APARECIDA SOUZA CARDOSO", "escola": "ALZIRA", "disciplina": "EDM", "ano": "1º", "turma": "E", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "CRISTIANE AUGUSTA COSTA", "escola": "ALZIRA", "disciplina": "EDM", "ano": "3º", "turma": "E", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "DAIANE ROBERTA DE SOUSA", "escola": "ESTHER", "disciplina": "EDM", "ano": "1º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "DANIELA MARA MACEDO SILVA", "escola": "ALZIRA", "disciplina": "EDM", "ano": "N/A", "turma": "N/A", "turno": "N/A", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "DANIELA PARADA FERREIRA", "escola": "PADRE", "disciplina": "EDM", "ano": "3º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "DEILANE FRANZONI", "escola": "BRAGA", "disciplina": "EDM", "ano": "1º", "turma": "B", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "DOUGLAS WILLIAM DA SILVA", "escola": "ESTHER", "disciplina": "EDM", "ano": "4º", "turma": "B", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "EDNILSA GABRIEL DE SOUSA", "escola": "CÉLIA", "disciplina": "EDM", "ano": "1º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ELAINE CRISTINA DE SOUSA GOULART", "escola": "PADRE", "disciplina": "EDM", "ano": "5º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ELISÂNGELA ALMINDA OLIVEIRA BIBIANO", "escola": "BRAGA", "disciplina": "EDM", "ano": "3º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ELIZÂNGELA CERCE CONUNCHUC", "escola": "ALZIRA", "disciplina": "EDM", "ano": "1º", "turma": "C", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "FABIANA CÁSSIA DOS SANTOS", "escola": "ALZIRA", "disciplina": "EDM", "ano": "2º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "FABIANA KARINA DE OLIVEIRA", "escola": "ALZIRA", "disciplina": "EDM", "ano": "2º", "turma": "B", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "FABIANA MEIRE NAZAR", "escola": "PADRE", "disciplina": "EDM", "ano": "4º", "turma": "B", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "GABRIELA BOLOGNA BÉRGAMO VENDRUSCOLO", "escola": "ALZIRA", "disciplina": "EDM", "ano": "1º", "turma": "D", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "GIOVANA TAIS DE OLIVEIRA BAGIO", "escola": "PADRE", "disciplina": "EDM", "ano": "4º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ISABEL CRISTINA MANIERI DANIEL", "escola": "ALZIRA", "disciplina": "EDM", "ano": "1º", "turma": "B", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "JACKELINE SILVA RODRIGUES", "escola": "ALZIRA", "disciplina": "EDM", "ano": "N/A", "turma": "N/A", "turno": "N/A", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "JESILDA BATISTA DA SILVA DOMINGOS", "escola": "ANNA", "disciplina": "EDM", "ano": "2º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "JULIANA MENDES FERREIRA FUKUDA", "escola": "ESTHER", "disciplina": "EDM", "ano": "1º", "turma": "A", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "LANA MARA FIOCO DOS SANTOS", "escola": "PADRE", "disciplina": "EDM", "ano": "4º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "LARISSA DANIELE DIAS", "escola": "ALZIRA", "disciplina": "EDM", "ano": "N/A", "turma": "N/A", "turno": "N/A", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "LEILA APARECIDA MILAN BARBOZA", "escola": "ANNA", "disciplina": "EDM", "ano": "1º", "turma": "D", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "LETÍCIA NARA PIRES", "escola": "ANNA", "disciplina": "EDM", "ano": "N/A", "turma": "N/A", "turno": "N/A", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "LOURDES RAYMUNDINI DA SILVA", "escola": "ALZIRA", "disciplina": "EDM", "ano": "2º", "turma": "D", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "LÚCIA HELENA SAQUETO G. GONÇALVES", "escola": "ANNA", "disciplina": "EDM", "ano": "3º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "LUCIANA PAULA LEMES", "escola": "ALZIRA", "disciplina": "EDM", "ano": "3º", "turma": "C", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "MARCELA YARA V. L. RAYMUNDO A. CARNEIRO", "escola": "ANNA", "disciplina": "EDM", "ano": "5º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "MARIANA R. DE FARIA EVANGELISTA", "escola": "BRAGA", "disciplina": "EDM", "ano": "4º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "MARLENE APARECIDA BARBOSA DUARTE", "escola": "CAIC", "disciplina": "EDM", "ano": "N/A", "turma": "N/A", "turno": "INTEGRAL", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "MARTA LUZIA PACHETI", "escola": "ALZIRA", "disciplina": "EDM", "ano": "5º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "MARTA VIEIRA ALVES", "escola": "ESTHER", "disciplina": "EDM", "ano": "2º", "turma": "B", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "MICHELLE CRISTINA SILVA", "escola": "ESTHER", "disciplina": "EDM", "ano": "2º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "NAYRA RODRIGUES OLIVÉRIO CAMPI", "escola": "ANNA", "disciplina": "EDM", "ano": "3º", "turma": "B", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "NEUSA HELENA DE CASTRO GALANTI", "escola": "ALZIRA", "disciplina": "EDM", "ano": "4º", "turma": "E", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "PATRÍCIA ALEIXO SILVA de OLIVEIRA", "escola": "ALZIRA", "disciplina": "EDM", "ano": "N/A", "turma": "N/A", "turno": "N/A", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "PATRÍCIA CORSINI COSTA", "escola": "ALZIRA", "disciplina": "EDM", "ano": "3º", "turma": "B", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "PRISCILA BRONDI ANHEZINI IVAN", "escola": "BRAGA", "disciplina": "EDM", "ano": "1º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "ROSANA APARECIDA DA SILVA", "escola": "BRAGA", "disciplina": "EDM", "ano": "4º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "SUELLEN FRANCINE DA SILVA e SILVA", "escola": "ANNA", "disciplina": "EDM", "ano": "1º", "turma": "C", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "TALUANA BARBOSA PEREIRA", "escola": "BRAGA", "disciplina": "EDM", "ano": "2º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "TATIANA DA SILVA LEMOS", "escola": "ALZIRA", "disciplina": "EDM", "ano": "N/A", "turma": "N/A", "turno": "N/A", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "VANESSA BORELLI DOS SANTOS", "escola": "PADRE", "disciplina": "EDM", "ano": "1º", "turma": "N/A", "turno": "N/A", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "VERENA DE FÁTIMA CARVALHO", "escola": "PADRE", "disciplina": "EDM", "ano": "2º", "turma": "A", "turno": "MANHÃ", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true },
+                { "nome": "VIVIANE TOMAZ BANACO", "escola": "ALZIRA", "disciplina": "EDM", "ano": "4º", "turma": "D", "turno": "TARDE", "telefone": "(00) 00000-0000", "presenca_2026_05_06": true }
+            ]
+        };
+
+        // Extrair escolas e disciplinas únicas para os filtros
+        const allSchools = [...new Set(jsonData.professores.map(p => p.escola))].sort();
+        const allDisciplines = [...new Set(jsonData.professores.map(p => p.disciplina))].sort();
+
+        const professoresListDiv = document.getElementById('professores-list');
+        const searchInput = document.getElementById('search-input');
+        const schoolFilter = document.getElementById('school-filter');
+        const disciplineFilter = document.getElementById('discipline-filter');
+        const paginationDiv = document.getElementById('pagination');
+
+        // Configuração de ordenação inicial
+        let sortConfig = {
+            key: 'nome',
+            direction: 'asc'
+        };
+
+        // Configuração de paginação
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        // Preencher os filtros de escola
+        allSchools.forEach(school => {
+            const option = document.createElement('option');
+            option.value = school;
+            option.textContent = school;
+            schoolFilter.appendChild(option);
+        });
+
+        // Preencher os filtros de disciplina
+        allDisciplines.forEach(discipline => {
+            const option = document.createElement('option');
+            option.value = discipline;
+            option.textContent = discipline;
+            disciplineFilter.appendChild(option);
+        });
+
+        // Função para alterar a ordenação
+        window.setSort = (key) => {
+            if (sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = key;
+                sortConfig.direction = 'asc';
+            }
+            renderTable();
+        };
+
+        function renderPagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / rowsPerPage);
+            paginationDiv.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = 'Anterior';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => { currentPage--; renderTable(); };
+            paginationDiv.appendChild(prevBtn);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === currentPage) btn.classList.add('active');
+                btn.onclick = () => { currentPage = i; renderTable(); };
+                paginationDiv.appendChild(btn);
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Próximo';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => { currentPage++; renderTable(); };
+            paginationDiv.appendChild(nextBtn);
+        }
+
+        function renderTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedSchool = schoolFilter.value;
+            const selectedDisciplina = disciplineFilter.value;
+
+            const filteredProfessores = jsonData.professores.filter(professor => {
+                const matchesSearch = (
+                    professor.nome.toLowerCase().includes(searchTerm) ||
+                    professor.escola.toLowerCase().includes(searchTerm) ||
+                    professor.disciplina.toLowerCase().includes(searchTerm) ||
+                    professor.ano.toLowerCase().includes(searchTerm) ||
+                    professor.turma.toLowerCase().includes(searchTerm) ||
+                    professor.turno.toLowerCase().includes(searchTerm)
+                );
+
+                const matchesSchool = selectedSchool === '' || professor.escola === selectedSchool;
+                const matchesDiscipline = selectedDisciplina === '' || professor.disciplina === selectedDisciplina;
+
+                return matchesSearch && matchesSchool && matchesDiscipline;
+            });
+
+            // Lógica de Ordenação
+            filteredProfessores.sort((a, b) => {
+                let valA = a[sortConfig.key];
+                let valB = b[sortConfig.key];
+
+                if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            // Lógica de Paginação: fatiar os resultados
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedItems = filteredProfessores.slice(start, end);
+
+            if (paginatedItems.length > 0) {
+                const headers = [
+                    { label: 'Nome', key: 'nome' },
+                    { label: 'Escola', key: 'escola' },
+                    { label: 'Disciplina', key: 'disciplina' },
+                    { label: 'Ano', key: 'ano' },
+                    { label: 'Turma', key: 'turma' },
+                    { label: 'Turno', key: 'turno' },
+                    { label: 'Telefone', key: 'telefone' },
+                    { label: 'Presença (06/05/2026)', key: 'presenca_2026_05_06' }
+                ];
+
+                let tableHTML = '<table>';
+                tableHTML += '<thead><tr>';
+                headers.forEach(h => {
+                    const icon = sortConfig.key === h.key ? (sortConfig.direction === 'asc' ? ' ▴' : ' ▾') : '';
+                    tableHTML += `<th onclick="setSort('${h.key}')">${h.label}${icon}</th>`;
+                });
+                tableHTML += '</tr></thead>';
+                tableHTML += '<tbody>';
+
+                paginatedItems.forEach(professor => {
+                    const presencaClass = professor.presenca_2026_05_06 ? 'badge-presente' : 'badge-ausente';
+                    const presencaText = professor.presenca_2026_05_06 ? 'Presente' : 'Ausente';
+
+                    tableHTML += '<tr>';
+                    tableHTML += `<td><strong>${professor.nome}</strong></td>`;
+                    tableHTML += `<td>${professor.escola}</td>`;
+                    tableHTML += `<td>${professor.disciplina}</td>`;
+                    tableHTML += `<td>${professor.ano}</td>`;
+                    tableHTML += `<td>${professor.turma}</td>`;
+                    tableHTML += `<td>${professor.turno}</td>`;
+                    tableHTML += `<td>${professor.telefone}</td>`;
+                    tableHTML += `<td><span class="badge ${presencaClass}">${presencaText}</span></td>`;
+                    tableHTML += '</tr>';
+                });
+
+                tableHTML += '</tbody></table>';
+                professoresListDiv.innerHTML = tableHTML;
+            } else {
+                professoresListDiv.innerHTML = '<p>Nenhum professor encontrado com os critérios de busca e filtro.</p>';
+            }
+
+            renderPagination(filteredProfessores.length);
+        }
+
+        const resetAndRender = () => {
+            currentPage = 1;
+            renderTable();
+        };
+
+        // Adicionar event listeners para os filtros
+        searchInput.addEventListener('input', resetAndRender);
+        schoolFilter.addEventListener('change', resetAndRender);
+        disciplineFilter.addEventListener('change', resetAndRender);
+
+        // Renderizar a tabela inicialmente
+        renderTable();
+    </script>
+</body>
+</html>

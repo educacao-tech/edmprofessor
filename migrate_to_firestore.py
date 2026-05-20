@@ -22,7 +22,7 @@ def setup_firestore():
 
     if not cred_path.exists():
         logger.error(f"Arquivo de credenciais não encontrado em: {cred_path}")
-        logger.info("Dica: Defina a variável FIREBASE_SERVICE_ACCOUNT_JSON com o caminho do seu arquivo .json.")
+        logger.info("Dica: Use a variável FIREBASE_SERVICE_ACCOUNT_JSON. Nunca envie o arquivo .json para o GitHub.")
         return None
     
     cred = credentials.Certificate(str(cred_path))
@@ -55,8 +55,10 @@ def migrate():
             # Reutilizamos sua lógica de processamento e validação
             processed = processar_professor(prof_data)
             if processed:
-                # Criar um ID determinístico baseado no nome para evitar duplicatas
-                doc_id = hashlib.md5(processed['nome'].encode()).hexdigest()
+                # Criar um ID determinístico baseado no nome e escola para evitar colisões
+                unique_string = f"{processed['nome']}_{processed.get('escola', '')}"
+                doc_id = hashlib.md5(unique_string.encode()).hexdigest()
+                
                 doc_ref = db.collection('professores').document(doc_id)
                 
                 batch.set(doc_ref, processed)

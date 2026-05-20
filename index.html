@@ -336,6 +336,26 @@
         .btn-primary { background: var(--primary-color); color: white; }
         .btn-secondary { background: var(--border-color); color: var(--text-color); }
         .btn-danger { background: var(--danger-color); color: white; }
+
+        .social-login {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+        .btn-social:hover { background-color: var(--bg-color); }
         
         .action-btns {
             display: flex;
@@ -361,9 +381,49 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        /* Sistema de Notificações (Toasts) */
+        #notification-area {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .notification {
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+            min-width: 280px;
+            pointer-events: auto;
+        }
+
+        .notification.success { background-color: var(--success-color); }
+        .notification.danger { background-color: var(--danger-color); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
     </style>
 </head>
 <body>
+    <div id="notification-area"></div>
     <div class="container">
         <div class="theme-switch-wrapper" style="display: flex; gap: 10px;">
             <button id="auth-toggle" onclick="handleAuthClick()" title="Login Administrativo"><i class="fas fa-sign-in-alt"></i> Login</button>
@@ -489,6 +549,11 @@
                     <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Entrar</button>
                 </div>
+                <div class="social-login">
+                    <p style="text-align: center; font-size: 0.8em; color: var(--text-secondary);">Ou entre com</p>
+                    <button type="button" class="btn btn-social" onclick="loginSocial('google')"><i class="fab fa-google" style="color: #ea4335;"></i> Google</button>
+                    <button type="button" class="btn btn-social" onclick="loginSocial('github')"><i class="fab fa-github"></i> GitHub</button>
+                </div>
             </form>
         </div>
     </div>
@@ -497,7 +562,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, getDoc, addDoc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, GithubAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
 
         // Cole aqui as configurações do seu projeto Firebase Console
@@ -531,6 +596,20 @@
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
+
+        // Função para exibir notificações amigáveis na tela
+        window.showNotification = (message, type = 'success') => {
+            const area = document.getElementById('notification-area');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation';
+            notification.innerHTML = `<i class="fas ${icon}"></i> <span>${escapeHTML(message)}</span>`;
+            area.appendChild(notification);
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => notification.remove(), 500);
+            }, 3500);
+        };
 
         // Lógica de Dark Mode
         const themeToggle = document.getElementById('theme-toggle');
@@ -591,14 +670,40 @@
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
                 closeLoginModal();
+                window.showNotification("Bem-vindo! Acesso administrativo liberado.");
             } catch (error) {
                 console.error("Erro Técnico Firebase:", error.code); // Isso aparecerá no F12
-                alert(`Falha no login: ${error.code}\nVerifique se o e-mail/senha estão corretos e se o provedor está ativo no console.`);
+                window.showNotification(`Falha no login: ${error.code}`, 'danger');
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Entrar';
             }
         });
+
+        window.loginSocial = async (providerName) => {
+            let provider;
+            if (providerName === 'google') {
+                provider = new GoogleAuthProvider();
+            } else if (providerName === 'github') {
+                provider = new GithubAuthProvider();
+            }
+
+            try {
+                const result = await signInWithPopup(auth, provider);
+                // Você pode acessar informações do usuário aqui: result.user
+                closeLoginModal();
+                window.showNotification(`Bem-vindo, ${result.user.displayName || 'Administrador'}!`);
+            } catch (error) {
+                console.error("Erro no login social:", error);
+                let msg = "Falha na autenticação.";
+                if (error.code === 'auth/account-exists-with-different-credential') {
+                    msg = "Um usuário já existe com este e-mail usando outro provedor.";
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    return; // Ignora se o usuário apenas fechou a janela
+                }
+                window.showNotification(msg, 'danger');
+            }
+        };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -716,14 +821,16 @@
             try {
                 if (id) {
                     await updateDoc(doc(db, "professores", id), profData);
+                    window.showNotification("Professor atualizado com sucesso!");
                 } else {
                     // Adicionar nova chave de presença padrão para novos cadastros
                     if (presencaKey) profData[presencaKey] = false;
                     await addDoc(collection(db, "professores"), profData);
+                    window.showNotification("Novo professor cadastrado!");
                 }
                 closeProfessorModal();
             } catch (error) {
-                alert("Erro ao salvar: " + error.message);
+                window.showNotification("Erro ao salvar: " + error.message, 'danger');
             }
         });
 
@@ -731,8 +838,9 @@
             if (confirm(`Tem certeza que deseja excluir o(a) professor(a) ${nome}?`)) {
                 try {
                     await deleteDoc(doc(db, "professores", id));
+                    window.showNotification(`Professor(a) ${nome} removido(a).`);
                 } catch (error) {
-                    alert("Erro ao excluir: " + error.message);
+                    window.showNotification("Erro ao excluir: " + error.message, 'danger');
                 }
             }
         };
@@ -752,8 +860,9 @@
                 jsonData[type] = updatedList;
                 // Atualizar UI dos filtros
                 initFilters();
+                window.showNotification(`${type === 'escolas' ? 'Escola' : 'Disciplina'} adicionada com sucesso!`);
             } catch (error) {
-                alert("Erro ao atualizar lista: " + error.message);
+                window.showNotification("Erro ao atualizar lista: " + error.message, 'danger');
             }
         };
 
