@@ -292,12 +292,35 @@
         }
 
         .modal-content {
+            position: relative;
             background-color: var(--card-bg);
             margin: 5% auto;
             padding: 30px;
             border-radius: 12px;
             max-width: 500px;
             box-shadow: var(--shadow);
+        }
+
+        .modal-success-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--card-bg);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            border-radius: 12px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-success-overlay i {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 15px;
         }
 
         .modal-header {
@@ -332,6 +355,11 @@
             border: none;
             transition: 0.2s;
         }
+
+        .btn i { margin-right: 8px; }
+        .btn-loading { pointer-events: none; opacity: 0.7; }
+        
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); }
 
         .btn-primary { background: var(--primary-color); color: white; }
         .btn-secondary { background: var(--border-color); color: var(--text-color); }
@@ -478,6 +506,10 @@
     <!-- Modal Professor -->
     <div id="professorModal" class="modal">
         <div class="modal-content">
+            <div id="modalSuccessOverlay" class="modal-success-overlay">
+                <i class="fas fa-check-circle"></i>
+                <h3 id="modalSuccessMessage">Sucesso!</h3>
+            </div>
             <div class="modal-header">
                 <h2 id="modalTitle">Novo Professor</h2>
                 <span style="cursor:pointer" onclick="closeProfessorModal()">&times;</span>
@@ -609,6 +641,12 @@
                 notification.style.animation = 'fadeOut 0.5s forwards';
                 setTimeout(() => notification.remove(), 500);
             }, 3500);
+        };
+
+        // Máscara para Telefone (00) 00000-0000
+        const applyPhoneMask = (value) => {
+            if (!value) return "";
+            return value.replace(/\D/g, '').replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2").replace(/(-\d{4})\d+?$/, "$1");
         };
 
         // Lógica de Dark Mode
@@ -775,14 +813,24 @@
 
         window.openProfessorModal = (profId = null) => {
             professorForm.reset();
+            // Garante que o overlay de sucesso esteja escondido ao abrir
+            document.getElementById('modalSuccessOverlay').style.display = 'none';
+            
             document.getElementById('prof-id').value = profId || '';
             document.getElementById('modalTitle').textContent = profId ? 'Editar Professor' : 'Novo Professor';
             
+            const submitBtn = professorForm.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = profId ? '<i class="fas fa-save"></i> Atualizar' : '<i class="fas fa-plus"></i> Cadastrar';
+
             // Popular selects do modal
             const schoolSelect = document.getElementById('prof-escola');
             const discSelect = document.getElementById('prof-disciplina');
-            schoolSelect.innerHTML = jsonData.escolas.map(s => `<option value="${s}">${s}</option>`).join('');
-            discSelect.innerHTML = jsonData.disciplinas.map(d => `<option value="${d}">${d}</option>`).join('');
+            
+            schoolSelect.innerHTML = '<option value="" disabled selected>Selecione a Escola</option>' + 
+                jsonData.escolas.map(s => `<option value="${s}">${s}</option>`).join('');
+            
+            discSelect.innerHTML = '<option value="" disabled selected>Selecione a Disciplina</option>' + 
+                jsonData.disciplinas.map(d => `<option value="${d}">${d}</option>`).join('');
 
             if (profId) {
                 const prof = jsonData.professores.find(p => p.id === profId);
@@ -799,12 +847,24 @@
             professorModal.style.display = 'block';
         };
 
+        // Event listener para a máscara de telefone
+        document.getElementById('prof-telefone').addEventListener('input', (e) => {
+            e.target.value = applyPhoneMask(e.target.value);
+        });
+
         window.closeProfessorModal = () => {
             professorModal.style.display = 'none';
         };
 
         professorForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalContent = submitBtn.innerHTML;
+            
+            submitBtn.disabled = true;
+            submitBtn.classList.add('btn-loading');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+
             const id = document.getElementById('prof-id').value;
             
             const profData = {
@@ -821,16 +881,28 @@
             try {
                 if (id) {
                     await updateDoc(doc(db, "professores", id), profData);
-                    window.showNotification("Professor atualizado com sucesso!");
                 } else {
                     // Adicionar nova chave de presença padrão para novos cadastros
                     if (presencaKey) profData[presencaKey] = false;
                     await addDoc(collection(db, "professores"), profData);
-                    window.showNotification("Novo professor cadastrado!");
                 }
-                closeProfessorModal();
+                
+                // Exibe confirmação visual dentro do modal
+                const overlay = document.getElementById('modalSuccessOverlay');
+                const successMsg = document.getElementById('modalSuccessMessage');
+                successMsg.textContent = id ? "Professor atualizado!" : "Professor cadastrado!";
+                overlay.style.display = 'flex';
+                
+                // Aguarda 1.5 segundos para o usuário ver a confirmação antes de fechar
+                setTimeout(() => {
+                    closeProfessorModal();
+                }, 1500);
             } catch (error) {
                 window.showNotification("Erro ao salvar: " + error.message, 'danger');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.innerHTML = originalContent;
             }
         });
 
@@ -909,6 +981,7 @@
 
         // Função para alterar a ordenação
         window.setSort = (key) => {
+            if (key === 'actions') return; // Não ordenar pela coluna de ações
             if (sortConfig.key === key) {
                 sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
             } else {
@@ -1014,14 +1087,15 @@
                     let tableHTML = '<table>';
                     tableHTML += '<thead><tr>';
                     headers.forEach(h => {
-                        let icon = (h.key !== 'actions' && h.key !== 'presenca') ? '<i class="fas fa-sort" style="opacity: 0.2; margin-left: 5px;"></i>' : '';
+                        let icon = (h.key !== 'actions') ? '<i class="fas fa-sort" style="opacity: 0.2; margin-left: 5px;"></i>' : '';
                         if (sortConfig.key === h.key) {
                             icon = sortConfig.direction === 'asc' 
                                 ? ' <i class="fas fa-sort-up" style="margin-left: 5px;"></i>' 
                                 : ' <i class="fas fa-sort-down" style="margin-left: 5px;"></i>';
                         }
                         let adminClass = h.key === 'actions' ? 'admin-only' : '';
-                        tableHTML += `<th onclick="setSort('${h.key}')" class="${adminClass}">${h.label}${icon}</th>`;
+                        let style = h.key === 'actions' ? 'style="cursor: default;"' : '';
+                        tableHTML += `<th onclick="setSort('${h.key}')" class="${adminClass}" ${style}>${h.label}${icon}</th>`;
                     });
                     tableHTML += '</tr></thead><tbody>';
 
