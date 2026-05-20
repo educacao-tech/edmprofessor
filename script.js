@@ -610,6 +610,13 @@ const ModalManager = {
         modalElement.classList.add("hidden");
         document.body.style.overflow = "";
         if (onCloseCallback) onCloseCallback();
+    },
+    closeAll: function() {
+        const modals = [registrationSection, schoolModalSection, disciplineModalSection, columnModalSection, confirmModalSection, attendanceModalSection];
+        modals.forEach(modal => {
+            if (modal) modal.classList.add("hidden");
+        });
+        document.body.style.overflow = "";
     }
 };
 
@@ -989,16 +996,13 @@ function editProfessor(index) {
     document.getElementById("turno").value = professorToEdit.turno || "";
     document.getElementById("telefone").value = professorToEdit.telefone || ""; // Fallback para campo vazio
 
-    if (registrationSection) {
-        registrationSection.classList.remove("hidden");
-        document.body.style.overflow = "hidden"; // Trava o scroll da página
-        setTimeout(() => document.getElementById("nome").focus(), 100);
-
+    ModalManager.open(registrationSection, () => {
+        setTimeout(() => nomeInput && nomeInput.focus(), 100);
         // Dispara a validação visual ao carregar os dados para edição
         [nomeInput, escolaInput, disciplinaInput, anoInput, turmaInput, turnoInput, telefoneInput].forEach(input => {
             if (input) input.dispatchEvent(new Event('input'));
         });
-    }
+    });
 
     if (submitButton) {
         submitButton.textContent = "Atualizar Professor";
