@@ -5,64 +5,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Professores</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
+        :root {
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #2d3436;
+            --border-color: #dfe6e9;
+            --success-color: #27ae60;
+            --danger-color: #d63031;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
         h1 {
-            color: #0056b3;
+            color: var(--primary-hover);
             text-align: center;
             margin-bottom: 30px;
+            font-weight: 300;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            background-color: #fff;
-        }
-        th, td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #e9e9e9;
-        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
         }
+
         .filters {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 20px;
             align-items: center;
+            padding: 20px;
+            background-color: #f1f3f5;
+            border-radius: 8px;
         }
+
         .filters label {
-            font-weight: bold;
-            margin-right: 5px;
+            font-weight: 600;
+            font-size: 0.9em;
         }
+
         .filters input[type="text"],
         .filters select {
-            padding: 8px;
-            border: 1px solid #ccc;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .filters input[type="text"]:focus,
+        .filters select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-bg);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            background-color: var(--primary-hover);
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: white;
+            display: inline-block;
+        }
+
+        .badge-presente {
+            background-color: var(--success-color);
+        }
+
+        .badge-ausente {
+            background-color: var(--danger-color);
+        }
+
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            cursor: pointer;
             border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background-color: #f1f3f5;
+            border-color: var(--primary-color);
+        }
+
+        .pagination button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -83,9 +180,10 @@
                 <option value="">Todas</option>
             </select>
         </div>
-        <div id="professores-list">
+        <div id="professores-list" class="table-responsive">
             <!-- A lista de professores será carregada aqui pelo JavaScript -->
         </div>
+        <div id="pagination" class="pagination"></div>
     </div>
 
     <script>
@@ -154,6 +252,17 @@
         const searchInput = document.getElementById('search-input');
         const schoolFilter = document.getElementById('school-filter');
         const disciplineFilter = document.getElementById('discipline-filter');
+        const paginationDiv = document.getElementById('pagination');
+
+        // Configuração de ordenação inicial
+        let sortConfig = {
+            key: 'nome',
+            direction: 'asc'
+        };
+
+        // Configuração de paginação
+        let currentPage = 1;
+        const rowsPerPage = 10;
 
         // Preencher os filtros de escola
         allSchools.forEach(school => {
@@ -170,6 +279,44 @@
             option.textContent = discipline;
             disciplineFilter.appendChild(option);
         });
+
+        // Função para alterar a ordenação
+        window.setSort = (key) => {
+            if (sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = key;
+                sortConfig.direction = 'asc';
+            }
+            renderTable();
+        };
+
+        function renderPagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / rowsPerPage);
+            paginationDiv.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = 'Anterior';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => { currentPage--; renderTable(); };
+            paginationDiv.appendChild(prevBtn);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === currentPage) btn.classList.add('active');
+                btn.onclick = () => { currentPage = i; renderTable(); };
+                paginationDiv.appendChild(btn);
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Próximo';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => { currentPage++; renderTable(); };
+            paginationDiv.appendChild(nextBtn);
+        }
 
         function renderTable() {
             const searchTerm = searchInput.value.toLowerCase();
@@ -192,21 +339,57 @@
                 return matchesSearch && matchesSchool && matchesDiscipline;
             });
 
+            // Lógica de Ordenação
+            filteredProfessores.sort((a, b) => {
+                let valA = a[sortConfig.key];
+                let valB = b[sortConfig.key];
+
+                if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
             if (filteredProfessores.length > 0) {
+            // Lógica de Paginação: fatiar os resultados
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedItems = filteredProfessores.slice(start, end);
+
+            if (paginatedItems.length > 0) {
+                const headers = [
+                    { label: 'Nome', key: 'nome' },
+                    { label: 'Escola', key: 'escola' },
+                    { label: 'Disciplina', key: 'disciplina' },
+                    { label: 'Ano', key: 'ano' },
+                    { label: 'Turma', key: 'turma' },
+                    { label: 'Turno', key: 'turno' },
+                    { label: 'Telefone', key: 'telefone' },
+                    { label: 'Presença (06/05/2026)', key: 'presenca_2026_05_06' }
+                ];
+
                 let tableHTML = '<table>';
-                tableHTML += '<thead><tr><th>Nome</th><th>Escola</th><th>Disciplina</th><th>Ano</th><th>Turma</th><th>Turno</th><th>Telefone</th><th>Presença (06/05/2026)</th></tr></thead>';
+                tableHTML += '<thead><tr>';
+                headers.forEach(h => {
+                    const icon = sortConfig.key === h.key ? (sortConfig.direction === 'asc' ? ' ▴' : ' ▾') : '';
+                    tableHTML += `<th onclick="setSort('${h.key}')">${h.label}${icon}</th>`;
+                });
+                tableHTML += '</tr></thead>';
                 tableHTML += '<tbody>';
 
                 filteredProfessores.forEach(professor => {
+                paginatedItems.forEach(professor => {
+                    const presencaClass = professor.presenca_2026_05_06 ? 'badge-presente' : 'badge-ausente';
+                    const presencaText = professor.presenca_2026_05_06 ? 'Presente' : 'Ausente';
+
                     tableHTML += '<tr>';
-                    tableHTML += `<td>${professor.nome}</td>`;
+                    tableHTML += `<td><strong>${professor.nome}</strong></td>`;
                     tableHTML += `<td>${professor.escola}</td>`;
                     tableHTML += `<td>${professor.disciplina}</td>`;
                     tableHTML += `<td>${professor.ano}</td>`;
                     tableHTML += `<td>${professor.turma}</td>`;
                     tableHTML += `<td>${professor.turno}</td>`;
                     tableHTML += `<td>${professor.telefone}</td>`;
-                    tableHTML += `<td>${professor.presenca_2026_05_06 ? 'Presente' : 'Ausente'}</td>`;
+                    tableHTML += `<td><span class="badge ${presencaClass}">${presencaText}</span></td>`;
                     tableHTML += '</tr>';
                 });
 
@@ -215,12 +398,22 @@
             } else {
                 professoresListDiv.innerHTML = '<p>Nenhum professor encontrado com os critérios de busca e filtro.</p>';
             }
+
+            renderPagination(filteredProfessores.length);
         }
+
+        const resetAndRender = () => {
+            currentPage = 1;
+            renderTable();
+        };
 
         // Adicionar event listeners para os filtros
         searchInput.addEventListener('input', renderTable);
         schoolFilter.addEventListener('change', renderTable);
         disciplineFilter.addEventListener('change', renderTable);
+        searchInput.addEventListener('input', resetAndRender);
+        schoolFilter.addEventListener('change', resetAndRender);
+        disciplineFilter.addEventListener('change', resetAndRender);
 
         // Renderizar a tabela inicialmente
         renderTable();
