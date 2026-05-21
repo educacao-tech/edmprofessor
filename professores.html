@@ -87,12 +87,22 @@
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            transition: box-shadow 0.2s ease;
+        }
+
+        td:hover {
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.06);
+        }
+
+        th:last-child, td:last-child {
+            border-right: none;
         }
 
         th {
-            background-color: var(--primary-color);
+            background-color: var(--primary-hover); /* Um tom um pouco mais escuro para diferenciar */
             color: white;
-            font-weight: 500;
+            font-weight: 600; /* Aumentado para mais destaque */
             cursor: pointer;
             user-select: none;
             transition: background-color 0.2s;
@@ -102,13 +112,14 @@
         th:hover {
             background-color: var(--primary-hover);
         }
-
+        
         tr:nth-child(even) {
-            background-color: #fafafa;
+            background-color: #f2f2f2;
         }
 
         tr:hover {
-            background-color: #f1f3f5;
+            background-color: rgba(0, 123, 255, 0.08);
+            transition: background-color 0.15s ease;
         }
 
         .badge {

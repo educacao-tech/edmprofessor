@@ -4,21 +4,30 @@ import time
 import logging
 from pathlib import Path
 import argparse
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field, ValidationError
+from typing import List, Dict, Any, Optional, Literal
+from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
 # --- Modelos Pydantic para Validação de Dados ---
 class ProfessorModel(BaseModel):
-    nome: str
-    escola: str
-    disciplina: str
-    ano: str
+    nome: str = Field(..., min_length=3)
+    escola: str = Field(..., min_length=2)
+    disciplina: str = Field(..., min_length=2)
+    ano: str 
     turma: str
-    turno: str
+    turno: Literal["MANHÃ", "TARDE", "INTEGRAL", "NOITE", "N/A"]
     telefone: Optional[str] = Field(default=None, pattern=r"^\(\d{2}\) \d{5}-\d{4}$") # Telefone pode ser None, e o padrão só se aplica se não for None
+
+    @field_validator('nome', 'escola', 'disciplina', 'ano', 'turma', 'turno', mode='before')
+    @classmethod
+    def normalize_strings(cls, v):
+        """Garante que strings sejam limpas e fiquem em maiúsculo para consistência."""
+        if isinstance(v, str):
+            v = v.strip().upper()
+            return v if v != "" else "N/A"
+        return v
 
     # Pydantic v2: Permite campos dinâmicos (como as chaves de presença)
     model_config = {
@@ -54,11 +63,12 @@ def processar_professor(professor_data: Dict[str, Any]) -> Optional[Dict[str, An
 def main():
     # --- Configuração de Argumentos de Linha de Comando ---
     parser = argparse.ArgumentParser(description="Processa dados de professores em paralelo.")
+    default_path = Path(__file__).parent / 'backup_professores_2026-05-18.json'
     parser.add_argument(
         '--input_file', 
         type=str, 
-        default=r'c:\Users\server\OneDrive\Documentos\GitHub\edmprofessor\backup_professores_2026-05-18.json',
-        help="Caminho para o arquivo JSON de entrada com os dados dos professores."
+        default=str(default_path),
+        help=f"Caminho para o arquivo JSON de entrada (padrão: {default_path.name})"
     )
     args = parser.parse_args()
     caminho_arquivo = Path(args.input_file)

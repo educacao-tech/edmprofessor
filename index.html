@@ -16,6 +16,7 @@
             --success-color: #27ae60;
             --danger-color: #d63031;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --zebra-bg: rgba(0, 0, 0, 0.035);
         }
 
         html[data-theme="dark"] {
@@ -26,6 +27,7 @@
             --primary-color: #3791f9;
             --primary-hover: #56a2f9;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            --zebra-bg: rgba(255, 255, 255, 0.035);
         }
 
         body {
@@ -142,6 +144,7 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             outline: none;
+            text-transform: uppercase;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
@@ -185,18 +188,32 @@
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            transition: box-shadow 0.2s ease;
+        }
+
+        td:hover {
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.06);
+        }
+
+        html[data-theme="dark"] td:hover {
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.04);
+        }
+
+        th:last-child, td:last-child {
+            border-right: none;
         }
 
         th {
-            background-color: var(--card-bg); /* Fundo do cabeçalho da tabela, para que fique fixo e consistente */
-            color: var(--text-color);
+            background-color: var(--primary-color);
+            color: white;
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             position: sticky;
             top: 0;
             z-index: 10;
-            font-weight: 500;
+            font-weight: 600; /* Aumentado para mais destaque */
             cursor: pointer;
             user-select: none;
             transition: background-color 0.2s;
@@ -204,24 +221,7 @@
         }
 
         th:hover {
-            background-color: var(--border-color); /* Um pouco mais escuro no hover */
-            color: var(--text-color);
-        }
-
-        tr:nth-child(even) {
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-
-        table tbody tr:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-        
-        /* Ajustes para o modo escuro */
-        html[data-theme="dark"] th {
-            background-color: #2a2a2a; /* Fundo escuro para o cabeçalho no dark mode */
-        }
-        html[data-theme="dark"] th:hover {
-            background-color: #3a3a3a; /* Hover mais escuro no dark mode */
+            background-color: var(--primary-hover);
         }
 
         .badge {
@@ -235,6 +235,20 @@
             align-items: center;
             gap: 6px;
             white-space: nowrap;
+            transition: transform 0.1s ease-in-out, filter 0.2s;
+        }
+
+        body.is-admin .badge {
+            cursor: pointer;
+        }
+
+        body.is-admin .badge:hover {
+            filter: brightness(1.1);
+            transform: scale(1.05);
+        }
+
+        body.is-admin .badge:active {
+            transform: scale(0.95);
         }
 
         .badge-presente {
@@ -360,6 +374,10 @@
         .btn-loading { pointer-events: none; opacity: 0.7; }
         
         .form-group input:focus, .form-group select:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); }
+
+        .form-group input {
+            text-transform: uppercase;
+        }
 
         .btn-primary { background: var(--primary-color); color: white; }
         .btn-secondary { background: var(--border-color); color: var(--text-color); }
@@ -751,6 +769,7 @@
                 document.body.classList.remove('is-admin');
                 document.getElementById('auth-toggle').innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
             }
+            if (jsonData.professores.length > 0) renderTable();
         });
 
         let jsonData = { professores: [], escolas: [], disciplinas: [] };
@@ -758,17 +777,19 @@
         let presencaDateFormatted = ''; // Data formatada para o cabeçalho da tabela
 
         function extractPresenceInfo(professores) {
-            if (professores.length > 0) {
-                const firstProfessor = professores[0];
-                for (const key in firstProfessor) {
-                    if (key.startsWith('presenca_')) {
-                        presencaKey = key;
-                        const datePart = key.replace('presenca_', ''); // e.g., "2026_05_06"
-                        const [year, month, day] = datePart.split('_');
-                        presencaDateFormatted = `${day}/${month}/${year}`;
-                        break;
-                    }
-                }
+            if (!professores || professores.length === 0) return;
+            
+            // Tenta encontrar a chave de presença mais recente disponível nos dados
+            const foundKey = professores.reduce((acc, prof) => {
+                if (acc) return acc;
+                return Object.keys(prof).find(k => k.startsWith('presenca_'));
+            }, null);
+
+            if (foundKey) {
+                presencaKey = foundKey;
+                const datePart = foundKey.replace('presenca_', ''); 
+                const [year, month, day] = datePart.split('_');
+                presencaDateFormatted = `${day}/${month}/${year}`;
             }
         }
 
@@ -779,30 +800,43 @@
             onSnapshot(collection(db, "professores"), (snapshot) => {
                 if (snapshot.empty) {
                     professoresListDiv.innerHTML = '<p class="no-results-message"><i class="fas fa-database"></i> O banco de dados está vazio. Execute o script de migração.</p>';
+                    jsonData.professores = []; //
+                    renderTable(); //
                     return;
                 }
 
                 jsonData.professores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 // Atualizar metadados de presença baseado nos dados novos
-                extractPresenceInfo(jsonData.professores);
+                extractPresenceInfo(jsonData.professores); //
                 
                 // Re-inicializar filtros apenas se estiverem vazios
-                if (schoolFilter.options.length <= 1) initFilters();
+                // if (schoolFilter.options.length <= 1) initFilters(); // - Removido, initFilters será chamado pelo onSnapshot de configurações
                 
-                renderTable();
+                renderTable(); //
             }, (error) => {
-                console.error("Erro no Real-time:", error);
-                professoresListDiv.innerHTML = `<p class="no-results-message"><i class="fas fa-shield-alt"></i> Erro de Permissão: Verifique as Regras do Firestore.<br><small>${error.message}</small></p>`;
+                console.error("Erro no Real-time de Professores:", error); //
+                window.showNotification(`Erro de Permissão ou Conexão: ${error.message}`, 'danger'); //
+                professoresListDiv.innerHTML = `<p class="no-results-message"><i class="fas fa-shield-alt"></i> Erro de Permissão: Verifique as Regras do Firestore.<br><small>${escapeHTML(error.message)}</small></p>`; //
             });
 
-            // 2. Carregar Configurações (Uma única vez ou Snapshot)
-            getDoc(doc(db, "configuracoes", "geral")).then(configSnap => {
+            // 2. Ouvinte em tempo real para Configurações (se desejar atualizações em tempo real)
+            onSnapshot(doc(db, "configuracoes", "geral"), (configSnap) => { //
                 if (configSnap.exists()) {
                     const configData = configSnap.data();
                     jsonData.escolas = configData.escolas;
                     jsonData.disciplinas = configData.disciplinas;
+                    initFilters(); // Re-inicializa os filtros quando as configurações mudam
+                    renderTable(); // Re-renderiza a tabela para garantir que os filtros atualizados sejam aplicados
+                } else { //
+                    jsonData.escolas = []; //
+                    jsonData.disciplinas = []; //
+                    initFilters(); //
+                    renderTable(); //
                 }
+            }, (error) => { //
+                console.error("Erro no Real-time de Configurações:", error); //
+                window.showNotification(`Erro ao carregar configurações: ${error.message}`, 'danger'); //
             });
         }
 
@@ -917,12 +951,42 @@
             }
         };
 
+        window.togglePresenca = async (id, currentStatus) => {
+            if (!auth.currentUser) {
+                window.showNotification("Acesso negado. Faça login para alterar a presença.", 'danger');
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "professores", id);
+                const newStatus = !currentStatus;
+                
+                await updateDoc(docRef, {
+                    [presencaKey]: newStatus,
+                    ultima_alteracao: new Date().toISOString()
+                });
+                
+                // Não é necessário chamar renderTable manualmente, pois o onSnapshot cuidará disso
+            } catch (error) {
+                console.error("Erro ao atualizar presença:", error);
+                window.showNotification("Erro ao atualizar presença.", 'danger');
+            }
+        };
+
         // Gerenciamento de Escolas/Disciplinas (Metadados)
         window.manageMetadata = async (type) => {
-            const newValue = prompt(`Digite o nome da nova ${type === 'escolas' ? 'Escola' : 'Disciplina'}:`);
-            if (!newValue) return;
+            const label = type === 'escolas' ? 'Escola' : 'Disciplina';
+            let newValue = prompt(`Digite o nome da nova ${label}:`);
+            
+            if (!newValue || newValue.trim() === "") return;
+            newValue = newValue.trim().toUpperCase();
 
-            const updatedList = [...jsonData[type], newValue.toUpperCase()].sort();
+            if (jsonData[type].includes(newValue)) {
+                window.showNotification(`${label} já existe na lista.`, 'danger');
+                return;
+            }
+
+            const updatedList = [...jsonData[type], newValue].sort();
             const updateObj = {};
             updateObj[type] = updatedList;
 
@@ -957,6 +1021,10 @@
         const rowsPerPage = 10;
 
         function initFilters() {
+            // Salva os valores selecionados atualmente para não perdê-los no refresh real-time
+            const currentSchool = schoolFilter.value;
+            const currentDiscipline = disciplineFilter.value;
+
             // Limpa as opções atuais para evitar duplicatas
             schoolFilter.innerHTML = '<option value="">Todas as Escolas</option>';
             disciplineFilter.innerHTML = '<option value="">Todas as Disciplinas</option>';
@@ -973,10 +1041,12 @@
             schools.forEach(school => {
                 schoolFilter.add(new Option(school, school));
             });
+            schoolFilter.value = currentSchool;
 
             disciplines.forEach(discipline => {
                 disciplineFilter.add(new Option(discipline, discipline));
             });
+            disciplineFilter.value = currentDiscipline;
         }
 
         // Função para alterar a ordenação
@@ -1035,13 +1105,15 @@
             const selectedDisciplina = disciplineFilter.value;
 
             const filteredProfessores = jsonData.professores.filter(professor => {
+                const safeVal = (val) => (val || "").toString().toLowerCase();
+                
                 const matchesSearch = (
-                    professor.nome.toLowerCase().includes(searchTerm) ||
-                    professor.escola.toLowerCase().includes(searchTerm) ||
-                    professor.disciplina.toLowerCase().includes(searchTerm) ||
-                    professor.ano.toLowerCase().includes(searchTerm) ||
-                    professor.turma.toLowerCase().includes(searchTerm) ||
-                    professor.turno.toLowerCase().includes(searchTerm)
+                    safeVal(professor.nome).includes(searchTerm) ||
+                    safeVal(professor.escola).includes(searchTerm) ||
+                    safeVal(professor.disciplina).includes(searchTerm) ||
+                    safeVal(professor.ano).includes(searchTerm) ||
+                    safeVal(professor.turma).includes(searchTerm) ||
+                    safeVal(professor.turno).includes(searchTerm)
                 );
 
                 const matchesSchool = selectedSchool === '' || professor.escola === selectedSchool;
@@ -1076,13 +1148,13 @@
                         { label: 'Ano', key: 'ano' },
                         { label: 'Turma', key: 'turma' },
                         { label: 'Turno', key: 'turno' },
-                        { label: 'Telefone', key: 'telefone' },
-                        { label: 'Ações', key: 'actions' }
+                        { label: 'Telefone', key: 'telefone' }
                         // A chave de presença será adicionada dinamicamente
                     ];
                     if (presencaKey && presencaDateFormatted) {
                         headers.push({ label: `Presença (${presencaDateFormatted})`, key: presencaKey });
                     }
+                    headers.push({ label: 'Ações', key: 'actions' });
 
                     let tableHTML = '<table>';
                     tableHTML += '<thead><tr>';
@@ -1109,10 +1181,15 @@
                         tableHTML += `<td>${escapeHTML(professor.turno)}</td>`;
                         tableHTML += `<td>${escapeHTML(professor.telefone)}</td>`;
                         if (presencaKey && professor[presencaKey] !== undefined) {
-                            const presencaClass = professor[presencaKey] ? 'badge-presente' : 'badge-ausente';
-                            const presencaText = professor[presencaKey] ? 'Presente' : 'Ausente';
-                            const presencaIcon = professor[presencaKey] ? 'fa-circle-check' : 'fa-circle-xmark';
-                            tableHTML += `<td><span class="badge ${presencaClass}"><i class="fas ${presencaIcon}"></i> ${escapeHTML(presencaText)}</span></td>`;
+                            const isPresent = professor[presencaKey];
+                            const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
+                            const presencaText = isPresent ? 'Presente' : 'Ausente';
+                            const presencaIcon = isPresent ? 'fa-circle-check' : 'fa-circle-xmark';
+                            
+                            const clickHandler = auth.currentUser ? `onclick="togglePresenca('${professor.id}', ${isPresent})"` : '';
+                            const tooltip = auth.currentUser ? 'title="Clique para alternar presença"' : '';
+                            
+                            tableHTML += `<td><span class="badge ${presencaClass}" ${clickHandler} ${tooltip}><i class="fas ${presencaIcon}"></i> ${escapeHTML(presencaText)}</span></td>`;
                         }
                         tableHTML += `<td class="admin-only">
                             <div class="action-btns">
@@ -1147,6 +1224,16 @@
         // Adicionar event listeners para os filtros
         // Usando debouncedRenderTable para otimizar a performance
         searchInput.addEventListener('input', debouncedRenderTable);
+
+        // Forçar maiúsculas nos campos de texto (UI e Valor)
+        const uppercaseFields = ['search-input', 'prof-nome', 'prof-ano', 'prof-turma'];
+        uppercaseFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase(); });
+            }
+        });
+
         schoolFilter.addEventListener('change', debouncedRenderTable);
         disciplineFilter.addEventListener('change', debouncedRenderTable);
 
