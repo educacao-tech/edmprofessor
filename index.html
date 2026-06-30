@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Professores</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --primary-color: #007bff;
@@ -417,6 +419,40 @@
         .action-btn:hover { color: var(--primary-color); }
         .action-btn.delete:hover { color: var(--danger-color); }
 
+        /* Dropdown de Ações */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: var(--card-bg);
+            min-width: 140px;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .dropdown-content button {
+            width: 100%;
+            text-align: left;
+            padding: 10px 15px;
+            border: none;
+            background: none;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+        .dropdown-content button:hover { background-color: var(--zebra-bg); color: var(--primary-color); }
+        .dropdown-content button.delete:hover { color: var(--danger-color); }
+        .show { display: block !important; }
+
         .pagination button.active {
             background-color: var(--primary-color);
             color: white;
@@ -479,7 +515,11 @@
             <h1>Lista de Professores</h1>
             <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                 <p style="color: var(--text-secondary); margin: 0;">Sistema de Gestão e Monitoramento de Frequência Acadêmica</p>
-                <button class="btn btn-primary admin-only" onclick="openProfessorModal()"><i class="fas fa-plus"></i> Novo Professor</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="exportToPDF()" title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-secondary" onclick="copyShareLink()" title="Copiar link desta visualização"><i class="fas fa-share-nodes"></i> Compartilhar Vista</button>
+                    <button class="btn btn-primary admin-only" onclick="openProfessorModal()"><i class="fas fa-plus"></i> Novo Professor</button>
+                </div>
             </div>
         </div>
 
@@ -570,6 +610,10 @@
                 <div class="form-group">
                     <label>Telefone</label>
                     <input type="text" id="prof-telefone" placeholder="(00) 00000-0000">
+                </div>
+                <div class="form-group">
+                    <label>Link da Chamada Online (Meet/Zoom/Teams)</label>
+                    <input type="url" id="prof-link-chamada" placeholder="https://meet.google.com/..." style="text-transform: none;">
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeProfessorModal()">Cancelar</button>
@@ -772,6 +816,21 @@
             if (jsonData.professores.length > 0) renderTable();
         });
 
+        // Funções para controle do seletor de ações (Dropdown)
+        window.closeAllDropdowns = () => {
+            document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+        };
+
+        window.toggleActions = (id, event) => {
+            event.stopPropagation();
+            const dropdown = document.getElementById(`dropdown-${id}`);
+            const isShowing = dropdown.classList.contains('show');
+            window.closeAllDropdowns();
+            if (!isShowing) dropdown.classList.add('show');
+        };
+
+        window.addEventListener('click', () => window.closeAllDropdowns());
+
         let jsonData = { professores: [], escolas: [], disciplinas: [] };
         let presencaKey = ''; // Chave dinâmica para a presença (ex: presenca_2026_05_06)
         let presencaDateFormatted = ''; // Data formatada para o cabeçalho da tabela
@@ -876,6 +935,7 @@
                     document.getElementById('prof-turma').value = prof.turma;
                     document.getElementById('prof-turno').value = prof.turno;
                     document.getElementById('prof-telefone').value = prof.telefone;
+                    document.getElementById('prof-link-chamada').value = prof.link_chamada || '';
                 }
             }
             professorModal.style.display = 'block';
@@ -909,6 +969,7 @@
                 turma: document.getElementById('prof-turma').value,
                 turno: document.getElementById('prof-turno').value,
                 telefone: document.getElementById('prof-telefone').value,
+                link_chamada: document.getElementById('prof-link-chamada').value,
                 ultima_alteracao: new Date().toISOString()
             };
 
@@ -971,6 +1032,109 @@
                 console.error("Erro ao atualizar presença:", error);
                 window.showNotification("Erro ao atualizar presença.", 'danger');
             }
+        };
+
+        window.copyShareLink = () => {
+            const params = new URLSearchParams();
+            if (searchInput.value) params.set('search', searchInput.value);
+            if (schoolFilter.value) params.set('escola', schoolFilter.value);
+            if (disciplineFilter.value) params.set('disciplina', disciplineFilter.value);
+            
+            const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                window.showNotification("Link da visualização copiado para o clipboard!");
+            });
+        };
+
+        window.exportToPDF = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const totalPagesExp = '{total_pages_count_string}';
+            
+            // Filtrar os dados baseado na visualização atual
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedSchool = schoolFilter.value;
+            const selectedDisciplina = disciplineFilter.value;
+
+            const filtered = jsonData.professores.filter(p => {
+                const safeVal = (v) => (v || "").toString().toLowerCase();
+                return (safeVal(p.nome).includes(searchTerm) ||
+                        safeVal(p.escola).includes(searchTerm) ||
+                        safeVal(p.disciplina).includes(searchTerm) ||
+                        safeVal(p.ano).includes(searchTerm) ||
+                        safeVal(p.turma).includes(searchTerm) ||
+                        safeVal(p.turno).includes(searchTerm)) &&
+                       (selectedSchool === '' || p.escola === selectedSchool) &&
+                       (selectedDisciplina === '' || p.disciplina === selectedDisciplina);
+            });
+
+            // Configuração do Logotipo (Exemplo com placeholder Base64)
+            // Dica: Converta sua imagem para Base64 usando ferramentas online
+            const logoBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gYCFQocGmaEqAAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAASSURBVFjHY2AYBaNgFAyDAwAAAzAAAR873eAAAAAASUVORK5CYII=';
+
+            try {
+                // Adiciona a imagem: addImage(dados, formato, x, y, largura, altura)
+                doc.addImage(logoBase64, 'PNG', 14, 10, 20, 20);
+            } catch (e) {
+                console.error("Erro ao carregar logotipo:", e);
+            }
+
+            doc.setFontSize(16);
+            doc.text('Relatório de Presença - Professores', 38, 18);
+            doc.setFontSize(10);
+            doc.text(`Data da Chamada: ${presencaDateFormatted || 'N/A'}`, 38, 24);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString()}`, 38, 29);
+
+            const tableData = filtered.map(p => [
+                p.nome, p.escola, p.disciplina, p.ano, p.turma, p.turno, 
+                p[presencaKey] ? 'PRESENTE' : 'AUSENTE'
+            ]);
+
+            doc.autoTable({
+                startY: 35,
+                head: [['Nome', 'Escola', 'Disciplina', 'Ano', 'Turma', 'Turno', 'Presença']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { 
+                    fillColor: [0, 86, 179], // Um azul mais escuro (Ex: --primary-hover)
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: { 
+                    fillColor: [248, 249, 250] // Cor de fundo das linhas pares (Ex: --bg-color)
+                },
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3,
+                    lineColor: [223, 230, 233], // Cor das bordas da tabela
+                    lineWidth: 0.1
+                },
+                didDrawPage: function (data) {
+                    // Configuração do Estilo do Rodapé
+                    doc.setFontSize(8);
+                    doc.setTextColor(150);
+
+                    // Texto do Rodapé (Esquerda)
+                    const footerText = "Sistema EDM Professor - Relatório de Frequência Acadêmica";
+                    doc.text(footerText, data.settings.margin.left, doc.internal.pageSize.height - 10);
+
+                    // Numeração de Página (Direita)
+                    let pageStr = "Página " + doc.internal.getCurrentPageInfo().pageNumber;
+                    if (typeof doc.putTotalPages === 'function') {
+                        pageStr += " de " + totalPagesExp;
+                    }
+                    doc.text(pageStr, doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 10, { align: 'right' });
+                }
+            });
+
+            // Substitui o placeholder pelo total real de páginas antes de salvar
+            if (typeof doc.putTotalPages === 'function') {
+                doc.putTotalPages(totalPagesExp);
+            }
+
+            const fileName = `presenca_${(presencaDateFormatted || 'lista').replace(/\//g, '_')}.pdf`;
+            doc.save(fileName);
+            window.showNotification("PDF gerado com sucesso!");
         };
 
         // Gerenciamento de Escolas/Disciplinas (Metadados)
@@ -1148,7 +1312,8 @@
                         { label: 'Ano', key: 'ano' },
                         { label: 'Turma', key: 'turma' },
                         { label: 'Turno', key: 'turno' },
-                        { label: 'Telefone', key: 'telefone' }
+                        { label: 'Telefone', key: 'telefone' },
+                        { label: 'Link', key: 'link_chamada' }
                         // A chave de presença será adicionada dinamicamente
                     ];
                     if (presencaKey && presencaDateFormatted) {
@@ -1180,6 +1345,12 @@
                         tableHTML += `<td>${escapeHTML(professor.turma)}</td>`;
                         tableHTML += `<td>${escapeHTML(professor.turno)}</td>`;
                         tableHTML += `<td>${escapeHTML(professor.telefone)}</td>`;
+                        
+                        const linkHtml = professor.link_chamada 
+                            ? `<a href="${escapeHTML(professor.link_chamada)}" target="_blank" class="link-call" title="Abrir Chamada Online"><i class="fas fa-video"></i></a>` 
+                            : '<span style="color: #ccc; font-size: 0.8em;">N/A</span>';
+                        tableHTML += `<td style="text-align: center;">${linkHtml}</td>`;
+
                         if (presencaKey && professor[presencaKey] !== undefined) {
                             const isPresent = professor[presencaKey];
                             const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
@@ -1195,6 +1366,14 @@
                             <div class="action-btns">
                                 <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
                                 <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                            <div class="dropdown">
+                                <button class="action-btn" onclick="toggleActions('${professor.id}', event)" title="Ações">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div id="dropdown-${professor.id}" class="dropdown-content">
+                                    <button onclick="openProfessorModal('${professor.id}')"><i class="fas fa-edit"></i> Editar</button>
+                                    <button class="delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')"><i class="fas fa-trash"></i> Excluir</button>
+                                </div>
                             </div>
                         </td>`;
                         tableHTML += '</tr>';
@@ -1236,6 +1415,15 @@
 
         schoolFilter.addEventListener('change', debouncedRenderTable);
         disciplineFilter.addEventListener('change', debouncedRenderTable);
+
+        // Verificar parâmetros da URL ao carregar para auto-filtrar
+        window.addEventListener('load', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('search')) searchInput.value = params.get('search').toUpperCase();
+            if (params.has('escola')) schoolFilter.value = params.get('escola').toUpperCase();
+            if (params.has('disciplina')) disciplineFilter.value = params.get('disciplina').toUpperCase();
+            if (params.toString()) debouncedRenderTable();
+        });
 
         // Iniciar o carregamento
         loadData();

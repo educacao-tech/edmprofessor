@@ -19,6 +19,7 @@ class ProfessorModel(BaseModel):
     turma: str
     turno: Literal["MANHÃ", "TARDE", "INTEGRAL", "NOITE", "N/A"]
     telefone: Optional[str] = Field(default=None, pattern=r"^\(\d{2}\) \d{5}-\d{4}$") # Telefone pode ser None, e o padrão só se aplica se não for None
+    link_chamada: Optional[str] = None
 
     @field_validator('nome', 'escola', 'disciplina', 'ano', 'turma', 'turno', mode='before')
     @classmethod
