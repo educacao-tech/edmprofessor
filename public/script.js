@@ -683,6 +683,17 @@ function renderPagination(totalItems) {
     paginationDiv.appendChild(nextBtn);
 }
 
+const getTurnoBadge = (turno) => {
+    if (!turno) return '<span class="tag-turno">N/A</span>';
+    const upper = turno.toUpperCase().trim();
+    let icon = 'fa-sun';
+    let tagClass = 'tag-manha';
+    if (upper === 'TARDE') { icon = 'fa-cloud-sun'; tagClass = 'tag-tarde'; }
+    else if (upper === 'NOITE') { icon = 'fa-moon'; tagClass = 'tag-noite'; }
+    else if (upper === 'INTEGRAL') { icon = 'fa-clock'; tagClass = 'tag-integral'; }
+    return `<span class="tag-turno ${tagClass}"><i class="fas ${icon}"></i> ${escapeHTML(upper)}</span>`;
+};
+
 function renderTable() {
     if (!professoresListDiv) return;
 
@@ -708,8 +719,28 @@ function renderTable() {
         return matchesSearch && matchesSchool && matchesDiscipline;
     });
 
+    // Cálculo do indicador de presença visual
+    let totalWithPresenca = 0;
+    let totalPresentes = 0;
+    filteredProfessores.forEach(p => {
+        if (presencaKey && p[presencaKey] !== undefined) {
+            totalWithPresenca++;
+            if (p[presencaKey]) totalPresentes++;
+        }
+    });
+    const presencePct = totalWithPresenca > 0 ? Math.round((totalPresentes / totalWithPresenca) * 100) : 0;
+
     if (resultsCountSpan) {
-        resultsCountSpan.textContent = `Mostrando ${filteredProfessores.length} professor(es) encontrado(s)`;
+        let presenceBarHTML = '';
+        if (presencaKey && totalWithPresenca > 0) {
+            presenceBarHTML = `<div class="presence-progress-container" title="${totalPresentes} de ${totalWithPresenca} presentes (${presencePct}%)">
+                <span style="margin-left: 12px; margin-right: 4px;">Presença: <strong>${presencePct}%</strong></span>
+                <div class="presence-bar-bg"><div class="presence-bar-fill" style="width: ${presencePct}%"></div></div>
+            </div>`;
+        }
+        resultsCountSpan.style.display = 'inline-flex';
+        resultsCountSpan.style.alignItems = 'center';
+        resultsCountSpan.innerHTML = `<span>Mostrando ${filteredProfessores.length} professor(es)</span> ${presenceBarHTML}`;
     }
 
     filteredProfessores.sort((a, b) => {
@@ -764,7 +795,7 @@ function renderTable() {
                 tableHTML += `<td>${escapeHTML(professor.disciplina)}</td>`;
                 tableHTML += `<td>${escapeHTML(professor.ano)}</td>`;
                 tableHTML += `<td>${escapeHTML(professor.turma)}</td>`;
-                tableHTML += `<td>${escapeHTML(professor.turno)}</td>`;
+                tableHTML += `<td>${getTurnoBadge(professor.turno)}</td>`;
                 tableHTML += `<td>${escapeHTML(professor.telefone)}</td>`;
                 
                 const linkHtml = professor.link_chamada 
