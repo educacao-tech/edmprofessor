@@ -229,7 +229,7 @@ onAuthStateChanged(auth, (user) => {
         document.body.classList.remove('is-admin');
         if (authBtn) authBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
     }
-    if (jsonData.professores.length > 0) renderTable();
+    renderTable();
 });
 
 // Funções para controle do seletor de ações (Dropdown)
@@ -362,7 +362,6 @@ window.openProfessorModal = (profId = null) => {
             document.getElementById('prof-turma').value = prof.turma || '';
             document.getElementById('prof-turno').value = prof.turno || 'MANHÃ';
             document.getElementById('prof-telefone').value = prof.telefone || '';
-            document.getElementById('prof-link-chamada').value = prof.link_chamada || '';
         }
     }
     if (professorModal) professorModal.style.display = 'block';
@@ -401,7 +400,6 @@ if (professorForm) {
             turma: document.getElementById('prof-turma').value,
             turno: document.getElementById('prof-turno').value,
             telefone: document.getElementById('prof-telefone').value,
-            link_chamada: document.getElementById('prof-link-chamada').value,
             ultima_alteracao: new Date().toISOString()
         };
 
@@ -765,13 +763,14 @@ function renderTable() {
                 { label: 'Ano', key: 'ano' },
                 { label: 'Turma', key: 'turma' },
                 { label: 'Turno', key: 'turno' },
-                { label: 'Telefone', key: 'telefone' },
-                { label: 'Link', key: 'link_chamada' }
+                { label: 'Telefone', key: 'telefone' }
             ];
             if (presencaKey && presencaDateFormatted) {
                 headers.push({ label: `Presença (${presencaDateFormatted})`, key: presencaKey });
             }
-            headers.push({ label: 'Ações', key: 'actions' });
+            if (auth.currentUser) {
+                headers.push({ label: 'Ações', key: 'actions' });
+            }
 
             let tableHTML = '<table>';
             tableHTML += '<thead><tr>';
@@ -797,11 +796,6 @@ function renderTable() {
                 tableHTML += `<td>${escapeHTML(professor.turma)}</td>`;
                 tableHTML += `<td>${getTurnoBadge(professor.turno)}</td>`;
                 tableHTML += `<td>${escapeHTML(professor.telefone)}</td>`;
-                
-                const linkHtml = professor.link_chamada 
-                    ? `<a href="${escapeHTML(professor.link_chamada)}" target="_blank" class="link-call" title="Abrir Chamada Online"><i class="fas fa-video"></i></a>` 
-                    : '<span style="color: #ccc; font-size: 0.8em;">N/A</span>';
-                tableHTML += `<td style="text-align: center;">${linkHtml}</td>`;
 
                 if (presencaKey && professor[presencaKey] !== undefined) {
                     const isPresent = professor[presencaKey];
@@ -814,20 +808,24 @@ function renderTable() {
                     
                     tableHTML += `<td><span class="badge ${presencaClass}" ${clickHandler} ${tooltip}><span class="status-dot ${dotClass}"></span> ${escapeHTML(presencaText)}</span></td>`;
                 }
-                tableHTML += `<td class="admin-only">
-                    <div class="action-btns">
-                        <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
-                    <div class="dropdown">
-                        <button class="action-btn" onclick="toggleActions('${professor.id}', event)" title="Ações">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <div id="dropdown-${professor.id}" class="dropdown-content">
-                            <button onclick="openProfessorModal('${professor.id}')"><i class="fas fa-edit"></i> Editar</button>
-                            <button class="delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')"><i class="fas fa-trash"></i> Excluir</button>
+
+                if (auth.currentUser) {
+                    tableHTML += `<td class="admin-only">
+                        <div class="action-btns">
+                            <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                            <div class="dropdown">
+                                <button class="action-btn" onclick="toggleActions('${professor.id}', event)" title="Ações">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div id="dropdown-${professor.id}" class="dropdown-content">
+                                    <button onclick="openProfessorModal('${professor.id}')"><i class="fas fa-edit"></i> Editar</button>
+                                    <button class="delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')"><i class="fas fa-trash"></i> Excluir</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </td>`;
+                    </td>`;
+                }
                 tableHTML += '</tr>';
             });
             tableHTML += '</tbody></table>';
