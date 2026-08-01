@@ -1,0 +1,536 @@
+{
+  "professores": [
+    {
+      "nome": "ADMILDE GABRIEL DE SOUSA",
+      "escola": "CÉLIA",
+      "disciplina": "EDM",
+      "ano": "5º",
+      "turma": "B",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ADRIANA APARECIDA VITAL DA SILVA",
+      "escola": "ESTHER",
+      "disciplina": "EDM",
+      "ano": "5º",
+      "turma": "B",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ALEXANDRE SILVA PEDROSO",
+      "escola": "ESTHER",
+      "disciplina": "EDM",
+      "ano": "3º",
+      "turma": "A",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ALINE SANTOS DA COSTA",
+      "escola": "CÉLIA",
+      "disciplina": "EDM",
+      "ano": "5º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ANA CAROLINA VENTUROSO BÉRGAMO CÂNDIDO",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "4º",
+      "turma": "B",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ANDRÉA LÚCIA STOPPA DE O. BAVIERA",
+      "escola": "PADRE",
+      "disciplina": "EDM",
+      "ano": "5º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ARETA FIGUEIREDO ROSA",
+      "escola": "PADRE",
+      "disciplina": "EDM",
+      "ano": "2º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ÁUREA APARECIDA SOUZA CARDOSO",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "E",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "CRISTIANE AUGUSTA COSTA",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "3º",
+      "turma": "E",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "DAIANE ROBERTA DE SOUSA",
+      "escola": "ESTHER",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "DANIELA MARA MACEDO SILVA",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "N/A",
+      "turma": "N/A",
+      "turno": "N/A",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "DANIELA PARADA FERREIRA",
+      "escola": "PADRE",
+      "disciplina": "EDM",
+      "ano": "3º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "DEILANE FRANZONI",
+      "escola": "BRAGA",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "B",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "DOUGLAS WILLIAM DA SILVA",
+      "escola": "ESTHER",
+      "disciplina": "EDM",
+      "ano": "4º",
+      "turma": "B",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "EDNILSA GABRIEL DE SOUSA",
+      "escola": "CÉLIA",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ELAINE CRISTINA DE SOUSA GOULART",
+      "escola": "PADRE",
+      "disciplina": "EDM",
+      "ano": "5º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ELISÂNGELA ALMINDA OLIVEIRA BIBIANO",
+      "escola": "BRAGA",
+      "disciplina": "EDM",
+      "ano": "3º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ELIZÂNGELA CERCE CONUNCHUC",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "C",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "FABIANA CÁSSIA DOS SANTOS",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "2º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "FABIANA KARINA DE OLIVEIRA",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "2º",
+      "turma": "B",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "FABIANA MEIRE NAZAR",
+      "escola": "PADRE",
+      "disciplina": "EDM",
+      "ano": "4º",
+      "turma": "B",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "GABRIELA BOLOGNA BÉRGAMO VENDRUSCOLO",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "D",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "GIOVANA TAIS DE OLIVEIRA BAGIO",
+      "escola": "PADRE",
+      "disciplina": "EDM",
+      "ano": "4º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ISABEL CRISTINA MANIERI DANIEL",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "B",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "JACKELINE SILVA RODRIGUES",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "N/A",
+      "turma": "N/A",
+      "turno": "N/A",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "JESILDA BATISTA DA SILVA DOMINGOS",
+      "escola": "ANNA",
+      "disciplina": "EDM",
+      "ano": "2º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "JULIANA MENDES FERREIRA FUKUDA",
+      "escola": "ESTHER",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "A",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "LANA MARA FIOCO DOS SANTOS",
+      "escola": "PADRE",
+      "disciplina": "EDM",
+      "ano": "4º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "LARISSA DANIELE DIAS",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "N/A",
+      "turma": "N/A",
+      "turno": "N/A",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "LEILA APARECIDA MILAN BARBOZA",
+      "escola": "ANNA",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "D",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "LETÍCIA NARA PIRES",
+      "escola": "ANNA",
+      "disciplina": "EDM",
+      "ano": "N/A",
+      "turma": "N/A",
+      "turno": "N/A",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "LOURDES RAYMUNDINI DA SILVA",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "2º",
+      "turma": "D",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "LÚCIA HELENA SAQUETO G. GONÇALVES",
+      "escola": "ANNA",
+      "disciplina": "EDM",
+      "ano": "3º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "LUCIANA PAULA LEMES",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "3º",
+      "turma": "C",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "MARCELA YARA V. L. RAYMUNDO A. CARNEIRO",
+      "escola": "ANNA",
+      "disciplina": "EDM",
+      "ano": "5º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "MARIANA R. DE FARIA EVANGELISTA",
+      "escola": "BRAGA",
+      "disciplina": "EDM",
+      "ano": "4º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "MARLENE APARECIDA BARBOSA DUARTE",
+      "escola": "CAIC",
+      "disciplina": "EDM",
+      "ano": "N/A",
+      "turma": "N/A",
+      "turno": "INTEGRAL",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "MARTA LUZIA PACHETI",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "5º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "MARTA VIEIRA ALVES",
+      "escola": "ESTHER",
+      "disciplina": "EDM",
+      "ano": "2º",
+      "turma": "B",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "MICHELLE CRISTINA SILVA",
+      "escola": "ESTHER",
+      "disciplina": "EDM",
+      "ano": "2º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "NAYRA RODRIGUES OLIVÉRIO CAMPI",
+      "escola": "ANNA",
+      "disciplina": "EDM",
+      "ano": "3º",
+      "turma": "B",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "NEUSA HELENA DE CASTRO GALANTI",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "4º",
+      "turma": "E",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "PATRÍCIA ALEIXO SILVA de OLIVEIRA",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "N/A",
+      "turma": "N/A",
+      "turno": "N/A",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "PATRÍCIA CORSINI COSTA",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "3º",
+      "turma": "B",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "PRISCILA BRONDI ANHEZINI IVAN",
+      "escola": "BRAGA",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "ROSANA APARECIDA DA SILVA",
+      "escola": "BRAGA",
+      "disciplina": "EDM",
+      "ano": "4º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "SUELLEN FRANCINE DA SILVA e SILVA",
+      "escola": "ANNA",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "C",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "TALUANA BARBOSA PEREIRA",
+      "escola": "BRAGA",
+      "disciplina": "EDM",
+      "ano": "2º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "TATIANA DA SILVA LEMOS",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "N/A",
+      "turma": "N/A",
+      "turno": "N/A",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "VANESSA BORELLI DOS SANTOS",
+      "escola": "PADRE",
+      "disciplina": "EDM",
+      "ano": "1º",
+      "turma": "N/A",
+      "turno": "N/A",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "VERENA DE FÁTIMA CARVALHO",
+      "escola": "PADRE",
+      "disciplina": "EDM",
+      "ano": "2º",
+      "turma": "A",
+      "turno": "MANHÃ",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    },
+    {
+      "nome": "VIVIANE TOMAZ BANACO",
+      "escola": "ALZIRA",
+      "disciplina": "EDM",
+      "ano": "4º",
+      "turma": "D",
+      "turno": "TARDE",
+      "telefone": "(00) 00000-0000",
+      "presenca_2026_05_06": true
+    }
+  ],
+  "escolas": [
+    "ALZIRA",
+    "ANNA",
+    "BRAGA",
+    "CAIC",
+    "CÉLIA",
+    "ESTHER",
+    "PADRE"
+  ],
+  "disciplinas": [
+    "EDM"
+  ]
+}

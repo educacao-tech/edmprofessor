@@ -101,11 +101,17 @@ const applyPhoneMask = (value) => {
     return value.replace(/\D/g, '').replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2").replace(/(-\d{4})\d+?$/, "$1");
 };
 
-// Lógica de Dark Mode
+// Lógica de Dark Mode com Detecção Automática do Sistema Operacional
 const themeToggle = document.getElementById('theme-toggle');
 if (themeToggle) {
     const themeIcon = themeToggle.querySelector('i');
-    const currentTheme = localStorage.getItem('theme') || 'light';
+    
+    // Obtém o tema salvo ou detecta a preferência do sistema operacional
+    const getPreferredTheme = () => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) return savedTheme;
+        return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    };
 
     function updateThemeIcon(theme) {
         if (themeIcon) {
@@ -113,21 +119,31 @@ if (themeToggle) {
         }
     }
 
-    if (currentTheme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        updateThemeIcon('dark');
-    } else {
-        updateThemeIcon('light');
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        updateThemeIcon(theme);
     }
 
+    // Aplica o tema inicial (salvo ou preferência do SO)
+    applyTheme(getPreferredTheme());
+
+    // Evento de clique para alternar manualmente
     themeToggle.addEventListener('click', () => {
-        let theme = document.documentElement.getAttribute('data-theme');
-        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         
-        document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
-        updateThemeIcon(newTheme);
+        applyTheme(newTheme);
     });
+
+    // Escuta mudanças de tema do SO em tempo real caso o usuário não tenha definido uma preferência manual
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+    }
 }
 
 // Lógica de Autenticação

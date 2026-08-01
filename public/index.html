@@ -1,89 +1,182 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Professores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div id="notification-area"></div>
+    <div class="container">
+        <div class="theme-switch-wrapper" style="display: flex; gap: 10px;">
+            <button id="auth-toggle" onclick="handleAuthClick()" title="Login Administrativo"><i class="fas fa-sign-in-alt"></i> Login</button>
+            <button id="theme-toggle" title="Alternar Modo Escuro/Claro" aria-label="Alternar Tema"><i class="fas fa-moon"></i></button>
+        </div>
+        <div class="header-section">
+            <h1>Lista de Professores</h1>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <p style="color: var(--text-secondary); margin: 0;">Sistema de Gestão e Monitoramento de Frequência Acadêmica</p>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="exportToPDF()" title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-secondary" onclick="copyShareLink()" title="Copiar link desta visualização"><i class="fas fa-share-nodes"></i> Compartilhar Vista</button>
+                    <button class="btn btn-primary admin-only" onclick="openProfessorModal()"><i class="fas fa-plus"></i> Novo Professor</button>
+                </div>
+            </div>
+        </div>
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.13.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.13.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.13.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
-
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
+        <div class="filters">
+            <div>
+                <label for="search-input">Pesquisa Geral</label>
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Nome, escola, disciplina...">
+                </div>
+            </div>
+            <div>
+                <label for="school-filter">Escola</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="school-filter">
+                        <option value="">Todas as Escolas</option>
+                    </select>
+                    <button class="btn-clear admin-only" onclick="manageMetadata('escolas')" title="Adicionar Escola"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+            <div>
+                <label for="discipline-filter">Disciplina</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="discipline-filter">
+                        <option value="">Todas as Disciplinas</option>
+                    </select>
+                    <button class="btn-clear admin-only" onclick="manageMetadata('disciplinas')" title="Adicionar Disciplina"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+            <div style="flex: 0; min-width: auto;">
+                <label>&nbsp;</label>
+                <button class="btn-clear" id="btn-clear-filters" title="Limpar todos os filtros"><i class="fas fa-filter-circle-xmark"></i></button>
+            </div>
+        </div>
+        <div class="results-info">
+            <span id="results-count">Carregando dados...</span>
+            <span>Ano Letivo: 2026</span>
+        </div>
+        <div id="professores-list" class="table-responsive">
+            <!-- A lista de professores será carregada aqui pelo JavaScript -->
+        </div>
+        <div id="pagination" class="pagination"></div>
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+    <!-- Modal Professor -->
+    <div id="professorModal" class="modal">
+        <div class="modal-content">
+            <div id="modalSuccessOverlay" class="modal-success-overlay">
+                <i class="fas fa-check-circle"></i>
+                <h3 id="modalSuccessMessage">Sucesso!</h3>
+            </div>
+            <div class="modal-header">
+                <h2 id="modalTitle">Novo Professor</h2>
+                <span style="cursor:pointer" onclick="closeProfessorModal()">&times;</span>
+            </div>
+            <form id="professorForm">
+                <input type="hidden" id="prof-id">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="prof-nome" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Escola</label>
+                        <select id="prof-escola" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Disciplina</label>
+                        <select id="prof-disciplina" required></select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <input type="text" id="prof-ano">
+                    </div>
+                    <div class="form-group">
+                        <label>Turma</label>
+                        <input type="text" id="prof-turma">
+                    </div>
+                    <div class="form-group">
+                        <label>Turno</label>
+                        <select id="prof-turno">
+                            <option value="MANHÃ">MANHÃ</option>
+                            <option value="TARDE">TARDE</option>
+                            <option value="INTEGRAL">INTEGRAL</option>
+                            <option value="NOITE">NOITE</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="text" id="prof-telefone" placeholder="(00) 00000-0000">
+                </div>
+                <div class="form-group">
+                    <label>Link da Chamada Online (Meet/Zoom/Teams)</label>
+                    <input type="url" id="prof-link-chamada" placeholder="https://meet.google.com/..." style="text-transform: none;">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeProfessorModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
-    </script>
-  </body>
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Acesso Administrativo</h2>
+                <span style="cursor:pointer" onclick="closeLoginModal()">&times;</span>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                </div>
+                <div class="social-login">
+                    <p style="text-align: center; font-size: 0.8em; color: var(--text-secondary);">Ou entre com</p>
+                    <button type="button" class="btn btn-social" onclick="loginSocial('google')"><i class="fab fa-google" style="color: #ea4335;"></i> Google</button>
+                    <button type="button" class="btn btn-social" onclick="loginSocial('github')"><i class="fab fa-github"></i> GitHub</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação Customizado -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content confirm-modal-content">
+            <i class="fas fa-exclamation-triangle confirm-icon" id="confirmIcon"></i>
+            <h3 id="confirmTitle" style="margin-bottom: 10px;">Confirmação</h3>
+            <p id="confirmMessage" style="color: var(--text-secondary); margin-bottom: 20px;"></p>
+            <div class="form-actions" style="justify-content: center; gap: 15px;">
+                <button type="button" class="btn btn-secondary" id="confirmCancelBtn">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmOkBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lógica Principal -->
+    <script type="module" src="script.js"></script>
+</body>
 </html>
