@@ -719,6 +719,39 @@ tbody tr:hover {
     100% { background-position: -200% 0; }
 }
 
+/* Classes Utilitárias de Layout Header & Form Grid */
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 15px;
+}
+
+.header-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.form-row {
+    display: grid;
+}
+
+.form-row-2 {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-row-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
 /* Confirm Modal Styling */
 .confirm-modal-content {
     max-width: 420px;
@@ -729,99 +762,6 @@ tbody tr:hover {
     font-size: 3rem;
     color: var(--danger-color);
     margin-bottom: 15px;
-}
-
-/* Responsividade Avançada (Mobile e Tablets) */
-@media (max-width: 768px) {
-    body {
-        margin: 10px;
-    }
-
-    .container {
-        padding: 16px;
-        min-height: auto;
-    }
-
-    .theme-switch-wrapper {
-        position: static;
-        margin-bottom: 15px;
-        justify-content: flex-end;
-    }
-
-    .header-section > div {
-        flex-direction: column;
-        align-items: stretch !important;
-        gap: 12px;
-    }
-
-    .header-section > div > div {
-        flex-wrap: wrap;
-        justify-content: stretch;
-    }
-
-    .header-section .btn {
-        flex: 1;
-        justify-content: center;
-        padding: 10px;
-        font-size: 0.85rem;
-    }
-
-    .filters {
-        padding: 12px;
-        gap: 12px;
-    }
-
-    .filters > div {
-        min-width: 100%;
-    }
-
-    #notification-area {
-        top: auto;
-        bottom: 20px;
-        right: 15px;
-        left: 15px;
-    }
-
-    .notification {
-        min-width: auto;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .table-responsive {
-        max-height: 500px;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    th, td {
-        padding: 10px 12px;
-        font-size: 0.85rem;
-    }
-
-    .results-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-    }
-
-    .modal-content {
-        margin: 10% 15px;
-        padding: 20px;
-    }
-
-    html, body {
-        height: auto;
-        overflow: auto;
-    }
-
-    .container {
-        height: auto;
-        padding: 14px;
-    }
-
-    .table-responsive {
-        max-height: 480px;
-    }
 }
 
 /* Rodapé de Informações de Atualização (Git) com Fundo de Contraste */
@@ -872,6 +812,284 @@ html[data-theme="dark"] .app-footer {
     font-style: normal;
     font-weight: 600;
     color: var(--text-color);
+}
+
+/* ==========================================================================
+   Responsividade Avançada (Smartphones, Phablets e Tablets)
+   ========================================================================== */
+
+/* Tablets / Telas Médias (< 992px) */
+@media (max-width: 992px) {
+    .container {
+        max-width: 100%;
+    }
+    
+    .filters > div {
+        min-width: 180px;
+    }
+}
+
+/* Tablets em Retrato e Smartphones (< 768px) */
+@media (max-width: 768px) {
+    html, body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    body {
+        padding: 8px;
+    }
+
+    .container {
+        height: auto;
+        min-height: calc(100vh - 16px);
+        padding: 12px;
+        border-radius: 10px;
+    }
+
+    /* Topo e Alternador de Tema */
+    .theme-switch-wrapper {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+    }
+
+    /* Seção do Cabeçalho */
+    .header-section {
+        margin: -12px -12px 10px -12px;
+        padding: 12px;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .header-section h1 {
+        font-size: 1.25rem;
+        margin-bottom: 4px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 12px;
+    }
+
+    .header-subtitle {
+        font-size: 0.82rem;
+        line-height: 1.3;
+    }
+
+    .header-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 8px !important;
+        width: 100%;
+    }
+
+    .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 8px 10px;
+        font-size: 0.82rem;
+        box-sizing: border-box;
+    }
+
+    /* Filtros */
+    .filters {
+        padding: 10px;
+        gap: 10px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters > div {
+        min-width: 100% !important;
+        width: 100%;
+    }
+
+    .filters select,
+    .filters input[type="text"] {
+        height: 40px;
+        font-size: 16px; /* Previne zoom automático no iOS e Android */
+    }
+
+    .btn-clear {
+        height: 40px;
+        width: 100%;
+        margin-top: 2px;
+    }
+
+    /* Informações de Resultados e Barra de Progresso */
+    .results-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 4px 0;
+    }
+
+    .presence-progress-container {
+        width: 100%;
+        justify-content: space-between;
+        margin-left: 0 !important;
+    }
+
+    .presence-bar-bg {
+        flex: 1;
+        max-width: 140px;
+    }
+
+    /* Tabela Responsiva */
+    .table-responsive {
+        max-height: calc(100vh - 340px);
+        min-height: 260px;
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+    }
+
+    table {
+        min-width: 680px; /* Garante rolagem horizontal fluida no mobile sem espremer conteúdo */
+    }
+
+    th, td {
+        padding: 8px 10px;
+        font-size: 0.82rem;
+    }
+
+    .badge {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+        min-height: 28px;
+    }
+
+    /* Paginação */
+    .pagination {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 12px;
+    }
+
+    .pagination button {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 10px;
+        font-size: 0.85rem;
+    }
+
+    /* Modais Responsivos */
+    .modal {
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        margin: auto;
+        padding: 20px 16px;
+        width: 100%;
+        max-width: 100%;
+        max-height: 88vh;
+        overflow-y: auto;
+        border-radius: 12px;
+    }
+
+    .form-group input,
+    .form-group select {
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+        margin-top: 20px;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    /* Notificações (Toasts) */
+    #notification-area {
+        top: auto;
+        bottom: 16px;
+        right: 12px;
+        left: 12px;
+        max-width: calc(100% - 24px);
+    }
+
+    .notification {
+        min-width: 0;
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 0.85rem;
+        padding: 10px 14px;
+    }
+
+    /* Rodapé */
+    .app-footer {
+        margin: 10px -12px -12px -12px;
+        padding: 10px 12px;
+    }
+
+    .footer-info {
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.72rem;
+    }
+
+    .footer-separator {
+        display: none;
+    }
+}
+
+/* Smartphones Pequenos (< 480px) */
+@media (max-width: 480px) {
+    body {
+        padding: 4px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    .header-section {
+        margin: -10px -10px 8px -10px;
+        padding: 10px;
+    }
+
+    .header-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row-2,
+    .form-row-3 {
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
+    }
+
+    th, td {
+        padding: 6px 8px;
+        font-size: 0.78rem;
+    }
+
+    .app-footer {
+        margin: 8px -10px -10px -10px;
+        padding: 8px 10px;
+    }
 }
 
 
