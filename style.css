@@ -1169,19 +1169,17 @@ html[data-theme="dark"] .app-footer {
     /* Modais Responsivos */
     .modal {
         padding: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 
     .modal-content {
-        margin: auto;
+        margin: 5% auto;
         padding: 20px 16px;
-        width: 100%;
-        max-width: 100%;
+        width: calc(100% - 24px);
+        max-width: 500px;
         max-height: 88vh;
         overflow-y: auto;
         border-radius: 12px;
+        box-sizing: border-box;
     }
 
     .form-group input,
