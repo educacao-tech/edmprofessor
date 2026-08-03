@@ -738,7 +738,7 @@ function renderTable() {
 
     if (resultsCountSpan) {
         let presenceBarHTML = '';
-        if (presencaKey && totalWithPresenca > 0) {
+        if (auth.currentUser && presencaKey && totalWithPresenca > 0) {
             presenceBarHTML = `<div class="presence-progress-container" title="${totalPresentes} de ${totalWithPresenca} presentes (${presencePct}%)">
                 <span style="margin-left: 12px; margin-right: 4px;">Presença: <strong>${presencePct}%</strong></span>
                 <div class="presence-bar-bg"><div class="presence-bar-fill" style="width: ${presencePct}%"></div></div>
@@ -773,7 +773,7 @@ function renderTable() {
                 { label: 'Turno', key: 'turno' },
                 { label: 'Telefone', key: 'telefone' }
             ];
-            if (presencaKey && presencaDateFormatted) {
+            if (auth.currentUser && presencaKey && presencaDateFormatted) {
                 headers.push({ label: `Presença (${presencaDateFormatted})`, key: presencaKey });
             }
             if (auth.currentUser) {
@@ -805,14 +805,14 @@ function renderTable() {
                 tableHTML += `<td>${getTurnoBadge(professor.turno)}</td>`;
                 tableHTML += `<td>${escapeHTML(professor.telefone)}</td>`;
 
-                if (presencaKey && professor[presencaKey] !== undefined) {
+                if (auth.currentUser && presencaKey && professor[presencaKey] !== undefined) {
                     const isPresent = professor[presencaKey];
                     const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
                     const presencaText = isPresent ? 'Presente' : 'Ausente';
                     const dotClass = isPresent ? 'dot-presente' : 'dot-ausente';
                     
-                    const clickHandler = auth.currentUser ? `onclick="togglePresenca('${professor.id}', ${isPresent})"` : '';
-                    const tooltip = auth.currentUser ? 'title="Clique para alternar presença"' : '';
+                    const clickHandler = `onclick="togglePresenca('${professor.id}', ${isPresent})"`;
+                    const tooltip = 'title="Clique para alternar presença"';
                     
                     tableHTML += `<td><span class="badge ${presencaClass}" ${clickHandler} ${tooltip}><span class="status-dot ${dotClass}"></span> ${escapeHTML(presencaText)}</span></td>`;
                 }
