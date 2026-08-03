@@ -514,14 +514,22 @@ window.exportToPDF = () => {
     doc.text(`Data da Chamada: ${presencaDateFormatted || 'N/A'}`, 38, 24);
     doc.text(`Gerado em: ${new Date().toLocaleDateString()}`, 38, 29);
 
-    const tableData = filtered.map(p => [
-        p.nome, p.escola, p.disciplina, p.ano, p.turma, p.turno, 
-        p[presencaKey] ? 'PRESENTE' : 'AUSENTE'
-    ]);
+    const pdfHead = ['Nome', 'Escola', 'Disciplina', 'Ano', 'Turma', 'Turno'];
+    if (auth.currentUser && presencaKey) {
+        pdfHead.push('Presença');
+    }
+
+    const tableData = filtered.map(p => {
+        const row = [p.nome, p.escola, p.disciplina, p.ano, p.turma, p.turno];
+        if (auth.currentUser && presencaKey) {
+            row.push(p[presencaKey] ? 'PRESENTE' : 'AUSENTE');
+        }
+        return row;
+    });
 
     doc.autoTable({
         startY: 35,
-        head: [['Nome', 'Escola', 'Disciplina', 'Ano', 'Turma', 'Turno', 'Presença']],
+        head: [pdfHead],
         body: tableData,
         theme: 'striped',
         headStyles: { 

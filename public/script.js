@@ -514,14 +514,22 @@ window.exportToPDF = () => {
     doc.text(`Data da Chamada: ${presencaDateFormatted || 'N/A'}`, 38, 24);
     doc.text(`Gerado em: ${new Date().toLocaleDateString()}`, 38, 29);
 
-    const tableData = filtered.map(p => [
-        p.nome, p.escola, p.disciplina, p.ano, p.turma, p.turno, 
-        p[presencaKey] ? 'PRESENTE' : 'AUSENTE'
-    ]);
+    const pdfHead = ['Nome', 'Escola', 'Disciplina', 'Ano', 'Turma', 'Turno'];
+    if (auth.currentUser && presencaKey) {
+        pdfHead.push('Presença');
+    }
+
+    const tableData = filtered.map(p => {
+        const row = [p.nome, p.escola, p.disciplina, p.ano, p.turma, p.turno];
+        if (auth.currentUser && presencaKey) {
+            row.push(p[presencaKey] ? 'PRESENTE' : 'AUSENTE');
+        }
+        return row;
+    });
 
     doc.autoTable({
         startY: 35,
-        head: [['Nome', 'Escola', 'Disciplina', 'Ano', 'Turma', 'Turno', 'Presença']],
+        head: [pdfHead],
         body: tableData,
         theme: 'striped',
         headStyles: { 
@@ -730,7 +738,7 @@ function renderTable() {
 
     if (resultsCountSpan) {
         let presenceBarHTML = '';
-        if (presencaKey && totalWithPresenca > 0) {
+        if (auth.currentUser && presencaKey && totalWithPresenca > 0) {
             presenceBarHTML = `<div class="presence-progress-container" title="${totalPresentes} de ${totalWithPresenca} presentes (${presencePct}%)">
                 <span style="margin-left: 12px; margin-right: 4px;">Presença: <strong>${presencePct}%</strong></span>
                 <div class="presence-bar-bg"><div class="presence-bar-fill" style="width: ${presencePct}%"></div></div>
@@ -765,7 +773,7 @@ function renderTable() {
                 { label: 'Turno', key: 'turno' },
                 { label: 'Telefone', key: 'telefone' }
             ];
-            if (presencaKey && presencaDateFormatted) {
+            if (auth.currentUser && presencaKey && presencaDateFormatted) {
                 headers.push({ label: `Presença (${presencaDateFormatted})`, key: presencaKey });
             }
             if (auth.currentUser) {
@@ -797,14 +805,14 @@ function renderTable() {
                 tableHTML += `<td>${getTurnoBadge(professor.turno)}</td>`;
                 tableHTML += `<td>${escapeHTML(professor.telefone)}</td>`;
 
-                if (presencaKey && professor[presencaKey] !== undefined) {
+                if (auth.currentUser && presencaKey && professor[presencaKey] !== undefined) {
                     const isPresent = professor[presencaKey];
                     const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
                     const presencaText = isPresent ? 'Presente' : 'Ausente';
                     const dotClass = isPresent ? 'dot-presente' : 'dot-ausente';
                     
-                    const clickHandler = auth.currentUser ? `onclick="togglePresenca('${professor.id}', ${isPresent})"` : '';
-                    const tooltip = auth.currentUser ? 'title="Clique para alternar presença"' : '';
+                    const clickHandler = `onclick="togglePresenca('${professor.id}', ${isPresent})"`;
+                    const tooltip = 'title="Clique para alternar presença"';
                     
                     tableHTML += `<td><span class="badge ${presencaClass}" ${clickHandler} ${tooltip}><span class="status-dot ${dotClass}"></span> ${escapeHTML(presencaText)}</span></td>`;
                 }
