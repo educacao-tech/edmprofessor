@@ -114,6 +114,20 @@ html[data-theme="dark"] .header-section {
     box-shadow: 0 4px 10px rgba(55, 145, 249, 0.25);
 }
 
+/* Controle de Exibição Administrativa */
+.admin-only {
+    display: none !important;
+}
+
+body.is-admin .admin-only {
+    display: inline-flex !important;
+}
+
+body.is-admin th.admin-only,
+body.is-admin td.admin-only {
+    display: table-cell !important;
+}
+
 .filters {
     flex: 0 0 auto;
     display: flex;
