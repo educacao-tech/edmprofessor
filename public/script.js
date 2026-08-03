@@ -612,6 +612,29 @@ let sortConfig = {
 let currentPage = 1;
 const rowsPerPage = 15;
 
+let currentViewMode = localStorage.getItem('viewMode') || 'table';
+
+function updateToggleButtonsUI() {
+    const btnTable = document.getElementById('btn-view-table');
+    const btnCards = document.getElementById('btn-view-cards');
+    if (btnTable) btnTable.classList.toggle('active', currentViewMode === 'table');
+    if (btnCards) btnCards.classList.toggle('active', currentViewMode === 'cards');
+}
+
+window.setViewMode = (mode) => {
+    currentViewMode = mode;
+    localStorage.setItem('viewMode', mode);
+    updateToggleButtonsUI();
+    renderTable();
+};
+
+function getInitials(name) {
+    if (!name) return 'P';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 function initFilters() {
     if (!schoolFilter || !disciplineFilter) return;
 
@@ -764,80 +787,143 @@ function renderTable() {
         const paginatedItems = filteredProfessores.slice(start, end);
 
         if (paginatedItems.length > 0) {
-            const headers = [
-                { label: 'Nome', key: 'nome' },
-                { label: 'Escola', key: 'escola' },
-                { label: 'Disciplina', key: 'disciplina' },
-                { label: 'Ano', key: 'ano' },
-                { label: 'Turma', key: 'turma' },
-                { label: 'Turno', key: 'turno' },
-                { label: 'Telefone', key: 'telefone' }
-            ];
-            if (auth.currentUser && presencaKey && presencaDateFormatted) {
-                headers.push({ label: `Presença (${presencaDateFormatted})`, key: presencaKey });
-            }
-            if (auth.currentUser) {
-                headers.push({ label: 'Ações', key: 'actions' });
-            }
+            updateToggleButtonsUI();
 
-            let tableHTML = '<table>';
-            tableHTML += '<thead><tr>';
-            headers.forEach(h => {
-                let icon = (h.key !== 'actions') ? '<i class="fas fa-sort" style="opacity: 0.2; margin-left: 5px;"></i>' : '';
-                if (sortConfig.key === h.key) {
-                    icon = sortConfig.direction === 'asc' 
-                        ? ' <i class="fas fa-sort-up" style="margin-left: 5px;"></i>' 
-                        : ' <i class="fas fa-sort-down" style="margin-left: 5px;"></i>';
-                }
-                let adminClass = h.key === 'actions' ? 'admin-only' : '';
-                let style = h.key === 'actions' ? 'style="cursor: default;"' : '';
-                tableHTML += `<th onclick="setSort('${h.key}')" class="${adminClass}" ${style}>${h.label}${icon}</th>`;
-            });
-            tableHTML += '</tr></thead><tbody>';
+            if (currentViewMode === 'cards') {
+                professoresListDiv.className = 'cards-container-wrapper';
+                let cardsHTML = '<div class="cards-grid">';
+                
+                paginatedItems.forEach(professor => {
+                    const initials = getInitials(professor.nome);
+                    const telFormatted = professor.telefone ? escapeHTML(professor.telefone) : 'N/A';
+                    const telClean = professor.telefone ? professor.telefone.replace(/\D/g, '') : '';
+                    const telLink = telClean ? `<a href="tel:${telClean}" class="phone-link"><i class="fas fa-phone-alt"></i> ${telFormatted}</a>` : 'N/A';
 
-            paginatedItems.forEach(professor => {
-                tableHTML += '<tr>';
-                tableHTML += `<td><strong>${escapeHTML(professor.nome)}</strong></td>`;
-                tableHTML += `<td>${escapeHTML(professor.escola)}</td>`;
-                tableHTML += `<td>${escapeHTML(professor.disciplina)}</td>`;
-                tableHTML += `<td>${escapeHTML(professor.ano)}</td>`;
-                tableHTML += `<td>${escapeHTML(professor.turma)}</td>`;
-                tableHTML += `<td>${getTurnoBadge(professor.turno)}</td>`;
-                tableHTML += `<td>${escapeHTML(professor.telefone)}</td>`;
+                    let presencaBadgeHTML = '';
+                    if (auth.currentUser && presencaKey && professor[presencaKey] !== undefined) {
+                        const isPresent = professor[presencaKey];
+                        const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
+                        const presencaText = isPresent ? 'Presente' : 'Ausente';
+                        const dotClass = isPresent ? 'dot-presente' : 'dot-ausente';
+                        presencaBadgeHTML = `<span class="badge ${presencaClass}" onclick="togglePresenca('${professor.id}', ${isPresent})" title="Clique para alternar presença"><span class="status-dot ${dotClass}"></span> ${escapeHTML(presencaText)}</span>`;
+                    }
 
-                if (auth.currentUser && presencaKey && professor[presencaKey] !== undefined) {
-                    const isPresent = professor[presencaKey];
-                    const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
-                    const presencaText = isPresent ? 'Presente' : 'Ausente';
-                    const dotClass = isPresent ? 'dot-presente' : 'dot-ausente';
-                    
-                    const clickHandler = `onclick="togglePresenca('${professor.id}', ${isPresent})"`;
-                    const tooltip = 'title="Clique para alternar presença"';
-                    
-                    tableHTML += `<td><span class="badge ${presencaClass}" ${clickHandler} ${tooltip}><span class="status-dot ${dotClass}"></span> ${escapeHTML(presencaText)}</span></td>`;
-                }
+                    let adminActionsHTML = '';
+                    if (auth.currentUser) {
+                        adminActionsHTML = `
+                            <div class="card-actions admin-only">
+                                <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                            </div>`;
+                    }
 
-                if (auth.currentUser) {
-                    tableHTML += `<td class="admin-only">
-                        <div class="action-btns">
-                            <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
-                            <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
-                            <div class="dropdown">
-                                <button class="action-btn" onclick="toggleActions('${professor.id}', event)" title="Ações">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <div id="dropdown-${professor.id}" class="dropdown-content">
-                                    <button onclick="openProfessorModal('${professor.id}')"><i class="fas fa-edit"></i> Editar</button>
-                                    <button class="delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')"><i class="fas fa-trash"></i> Excluir</button>
+                    cardsHTML += `
+                        <div class="prof-card">
+                            <div class="prof-card-header">
+                                <div class="prof-avatar">${initials}</div>
+                                <div class="prof-card-title">
+                                    <h3>${escapeHTML(professor.nome)}</h3>
+                                    <span class="prof-card-sub">${escapeHTML(professor.disciplina)}</span>
+                                </div>
+                                ${adminActionsHTML}
+                            </div>
+                            <div class="prof-card-body">
+                                <div class="prof-card-detail-item">
+                                    <i class="fas fa-school"></i> <span>${escapeHTML(professor.escola)}</span>
+                                </div>
+                                <div class="prof-card-detail-item">
+                                    <i class="fas fa-graduation-cap"></i> <span>Ano: ${escapeHTML(professor.ano)} | Turma: ${escapeHTML(professor.turma)}</span>
+                                </div>
+                                <div class="prof-card-detail-item">
+                                    <i class="fas fa-clock"></i> ${getTurnoBadge(professor.turno)}
+                                </div>
+                                <div class="prof-card-detail-item">
+                                    <i class="fas fa-phone"></i> <span>${telLink}</span>
                                 </div>
                             </div>
-                        </div>
-                    </td>`;
+                            ${presencaBadgeHTML ? `<div class="prof-card-footer"><span style="font-size: 0.8em; font-weight: 600; color: var(--text-secondary);">Frequência:</span> ${presencaBadgeHTML}</div>` : ''}
+                        </div>`;
+                });
+                
+                cardsHTML += '</div>';
+                professoresListDiv.innerHTML = cardsHTML;
+            } else {
+                professoresListDiv.className = 'table-responsive';
+                const headers = [
+                    { label: 'Nome', key: 'nome' },
+                    { label: 'Escola', key: 'escola' },
+                    { label: 'Disciplina', key: 'disciplina' },
+                    { label: 'Ano', key: 'ano' },
+                    { label: 'Turma', key: 'turma' },
+                    { label: 'Turno', key: 'turno' },
+                    { label: 'Telefone', key: 'telefone' }
+                ];
+                if (auth.currentUser && presencaKey && presencaDateFormatted) {
+                    headers.push({ label: `Presença (${presencaDateFormatted})`, key: presencaKey });
                 }
-                tableHTML += '</tr>';
-            });
-            tableHTML += '</tbody></table>';
-            professoresListDiv.innerHTML = tableHTML;
+                if (auth.currentUser) {
+                    headers.push({ label: 'Ações', key: 'actions' });
+                }
+
+                let tableHTML = '<table>';
+                tableHTML += '<thead><tr>';
+                headers.forEach(h => {
+                    let icon = (h.key !== 'actions') ? '<i class="fas fa-sort" style="opacity: 0.2; margin-left: 5px;"></i>' : '';
+                    if (sortConfig.key === h.key) {
+                        icon = sortConfig.direction === 'asc' 
+                            ? ' <i class="fas fa-sort-up" style="margin-left: 5px;"></i>' 
+                            : ' <i class="fas fa-sort-down" style="margin-left: 5px;"></i>';
+                    }
+                    let adminClass = h.key === 'actions' ? 'admin-only' : '';
+                    let style = h.key === 'actions' ? 'style="cursor: default;"' : '';
+                    tableHTML += `<th onclick="setSort('${h.key}')" class="${adminClass}" ${style}>${h.label}${icon}</th>`;
+                });
+                tableHTML += '</tr></thead><tbody>';
+
+                paginatedItems.forEach(professor => {
+                    tableHTML += '<tr>';
+                    tableHTML += `<td><strong>${escapeHTML(professor.nome)}</strong></td>`;
+                    tableHTML += `<td>${escapeHTML(professor.escola)}</td>`;
+                    tableHTML += `<td>${escapeHTML(professor.disciplina)}</td>`;
+                    tableHTML += `<td>${escapeHTML(professor.ano)}</td>`;
+                    tableHTML += `<td>${escapeHTML(professor.turma)}</td>`;
+                    tableHTML += `<td>${getTurnoBadge(professor.turno)}</td>`;
+                    tableHTML += `<td>${escapeHTML(professor.telefone)}</td>`;
+
+                    if (auth.currentUser && presencaKey && professor[presencaKey] !== undefined) {
+                        const isPresent = professor[presencaKey];
+                        const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
+                        const presencaText = isPresent ? 'Presente' : 'Ausente';
+                        const dotClass = isPresent ? 'dot-presente' : 'dot-ausente';
+                        
+                        const clickHandler = `onclick="togglePresenca('${professor.id}', ${isPresent})"`;
+                        const tooltip = 'title="Clique para alternar presença"';
+                        
+                        tableHTML += `<td><span class="badge ${presencaClass}" ${clickHandler} ${tooltip}><span class="status-dot ${dotClass}"></span> ${escapeHTML(presencaText)}</span></td>`;
+                    }
+
+                    if (auth.currentUser) {
+                        tableHTML += `<td class="admin-only">
+                            <div class="action-btns">
+                                <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                                <div class="dropdown">
+                                    <button class="action-btn" onclick="toggleActions('${professor.id}', event)" title="Ações">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div id="dropdown-${professor.id}" class="dropdown-content">
+                                        <button onclick="openProfessorModal('${professor.id}')"><i class="fas fa-edit"></i> Editar</button>
+                                        <button class="delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')"><i class="fas fa-trash"></i> Excluir</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>`;
+                    }
+                    tableHTML += '</tr>';
+                });
+                tableHTML += '</tbody></table>';
+                professoresListDiv.innerHTML = tableHTML;
+            }
         }
     } else {
         professoresListDiv.innerHTML = '<p class="no-results-message"><i class="fas fa-exclamation-circle"></i> Nenhum professor encontrado com os critérios de busca e filtro.</p>';

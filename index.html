@@ -64,7 +64,13 @@
         </div>
         <div class="results-info">
             <span id="results-count">Carregando dados...</span>
-            <span>Ano Letivo: 2026</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span>Ano Letivo: 2026</span>
+                <div class="view-mode-toggle">
+                    <button id="btn-view-table" class="btn-toggle active" onclick="setViewMode('table')" title="Visualização em Tabela"><i class="fas fa-table-list"></i> Tabela</button>
+                    <button id="btn-view-cards" class="btn-toggle" onclick="setViewMode('cards')" title="Visualização em Cartões"><i class="fas fa-id-card"></i> Cartões</button>
+                </div>
+            </div>
         </div>
         <div id="professores-list" class="table-responsive">
             <!-- A lista de professores será carregada aqui pelo JavaScript -->
