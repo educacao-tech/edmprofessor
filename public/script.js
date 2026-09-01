@@ -306,11 +306,13 @@ function loadData() {
             const configData = configSnap.data();
             jsonData.escolas = configData.escolas || [];
             jsonData.disciplinas = configData.disciplinas || [];
+            jsonData.anos = configData.anos || [];
             initFilters();
             renderTable();
         } else {
             jsonData.escolas = [];
             jsonData.disciplinas = [];
+            jsonData.anos = [];
             initFilters();
             renderTable();
         }
@@ -472,6 +474,7 @@ window.copyShareLink = () => {
     if (searchInput && searchInput.value) params.set('search', searchInput.value);
     if (schoolFilter && schoolFilter.value) params.set('escola', schoolFilter.value);
     if (disciplineFilter && disciplineFilter.value) params.set('disciplina', disciplineFilter.value);
+    if (selectedYears.length > 0) params.set('ano', selectedYears.join(','));
     
     const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     navigator.clipboard.writeText(shareUrl).then(() => {
@@ -497,7 +500,8 @@ window.exportToPDF = () => {
                 safeVal(p.turma).includes(searchTerm) ||
                 safeVal(p.turno).includes(searchTerm)) &&
                (selectedSchool === '' || p.escola === selectedSchool) &&
-               (selectedDisciplina === '' || p.disciplina === selectedDisciplina);
+               (selectedDisciplina === '' || p.disciplina === selectedDisciplina) &&
+               (selectedYears.length === 0 || selectedYears.includes(p.ano));
     });
 
     const logoBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5gYCFQocGmaEqAAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAASSURBVFjHY2AYBaNgFAyDAwAAAzAAAR873eAAAAAASUVORK5CYII=';
@@ -571,18 +575,22 @@ window.exportToPDF = () => {
 };
 
 window.manageMetadata = async (type) => {
-    const label = type === 'escolas' ? 'Escola' : 'Disciplina';
-    let newValue = prompt(`Digite o nome da nova ${label}:`);
+    let label = 'Disciplina';
+    if (type === 'escolas') label = 'Escola';
+    if (type === 'anos') label = 'Ano';
+
+    let newValue = prompt(`Digite o nome do(a) novo(a) ${label}:`);
     
     if (!newValue || newValue.trim() === "") return;
     newValue = newValue.trim().toUpperCase();
 
-    if (jsonData[type].includes(newValue)) {
+    const currentList = jsonData[type] || [];
+    if (currentList.includes(newValue)) {
         window.showNotification(`${label} já existe na lista.`, 'danger');
         return;
     }
 
-    const updatedList = [...jsonData[type], newValue].sort();
+    const updatedList = [...currentList, newValue].sort();
     const updateObj = {};
     updateObj[type] = updatedList;
 
@@ -590,7 +598,7 @@ window.manageMetadata = async (type) => {
         await updateDoc(doc(db, "configuracoes", "geral"), updateObj);
         jsonData[type] = updatedList;
         initFilters();
-        window.showNotification(`${type === 'escolas' ? 'Escola' : 'Disciplina'} adicionada com sucesso!`);
+        window.showNotification(`${label} adicionado(a) com sucesso!`);
     } catch (error) {
         window.showNotification("Erro ao atualizar lista: " + error.message, 'danger');
     }
@@ -603,6 +611,69 @@ const disciplineFilter = document.getElementById('discipline-filter');
 const paginationDiv = document.getElementById('pagination');
 const btnClearFilters = document.getElementById('btn-clear-filters');
 const resultsCountSpan = document.getElementById('results-count');
+
+let selectedYears = [];
+
+window.toggleYearDropdown = (e) => {
+    if (e) e.stopPropagation();
+    const dropdown = document.getElementById('year-dropdown-menu');
+    const btn = document.getElementById('year-filter-btn');
+    if (!dropdown || !btn) return;
+    const isOpen = dropdown.classList.contains('show');
+    
+    document.querySelectorAll('.multiselect-dropdown.show').forEach(d => d.classList.remove('show'));
+    document.querySelectorAll('.multiselect-btn.active').forEach(b => b.classList.remove('active'));
+
+    if (!isOpen) {
+        dropdown.classList.add('show');
+        btn.classList.add('active');
+    }
+};
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-multiselect')) {
+        document.querySelectorAll('.multiselect-dropdown.show').forEach(d => d.classList.remove('show'));
+        document.querySelectorAll('.multiselect-btn.active').forEach(b => b.classList.remove('active'));
+    }
+});
+
+window.handleYearSelectAll = (selectAllCb) => {
+    const checkboxes = document.querySelectorAll('.year-checkbox');
+    if (selectAllCb.checked) {
+        checkboxes.forEach(cb => cb.checked = false);
+        selectedYears = [];
+    }
+    updateYearFilterButtonLabel();
+    debouncedRenderTable();
+};
+
+window.handleYearCheckboxChange = () => {
+    const checkboxes = document.querySelectorAll('.year-checkbox');
+    const selectAllCb = document.getElementById('year-select-all');
+    
+    selectedYears = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+
+    if (selectAllCb) {
+        selectAllCb.checked = (selectedYears.length === 0);
+    }
+    
+    updateYearFilterButtonLabel();
+    debouncedRenderTable();
+};
+
+function updateYearFilterButtonLabel() {
+    const labelSpan = document.getElementById('year-filter-label');
+    if (!labelSpan) return;
+    if (selectedYears.length === 0) {
+        labelSpan.textContent = "Todos os Anos";
+    } else if (selectedYears.length === 1) {
+        labelSpan.textContent = `Ano: ${selectedYears[0]}`;
+    } else {
+        labelSpan.textContent = `Anos (${selectedYears.length}): ${selectedYears.join(', ')}`;
+    }
+}
 
 let sortConfig = {
     key: 'nome',
@@ -652,6 +723,8 @@ function initFilters() {
         ? jsonData.disciplinas
         : [...new Set(jsonData.professores.map(p => p.disciplina))].sort();
 
+    const years = [...new Set(jsonData.professores.map(p => p.ano).filter(Boolean))].sort();
+
     schools.forEach(school => {
         schoolFilter.add(new Option(school, school));
     });
@@ -661,6 +734,29 @@ function initFilters() {
         disciplineFilter.add(new Option(discipline, discipline));
     });
     disciplineFilter.value = currentDiscipline;
+
+    const dropdownMenu = document.getElementById('year-dropdown-menu');
+    if (dropdownMenu) {
+        let html = `
+            <label class="multiselect-option">
+                <input type="checkbox" id="year-select-all" ${selectedYears.length === 0 ? 'checked' : ''} onchange="handleYearSelectAll(this)">
+                <span><strong>(TODOS OS ANOS)</strong></span>
+            </label>
+            <div class="multiselect-divider"></div>
+        `;
+
+        years.forEach(year => {
+            const isChecked = selectedYears.includes(year);
+            html += `
+                <label class="multiselect-option">
+                    <input type="checkbox" class="year-checkbox" value="${escapeHTML(year)}" ${isChecked ? 'checked' : ''} onchange="handleYearCheckboxChange()">
+                    <span>${escapeHTML(year)}</span>
+                </label>
+            `;
+        });
+        dropdownMenu.innerHTML = html;
+        updateYearFilterButtonLabel();
+    }
 }
 
 window.setSort = (key) => {
@@ -744,8 +840,9 @@ function renderTable() {
 
         const matchesSchool = selectedSchool === '' || professor.escola === selectedSchool;
         const matchesDiscipline = selectedDisciplina === '' || professor.disciplina === selectedDisciplina;
+        const matchesYear = selectedYears.length === 0 || selectedYears.includes(professor.ano);
 
-        return matchesSearch && matchesSchool && matchesDiscipline;
+        return matchesSearch && matchesSchool && matchesDiscipline && matchesYear;
     });
 
     // Cálculo do indicador de presença visual
@@ -937,6 +1034,11 @@ if (btnClearFilters) {
         if (searchInput) searchInput.value = '';
         if (schoolFilter) schoolFilter.value = '';
         if (disciplineFilter) disciplineFilter.value = '';
+        selectedYears = [];
+        const selectAllCb = document.getElementById('year-select-all');
+        if (selectAllCb) selectAllCb.checked = true;
+        document.querySelectorAll('.year-checkbox').forEach(cb => cb.checked = false);
+        updateYearFilterButtonLabel();
         resetAndRender();
     });
 }
@@ -964,6 +1066,10 @@ window.addEventListener('load', () => {
     if (params.has('search') && searchInput) searchInput.value = params.get('search').toUpperCase();
     if (params.has('escola') && schoolFilter) schoolFilter.value = params.get('escola').toUpperCase();
     if (params.has('disciplina') && disciplineFilter) disciplineFilter.value = params.get('disciplina').toUpperCase();
+    if (params.has('ano')) {
+        const rawYears = params.get('ano').toUpperCase().split(',');
+        selectedYears = rawYears.map(y => y.trim()).filter(Boolean);
+    }
     if (params.toString()) debouncedRenderTable();
 });
 

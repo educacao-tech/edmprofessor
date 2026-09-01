@@ -57,6 +57,21 @@
                     <button class="btn-clear admin-only" onclick="manageMetadata('disciplinas')" title="Adicionar Disciplina"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
+            <div style="min-width: 180px; position: relative;">
+                <label for="year-filter-btn">Ano(s)</label>
+                <div style="display: flex; gap: 8px;">
+                    <div class="custom-multiselect" id="year-multiselect" style="flex: 1;">
+                        <button type="button" class="multiselect-btn" id="year-filter-btn" onclick="toggleYearDropdown(event)">
+                            <span id="year-filter-label">Todos os Anos</span>
+                            <i class="fas fa-chevron-down multiselect-arrow"></i>
+                        </button>
+                        <div class="multiselect-dropdown" id="year-dropdown-menu">
+                            <!-- As opções de anos serão carregadas aqui pelo JS -->
+                        </div>
+                    </div>
+                    <button class="btn-clear admin-only" onclick="manageMetadata('anos')" title="Adicionar Ano"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
             <div style="flex: 0; min-width: auto;">
                 <label>&nbsp;</label>
                 <button class="btn-clear" id="btn-clear-filters" title="Limpar todos os filtros"><i class="fas fa-filter-circle-xmark"></i></button>

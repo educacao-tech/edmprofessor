@@ -231,6 +231,107 @@ html[data-theme="dark"] .filters {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
 }
 
+/* Custom Multi-Select Component */
+.custom-multiselect {
+    position: relative;
+    width: 100%;
+}
+
+.multiselect-btn {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px 10px;
+    height: 34px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    outline: none;
+    font-size: 0.82rem;
+    font-family: inherit;
+    font-weight: 600;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.multiselect-btn:focus,
+.multiselect-btn.active {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+
+.multiselect-btn .multiselect-arrow {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+}
+
+.multiselect-btn.active .multiselect-arrow {
+    transform: rotate(180deg);
+}
+
+.multiselect-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    min-width: 180px;
+    max-height: 220px;
+    overflow-y: auto;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    padding: 6px;
+}
+
+.multiselect-dropdown.show {
+    display: block;
+    animation: fadeInDown 0.15s ease-out;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.multiselect-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s;
+}
+
+.multiselect-option:hover {
+    background-color: var(--zebra-bg);
+}
+
+.multiselect-option input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.multiselect-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 4px 0;
+}
+
 .results-info {
     flex: 0 0 auto;
     display: flex;

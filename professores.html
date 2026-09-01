@@ -200,6 +200,11 @@
             <select id="discipline-filter">
                 <option value="">Todas</option>
             </select>
+
+            <label for="year-filter">Ano:</label>
+            <select id="year-filter">
+                <option value="">Todos</option>
+            </select>
         </div>
         <div id="professores-list" class="table-responsive">
             <!-- A lista de professores será carregada aqui pelo JavaScript -->
@@ -268,11 +273,13 @@
         // Extrair escolas e disciplinas únicas para os filtros
         const allSchools = [...new Set(jsonData.professores.map(p => p.escola))].sort();
         const allDisciplines = [...new Set(jsonData.professores.map(p => p.disciplina))].sort();
+        const allYears = [...new Set(jsonData.professores.map(p => p.ano).filter(Boolean))].sort();
 
         const professoresListDiv = document.getElementById('professores-list');
         const searchInput = document.getElementById('search-input');
         const schoolFilter = document.getElementById('school-filter');
         const disciplineFilter = document.getElementById('discipline-filter');
+        const yearFilter = document.getElementById('year-filter');
         const paginationDiv = document.getElementById('pagination');
 
         // Configuração de ordenação inicial
@@ -300,6 +307,16 @@
             option.textContent = discipline;
             disciplineFilter.appendChild(option);
         });
+
+        // Preencher os filtros de ano
+        if (yearFilter) {
+            allYears.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearFilter.appendChild(option);
+            });
+        }
 
         // Função para alterar a ordenação
         window.setSort = (key) => {
@@ -343,6 +360,7 @@
             const searchTerm = searchInput.value.toLowerCase();
             const selectedSchool = schoolFilter.value;
             const selectedDisciplina = disciplineFilter.value;
+            const selectedYear = yearFilter ? yearFilter.value : '';
 
             const filteredProfessores = jsonData.professores.filter(professor => {
                 const matchesSearch = (
@@ -356,8 +374,9 @@
 
                 const matchesSchool = selectedSchool === '' || professor.escola === selectedSchool;
                 const matchesDiscipline = selectedDisciplina === '' || professor.disciplina === selectedDisciplina;
+                const matchesYear = selectedYear === '' || professor.ano === selectedYear;
 
-                return matchesSearch && matchesSchool && matchesDiscipline;
+                return matchesSearch && matchesSchool && matchesDiscipline && matchesYear;
             });
 
             // Lógica de Ordenação
@@ -430,6 +449,7 @@
         searchInput.addEventListener('input', resetAndRender);
         schoolFilter.addEventListener('change', resetAndRender);
         disciplineFilter.addEventListener('change', resetAndRender);
+        if (yearFilter) yearFilter.addEventListener('change', resetAndRender);
 
         // Renderizar a tabela inicialmente
         renderTable();
