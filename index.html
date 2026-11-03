@@ -45,6 +45,7 @@
                 <div class="header-actions" style="margin-left: auto; display: flex; gap: 8px;">
                     <button class="btn btn-secondary" onclick="exportToPDF()" title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
                     <button class="btn btn-secondary" onclick="copyShareLink()" title="Copiar link desta visualização"><i class="fas fa-share-nodes"></i> Compartilhar</button>
+                    <button class="btn btn-secondary admin-only" id="btn-sync-emails" onclick="syncEmailsFromPresenca()" title="Buscar e-mails da lista de presença oficial"><i class="fas fa-envelope-circle-check"></i> Sincronizar E-mails</button>
                     <button class="btn btn-primary admin-only" onclick="openProfessorModal()"><i class="fas fa-plus"></i> Novo Professor</button>
                 </div>
             </div>
@@ -313,58 +314,143 @@
     </div>
 
     <!-- Modal Professor -->
+    <!-- Modal Professor -->
     <div id="professorModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content professor-modal-content">
             <div id="modalSuccessOverlay" class="modal-success-overlay">
                 <i class="fas fa-check-circle"></i>
                 <h3 id="modalSuccessMessage">Sucesso!</h3>
             </div>
             <div class="modal-header">
-                <h2 id="modalTitle">Novo Professor</h2>
-                <span style="cursor:pointer" onclick="closeProfessorModal()">&times;</span>
-            </div>
-            <form id="professorForm">
-                <input type="hidden" id="prof-id">
-                <div class="form-group">
-                    <label>Nome Completo</label>
-                    <input type="text" id="prof-nome" required>
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge">
+                        <i class="fas fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <h2 id="modalTitle">Novo Professor</h2>
+                        <p class="modal-subtitle" id="modalSubtitle">Preencha os dados cadastrais do docente</p>
+                    </div>
                 </div>
+                <button type="button" class="modal-close-btn" onclick="closeProfessorModal()" title="Fechar" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+                        <form id="professorForm">
+                <input type="hidden" id="prof-id">
+
+                <!-- Seção 1: Identificação & Contato -->
+                <div class="form-section-title">
+                    <i class="fas fa-id-card"></i>
+                    <span>Identificação & Contato</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="prof-nome">Nome Completo <span class="req-star">*</span></label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" id="prof-nome" placeholder="Ex: Carlos Alberto da Silva" required autocomplete="name">
+                    </div>
+                </div>
+
+                <div class="form-row form-row-contact">
+                    <div class="form-group">
+                        <label for="prof-email">E-mail Institucional / Pessoal</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" id="prof-email" class="no-uppercase" placeholder="professor@educacao.batatais.sp.gov.br" autocomplete="email" autocapitalize="none">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-telefone">Telefone / WhatsApp</label>
+                        <div class="input-with-icon">
+                            <i class="fab fa-whatsapp input-icon icon-whatsapp"></i>
+                            <input type="text" id="prof-telefone" class="no-uppercase" placeholder="(16) 90000-0000" autocomplete="tel">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção 2: Atribuição Pedagógica -->
+                <div class="form-section-title">
+                    <i class="fas fa-chalkboard"></i>
+                    <span>Atribuição Pedagógica</span>
+                </div>
+
                 <div class="form-row form-row-2">
                     <div class="form-group">
-                        <label>Escola</label>
-                        <select id="prof-escola" required></select>
+                        <label for="prof-escola">Escola <span class="req-star">*</span></label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-school input-icon"></i>
+                            <select id="prof-escola" required></select>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Disciplina</label>
-                        <select id="prof-disciplina" required></select>
+                        <label for="prof-disciplina">Disciplina <span class="req-star">*</span></label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-book-open input-icon"></i>
+                            <select id="prof-disciplina" required></select>
+                        </div>
                     </div>
                 </div>
+
                 <div class="form-row form-row-3">
                     <div class="form-group">
-                        <label>Ano</label>
-                        <input type="text" id="prof-ano">
+                        <label for="prof-ano">Ano / Série</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-calendar-alt input-icon"></i>
+                            <input type="text" id="prof-ano" list="anos-sugestoes" placeholder="Ex: 5º ANO">
+                        </div>
+                        <datalist id="anos-sugestoes">
+                            <option value="1º ANO">
+                            <option value="2º ANO">
+                            <option value="3º ANO">
+                            <option value="4º ANO">
+                            <option value="5º ANO">
+                            <option value="6º ANO">
+                            <option value="7º ANO">
+                            <option value="8º ANO">
+                            <option value="9º ANO">
+                            <option value="EJA">
+                            <option value="INFANTIL">
+                        </datalist>
                     </div>
                     <div class="form-group">
-                        <label>Turma</label>
-                        <input type="text" id="prof-turma">
+                        <label for="prof-turma">Turma</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-layer-group input-icon"></i>
+                            <input type="text" id="prof-turma" list="turmas-sugestoes" placeholder="Ex: A, B...">
+                        </div>
+                        <datalist id="turmas-sugestoes">
+                            <option value="A">
+                            <option value="B">
+                            <option value="C">
+                            <option value="D">
+                            <option value="E">
+                            <option value="1">
+                            <option value="2">
+                            <option value="ÚNICA">
+                        </datalist>
                     </div>
                     <div class="form-group">
-                        <label>Turno</label>
-                        <select id="prof-turno">
-                            <option value="MANHÃ">MANHÃ</option>
-                            <option value="TARDE">TARDE</option>
-                            <option value="INTEGRAL">INTEGRAL</option>
-                            <option value="NOITE">NOITE</option>
-                        </select>
+                        <label for="prof-turno">Turno</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-clock input-icon"></i>
+                            <select id="prof-turno">
+                                <option value="MANHÃ">MANHÃ</option>
+                                <option value="TARDE">TARDE</option>
+                                <option value="INTEGRAL">INTEGRAL</option>
+                                <option value="NOITE">NOITE</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Telefone</label>
-                    <input type="text" id="prof-telefone" placeholder="(00) 00000-0000">
-                </div>
+
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeProfessorModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeProfessorModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-submit-prof">
+                        <i class="fas fa-check"></i> <span id="modalSubmitText">Cadastrar</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -387,37 +473,61 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
+            <div id="login-error-alert" class="login-alert" style="display: none;">
+                <div class="login-alert-icon"><i class="fas fa-circle-exclamation"></i></div>
+                <div class="login-alert-body">
+                    <strong id="login-error-title">Aviso do Firebase</strong>
+                    <p id="login-error-msg" style="margin: 4px 0 0 0; font-size: 0.84rem; line-height: 1.4;"></p>
+                    <div id="login-error-action" style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                </div>
+            </div>
             <form id="loginForm">
+                <button type="button" class="btn btn-google-primary" onclick="loginSocial('google')">
+                    <i class="fab fa-google" style="color: #ea4335;"></i>
+                    <span>Entrar com a Conta Google</span>
+                </button>
+
+                <div class="social-divider">
+                    <span>ou use e-mail e senha</span>
+                </div>
+
                 <div class="form-group">
                     <label for="login-email">E-mail</label>
                     <div class="input-with-icon">
                         <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="login-email" placeholder="admin@exemplo.com" required autocomplete="email">
+                        <input type="email" id="login-email" class="no-uppercase" placeholder="admin@exemplo.com ou sua conta google" required autocomplete="email" autocapitalize="none">
+                    </div>
+                    <div id="google-email-hint" class="google-detect-hint">
+                        <i class="fab fa-google" style="color: #4285f4;"></i>
+                        <span>Conta Google detectada! Você pode clicar em <strong>Entrar com a Conta Google</strong> acima para acesso direto.</span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="login-password">Senha</label>
                     <div class="input-with-icon">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="login-password" placeholder="Digite sua senha" required autocomplete="current-password">
+                        <input type="password" id="login-password" class="no-uppercase" placeholder="Digite sua senha" required autocomplete="current-password" autocorrect="off" autocapitalize="none" spellcheck="false">
                         <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('login-password', this)" title="Mostrar ou ocultar senha" tabindex="-1">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
+                    <small class="password-hint">
+                        <i class="fas fa-circle-check"></i> Aceita letras maiúsculas, minúsculas e números
+                    </small>
                 </div>
                 <div class="form-actions login-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">Cancelar</button>
+                    <button type="button" class="btn btn-secondary btn-register" onclick="handleCreateAccount()" title="Cadastrar novo usuário no Firebase">
+                        <i class="fas fa-user-plus"></i> Cadastrar
+                    </button>
                     <button type="submit" class="btn btn-primary btn-submit-login">
                         <i class="fas fa-arrow-right-to-bracket"></i> Entrar
                     </button>
                 </div>
                 <div class="social-divider">
-                    <span>Ou entre com</span>
+                    <span>outras opções</span>
                 </div>
                 <div class="social-login-grid">
-                    <button type="button" class="btn btn-social" onclick="loginSocial('google')">
-                        <i class="fab fa-google" style="color: #ea4335;"></i> Google
-                    </button>
                     <button type="button" class="btn btn-social" onclick="loginSocial('github')">
                         <i class="fab fa-github"></i> GitHub
                     </button>
