@@ -162,30 +162,57 @@
         </div>
     </div>
 
-    <!-- Modal Login -->
+        <!-- Modal Login -->
     <div id="loginModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content login-modal-content">
             <div class="modal-header">
-                <h2>Acesso Administrativo</h2>
-                <span style="cursor:pointer" onclick="closeLoginModal()">&times;</span>
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <h2>Acesso Administrativo</h2>
+                        <p class="modal-subtitle">Identifique-se para gerenciar o sistema</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeLoginModal()" title="Fechar" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>E-mail</label>
-                    <input type="email" id="login-email" required>
+                    <label for="login-email">E-mail</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" id="login-email" placeholder="admin@exemplo.com" required autocomplete="email">
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label>Senha</label>
-                    <input type="password" id="login-password" required>
+                    <label for="login-password">Senha</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="login-password" placeholder="Digite sua senha" required autocomplete="current-password">
+                        <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('login-password', this)" title="Mostrar ou ocultar senha" tabindex="-1">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="form-actions">
+                <div class="form-actions login-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Entrar</button>
+                    <button type="submit" class="btn btn-primary btn-submit-login">
+                        <i class="fas fa-arrow-right-to-bracket"></i> Entrar
+                    </button>
                 </div>
-                <div class="social-login">
-                    <p style="text-align: center; font-size: 0.8em; color: var(--text-secondary);">Ou entre com</p>
-                    <button type="button" class="btn btn-social" onclick="loginSocial('google')"><i class="fab fa-google" style="color: #ea4335;"></i> Google</button>
-                    <button type="button" class="btn btn-social" onclick="loginSocial('github')"><i class="fab fa-github"></i> GitHub</button>
+                <div class="social-divider">
+                    <span>Ou entre com</span>
+                </div>
+                <div class="social-login-grid">
+                    <button type="button" class="btn btn-social" onclick="loginSocial('google')">
+                        <i class="fab fa-google" style="color: #ea4335;"></i> Google
+                    </button>
+                    <button type="button" class="btn btn-social" onclick="loginSocial('github')">
+                        <i class="fab fa-github"></i> GitHub
+                    </button>
                 </div>
             </form>
         </div>

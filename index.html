@@ -20,88 +20,296 @@
             <button id="theme-toggle" title="Alternar Modo Escuro/Claro" aria-label="Alternar Tema"><i class="fas fa-moon"></i></button>
         </div>
         <div class="header-section">
-            <h1>Lista de Professores</h1>
-            <div class="header-content">
-                <p class="header-subtitle">Sistema de Gestão e Monitoramento de Frequência Acadêmica</p>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="exportToPDF()" title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
-                    <button class="btn btn-secondary" onclick="copyShareLink()" title="Copiar link desta visualização"><i class="fas fa-share-nodes"></i> Compartilhar Vista</button>
-                    <button class="btn btn-primary admin-only" onclick="openProfessorModal()"><i class="fas fa-plus"></i> Novo Professor</button>
+            <div class="header-title-row">
+                <div>
+                    <h1>Sistema de Gestão Docente & Frequência</h1>
+                    <p class="header-subtitle">Educação Digital e Midiática (EDM) • Secretaria Municipal de Educação</p>
                 </div>
+            </div>
+            
+            <!-- Barra de Abas de Navegação Principal -->
+            <div class="main-nav-tabs">
+                <button class="nav-tab-btn active" id="tab-btn-professores" onclick="switchMainTab('professores')">
+                    <i class="fas fa-users-gear"></i> Cadastro Docente
+                </button>
+                <button class="nav-tab-btn" id="tab-btn-cruzamento" onclick="switchMainTab('cruzamento')">
+                    <i class="fas fa-scale-balanced"></i> Cruzamento & Faltas
+                    <span class="tab-badge-alert" id="tab-faltas-badge" title="Faltas detectadas">...</span>
+                </button>
             </div>
         </div>
 
-        <div class="filters">
-            <div>
-                <label for="search-input">Pesquisa Geral</label>
-                <div class="search-wrapper">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="search-input" placeholder="Nome, escola, disciplina...">
+        <!-- ABA 1: CADASTRO DE PROFESSORES -->
+        <div id="view-tab-professores" class="main-tab-pane active">
+            <div class="tab-sub-header">
+                <div class="header-actions" style="margin-left: auto; display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" onclick="exportToPDF()" title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-secondary" onclick="copyShareLink()" title="Copiar link desta visualização"><i class="fas fa-share-nodes"></i> Compartilhar</button>
+                    <button class="btn btn-primary admin-only" onclick="openProfessorModal()"><i class="fas fa-plus"></i> Novo Professor</button>
                 </div>
             </div>
-            <div>
-                <label for="school-filter">Escola</label>
-                <div style="display: flex; gap: 8px;">
-                    <select id="school-filter">
+
+            <div class="filters">
+                <div>
+                    <label for="search-input">Pesquisa Geral</label>
+                    <div class="search-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="search-input" placeholder="Nome, escola, disciplina...">
+                    </div>
+                </div>
+                <div>
+                    <label for="school-filter">Escola</label>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="school-filter">
+                            <option value="">Todas as Escolas</option>
+                        </select>
+                        <button class="btn-clear admin-only" onclick="manageMetadata('escolas')" title="Adicionar Escola"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <label for="discipline-filter">Disciplina</label>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="discipline-filter">
+                            <option value="">Todas as Disciplinas</option>
+                        </select>
+                        <button class="btn-clear admin-only" onclick="manageMetadata('disciplinas')" title="Adicionar Disciplina"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div style="min-width: 180px; position: relative;">
+                    <label for="year-filter-btn">Ano(s)</label>
+                    <div style="display: flex; gap: 8px;">
+                        <div class="custom-multiselect" id="year-multiselect" style="flex: 1;">
+                            <button type="button" class="multiselect-btn" id="year-filter-btn" onclick="toggleYearDropdown(event)">
+                                <span id="year-filter-label">Todos os Anos</span>
+                                <i class="fas fa-chevron-down multiselect-arrow"></i>
+                            </button>
+                            <div class="multiselect-dropdown" id="year-dropdown-menu">
+                                <!-- As opções de anos serão carregadas aqui pelo JS -->
+                            </div>
+                        </div>
+                        <button class="btn-clear admin-only" onclick="manageMetadata('anos')" title="Adicionar Ano"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div style="flex: 0; min-width: auto;">
+                    <label>&nbsp;</label>
+                    <button class="btn-clear" id="btn-clear-filters" title="Limpar todos os filtros"><i class="fas fa-filter-circle-xmark"></i></button>
+                </div>
+            </div>
+            <div class="results-info">
+                <span id="results-count">Carregando dados...</span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span>Ano Letivo: 2026</span>
+                    <div class="view-mode-toggle">
+                        <button id="btn-view-table" class="btn-toggle active" onclick="setViewMode('table')" title="Visualização em Tabela"><i class="fas fa-table-list"></i> Tabela</button>
+                        <button id="btn-view-cards" class="btn-toggle" onclick="setViewMode('cards')" title="Visualização em Cartões"><i class="fas fa-id-card"></i> Cartões</button>
+                    </div>
+                </div>
+            </div>
+            <div id="professores-list" class="table-responsive">
+                <!-- A lista de professores será carregada aqui pelo JavaScript -->
+            </div>
+            <div id="pagination" class="pagination"></div>
+        </div>
+
+        <!-- ABA 2: CRUZAMENTO DE INFORMAÇÕES & FALTAS (AUDITORIA) -->
+        <div id="view-tab-cruzamento" class="main-tab-pane" style="display: none;">
+            <!-- Painel de Controle Direto da URL da Planilha Google -->
+            <div class="sheet-url-control-panel">
+                <div class="sheet-url-header">
+                    <div class="sheet-url-title">
+                        <i class="fas fa-file-csv text-primary"></i>
+                        <span>Link da Planilha Google (Respostas do Formulário CSV):</span>
+                    </div>
+                    <div class="sheet-url-status" id="sheetUrlStatusBadge">
+                        <i class="fas fa-circle-check text-success"></i> Pronto para Cruzamento
+                    </div>
+                </div>
+                <div class="sheet-url-input-group">
+                    <div class="sheet-input-wrapper">
+                        <i class="fas fa-link sheet-input-icon"></i>
+                        <input type="url" id="cruzamento-sheet-input" placeholder="Cole a URL CSV publicada na web (ex: https://docs.google.com/spreadsheets/d/.../pub?output=csv)" spellcheck="false" autocomplete="off">
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="btnApplySheetUrl" onclick="applySheetUrlFromInput()" title="Carregar dados desta planilha"><i class="fas fa-rotate"></i> Carregar</button>
+                    <button class="btn btn-secondary btn-sm" onclick="resetDefaultSheetInput()" title="Restaurar link padrão da formação"><i class="fas fa-rotate-left"></i> Padrão</button>
+                    <button class="btn btn-secondary btn-sm" onclick="openCurrentSheetInBrowser()" title="Abrir planilha no navegador"><i class="fas fa-arrow-up-right-from-square"></i> Abrir</button>
+                </div>
+            </div>
+
+            <!-- Barra de Status da Conexão e Ações Rápidas -->
+            <div class="cruzamento-status-bar" id="cruzamentoStatusBar">
+                <div class="cruzamento-status-info">
+                    <div class="status-pulse-dot" id="cruzamentoPulseDot"></div>
+                    <div>
+                        <strong id="cruzamentoStatusTitle">Conectando à Planilha Google...</strong>
+                        <p id="cruzamentoStatusDesc" class="cruzamento-status-sub">Buscando dados em tempo real</p>
+                    </div>
+                </div>
+                <div class="cruzamento-actions-bar">
+                    <button class="btn btn-secondary btn-sm" onclick="syncCruzamentoData(true)" title="Recarregar dados da planilha Google"><i class="fas fa-rotate"></i> Atualizar Dados</button>
+                    <button class="btn btn-secondary btn-sm" onclick="exportCruzamentoPDF()" title="Gerar Relatório de Faltas e Presenças em PDF"><i class="fas fa-file-pdf text-danger"></i> Relatório PDF</button>
+                    <button class="btn btn-secondary btn-sm" onclick="openWhatsAppModal()" title="Compartilhar resumo de faltas no WhatsApp"><i class="fab fa-whatsapp text-success"></i> WhatsApp</button>
+                    <button class="btn btn-secondary btn-sm" onclick="exportCruzamentoCSV()" title="Baixar cruzamento em CSV"><i class="fas fa-file-csv"></i> CSV</button>
+                    <button class="btn btn-primary btn-sm admin-only" id="btnSalvarPresencasFirestore" onclick="salvarPresencasNoFirestore()" title="Salvar presença dos docentes no banco de dados Firestore"><i class="fas fa-cloud-arrow-up"></i> Gravar no Banco</button>
+                </div>
+            </div>
+
+            <!-- KPIs e Indicadores Visuais de Faltas/Presenças -->
+            <div class="cruzamento-kpis-grid">
+                <div class="cruzamento-kpi-card kpi-total">
+                    <div class="kpi-icon-wrapper"><i class="fas fa-id-card-clip"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Cadastrados na Base</span>
+                        <h3 class="kpi-number" id="kpi-cadastrados-total">0</h3>
+                        <span class="kpi-foot">Professores no Sistema</span>
+                    </div>
+                </div>
+                <div class="cruzamento-kpi-card kpi-presentes">
+                    <div class="kpi-icon-wrapper"><i class="fas fa-circle-check"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Presentes Confirmados</span>
+                        <h3 class="kpi-number" id="kpi-presentes-total">0</h3>
+                        <span class="kpi-foot" id="kpi-presentes-pct">0% de comparecimento</span>
+                    </div>
+                </div>
+                <div class="cruzamento-kpi-card kpi-faltas">
+                    <div class="kpi-icon-wrapper"><i class="fas fa-circle-xmark"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Faltas Identificadas</span>
+                        <h3 class="kpi-number" id="kpi-faltas-total">0</h3>
+                        <span class="kpi-foot" id="kpi-faltas-pct">0% de ausência</span>
+                    </div>
+                </div>
+                <div class="cruzamento-kpi-card kpi-extras">
+                    <div class="kpi-icon-wrapper"><i class="fas fa-user-plus"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Registros Avulsos</span>
+                        <h3 class="kpi-number" id="kpi-extras-total">0</h3>
+                        <span class="kpi-foot">Assinaram s/ cadastro</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pílulas Rápidas de Escolas -->
+            <div class="cruzamento-schools-bar" id="cruzamentoSchoolsPills">
+                <!-- Carregado via JS com contagens individuais -->
+            </div>
+
+            <!-- Filtros da Aba de Cruzamento -->
+            <div class="filters cruzamento-filters">
+                <div style="flex: 2; min-width: 240px;">
+                    <label for="cruzamento-search">Buscar no Cruzamento</label>
+                    <div class="search-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="cruzamento-search" placeholder="Nome do professor, e-mail, escola...">
+                    </div>
+                </div>
+                <div style="flex: 1.2; min-width: 170px;">
+                    <label for="cruzamento-status-filter">Status da Presença</label>
+                    <select id="cruzamento-status-filter">
+                        <option value="todos">Todos os Registros</option>
+                        <option value="faltas" selected>❌ Apenas Faltas (Ausentes)</option>
+                        <option value="presentes">✅ Apenas Presentes</option>
+                        <option value="extras">➕ Apenas Registros Avulsos</option>
+                    </select>
+                </div>
+                <div style="flex: 1.2; min-width: 170px;">
+                    <label for="cruzamento-school-filter">Filtrar por Escola</label>
+                    <select id="cruzamento-school-filter">
                         <option value="">Todas as Escolas</option>
                     </select>
-                    <button class="btn-clear admin-only" onclick="manageMetadata('escolas')" title="Adicionar Escola"><i class="fas fa-plus"></i></button>
+                </div>
+                <div style="flex: 0; min-width: auto;">
+                    <label>&nbsp;</label>
+                    <button class="btn-clear" id="btn-clear-cruzamento-filters" onclick="clearCruzamentoFilters()" title="Limpar Filtros"><i class="fas fa-filter-circle-xmark"></i></button>
                 </div>
             </div>
-            <div>
-                <label for="discipline-filter">Disciplina</label>
-                <div style="display: flex; gap: 8px;">
-                    <select id="discipline-filter">
-                        <option value="">Todas as Disciplinas</option>
-                    </select>
-                    <button class="btn-clear admin-only" onclick="manageMetadata('disciplinas')" title="Adicionar Disciplina"><i class="fas fa-plus"></i></button>
-                </div>
-            </div>
-            <div style="min-width: 180px; position: relative;">
-                <label for="year-filter-btn">Ano(s)</label>
-                <div style="display: flex; gap: 8px;">
-                    <div class="custom-multiselect" id="year-multiselect" style="flex: 1;">
-                        <button type="button" class="multiselect-btn" id="year-filter-btn" onclick="toggleYearDropdown(event)">
-                            <span id="year-filter-label">Todos os Anos</span>
-                            <i class="fas fa-chevron-down multiselect-arrow"></i>
-                        </button>
-                        <div class="multiselect-dropdown" id="year-dropdown-menu">
-                            <!-- As opções de anos serão carregadas aqui pelo JS -->
-                        </div>
+
+            <!-- Contagem de Resultados e Toggle de Visualização -->
+            <div class="results-info">
+                <span id="cruzamento-results-count">Calculando cruzamento...</span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="view-mode-toggle">
+                        <button id="btn-cruz-view-table" class="btn-toggle active" onclick="setCruzamentoViewMode('table')" title="Visualização em Tabela"><i class="fas fa-table-list"></i> Tabela</button>
+                        <button id="btn-cruz-view-cards" class="btn-toggle" onclick="setCruzamentoViewMode('cards')" title="Visualização em Cartões"><i class="fas fa-id-card"></i> Cartões</button>
                     </div>
-                    <button class="btn-clear admin-only" onclick="manageMetadata('anos')" title="Adicionar Ano"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
-            <div style="flex: 0; min-width: auto;">
-                <label>&nbsp;</label>
-                <button class="btn-clear" id="btn-clear-filters" title="Limpar todos os filtros"><i class="fas fa-filter-circle-xmark"></i></button>
+
+            <!-- Tabela / Cards de Cruzamento -->
+            <div id="cruzamento-list" class="table-responsive">
+                <!-- Tabela de Cruzamento renderizada pelo JavaScript -->
             </div>
+            <div id="cruzamento-pagination" class="pagination"></div>
         </div>
-        <div class="results-info">
-            <span id="results-count">Carregando dados...</span>
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span>Ano Letivo: 2026</span>
-                <div class="view-mode-toggle">
-                    <button id="btn-view-table" class="btn-toggle active" onclick="setViewMode('table')" title="Visualização em Tabela"><i class="fas fa-table-list"></i> Tabela</button>
-                    <button id="btn-view-cards" class="btn-toggle" onclick="setViewMode('cards')" title="Visualização em Cartões"><i class="fas fa-id-card"></i> Cartões</button>
-                </div>
-            </div>
-        </div>
-        <div id="professores-list" class="table-responsive">
-            <!-- A lista de professores será carregada aqui pelo JavaScript -->
-        </div>
-        <div id="pagination" class="pagination"></div>
 
         <!-- Rodapé de Informações de Atualização (Git) -->
         <footer class="app-footer">
             <div class="footer-info">
-                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>03/08/2026 Ã s 09:49</strong></span>
+                <span><i class="fas fa-clock-rotate-left"></i> Sistema EDM Professor <strong>2026</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>cebe5e8</code></span>
+                <span><i class="fas fa-shield-halved"></i> Auditoria de Frequência em Tempo Real</span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>sssssssssssssss</em></span>
+                <span class="footer-changes" title="Status"><i class="fas fa-database"></i> Firestore & Google Sheets Integrados</span>
             </div>
         </footer>
+    </div>
+
+    <!-- Modal de Configuração da Planilha Google -->
+    <div id="configSheetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-table text-primary"></i> Configurar Planilha de Presença</h2>
+                <span style="cursor:pointer" onclick="closeConfigSheetModal()">&times;</span>
+            </div>
+            <form id="configSheetForm" onsubmit="handleSaveSheetConfig(event)">
+                <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 15px;">
+                    Insira o link publicado na web como <strong>CSV</strong> da planilha de respostas do Google Forms para realizar o cruzamento automático.
+                </p>
+                <div class="form-group">
+                    <label>URL do CSV Publicado na Web (Google Sheets)</label>
+                    <input type="url" id="sheet-csv-url" required placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv" style="font-size: 0.85rem; font-family: monospace;">
+                </div>
+                <div style="background: rgba(0, 123, 255, 0.08); padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary-color); margin-bottom: 15px; font-size: 0.82rem;">
+                    <strong>💡 Como obter o link CSV da sua planilha:</strong><br>
+                    1. No Google Planilhas, clique em <em>Arquivo</em> &gt; <em>Compartilhar</em> &gt; <em>Publicar na Web</em>.<br>
+                    2. Escolha o formato <strong>Valores separados por vírgula (.csv)</strong> e clique em <em>Publicar</em>.<br>
+                    3. Cole o link gerado no campo acima.
+                </div>
+                <div class="form-actions" style="justify-content: space-between;">
+                    <button type="button" class="btn btn-secondary" onclick="restoreDefaultSheetUrl()"><i class="fas fa-rotate-left"></i> Restaurar Padrão</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeConfigSheetModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Salvar e Sincronizar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Compartilhamento WhatsApp -->
+    <div id="whatsAppModal" class="modal">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h2><i class="fab fa-whatsapp text-success"></i> Relatório de Faltas para WhatsApp</h2>
+                <span style="cursor:pointer" onclick="closeWhatsAppModal()">&times;</span>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+                    <label style="font-weight: 700; font-size: 0.85rem; margin: 0;">Filtrar Resumo por Escola:</label>
+                    <select id="whatsapp-school-select" onchange="updateWhatsAppPreview()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-size: 0.85rem;">
+                        <option value="">Todas as Escolas (Consolidado)</option>
+                    </select>
+                </div>
+                <textarea id="whatsapp-message-text" rows="12" style="width: 100%; box-sizing: border-box; padding: 12px; font-family: monospace; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); color: var(--text-color); resize: vertical;"></textarea>
+            </div>
+            <div class="form-actions" style="justify-content: space-between;">
+                <button type="button" class="btn btn-secondary" onclick="closeWhatsAppModal()">Fechar</button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-secondary" onclick="copyWhatsAppMessage()"><i class="fas fa-copy"></i> Copiar Mensagem</button>
+                    <button type="button" class="btn btn-primary" style="background-color: #25d366; border-color: #25d366;" onclick="sendWhatsAppDirect()"><i class="fab fa-whatsapp"></i> Abrir WhatsApp</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal Professor -->
@@ -162,30 +370,57 @@
         </div>
     </div>
 
-    <!-- Modal Login -->
+        <!-- Modal Login -->
     <div id="loginModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content login-modal-content">
             <div class="modal-header">
-                <h2>Acesso Administrativo</h2>
-                <span style="cursor:pointer" onclick="closeLoginModal()">&times;</span>
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <h2>Acesso Administrativo</h2>
+                        <p class="modal-subtitle">Identifique-se para gerenciar o sistema</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeLoginModal()" title="Fechar" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>E-mail</label>
-                    <input type="email" id="login-email" required>
+                    <label for="login-email">E-mail</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" id="login-email" placeholder="admin@exemplo.com" required autocomplete="email">
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label>Senha</label>
-                    <input type="password" id="login-password" required>
+                    <label for="login-password">Senha</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="login-password" placeholder="Digite sua senha" required autocomplete="current-password">
+                        <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('login-password', this)" title="Mostrar ou ocultar senha" tabindex="-1">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="form-actions">
+                <div class="form-actions login-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Entrar</button>
+                    <button type="submit" class="btn btn-primary btn-submit-login">
+                        <i class="fas fa-arrow-right-to-bracket"></i> Entrar
+                    </button>
                 </div>
-                <div class="social-login">
-                    <p style="text-align: center; font-size: 0.8em; color: var(--text-secondary);">Ou entre com</p>
-                    <button type="button" class="btn btn-social" onclick="loginSocial('google')"><i class="fab fa-google" style="color: #ea4335;"></i> Google</button>
-                    <button type="button" class="btn btn-social" onclick="loginSocial('github')"><i class="fab fa-github"></i> GitHub</button>
+                <div class="social-divider">
+                    <span>Ou entre com</span>
+                </div>
+                <div class="social-login-grid">
+                    <button type="button" class="btn btn-social" onclick="loginSocial('google')">
+                        <i class="fab fa-google" style="color: #ea4335;"></i> Google
+                    </button>
+                    <button type="button" class="btn btn-social" onclick="loginSocial('github')">
+                        <i class="fab fa-github"></i> GitHub
+                    </button>
                 </div>
             </form>
         </div>

@@ -163,14 +163,47 @@ window.handleAuthClick = async () => {
     }
 };
 
+window.togglePasswordVisibility = (inputId, btn) => {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    const icon = btn.querySelector('i');
+    if (icon) {
+        icon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+    }
+};
+
 window.openLoginModal = () => {
     if (loginForm) loginForm.reset();
-    if (loginModal) loginModal.style.display = 'block';
+    const passInput = document.getElementById('login-password');
+    if (passInput) passInput.type = 'password';
+    const toggleIcon = loginForm ? loginForm.querySelector('.btn-toggle-password i') : null;
+    if (toggleIcon) toggleIcon.className = 'fas fa-eye';
+    if (loginModal) {
+        loginModal.style.display = 'block';
+        setTimeout(() => {
+            const emailInput = document.getElementById('login-email');
+            if (emailInput) emailInput.focus();
+        }, 100);
+    }
 };
 
 window.closeLoginModal = () => {
     if (loginModal) loginModal.style.display = 'none';
 };
+
+// Fechar modal ao clicar fora ou ao teclar Escape
+if (loginModal) {
+    loginModal.addEventListener('click', (e) => {
+        if (e.target === loginModal) window.closeLoginModal();
+    });
+}
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && loginModal && loginModal.style.display === 'block') {
+        window.closeLoginModal();
+    }
+});
 
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -191,7 +224,7 @@ if (loginForm) {
             window.showNotification(`Falha no login: ${error.code}`, 'danger');
         } finally {
             btn.disabled = false;
-            btn.textContent = 'Entrar';
+            btn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Entrar';
         }
     });
 }

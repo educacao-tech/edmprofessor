@@ -163,14 +163,47 @@ window.handleAuthClick = async () => {
     }
 };
 
+window.togglePasswordVisibility = (inputId, btn) => {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    const icon = btn.querySelector('i');
+    if (icon) {
+        icon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+    }
+};
+
 window.openLoginModal = () => {
     if (loginForm) loginForm.reset();
-    if (loginModal) loginModal.style.display = 'block';
+    const passInput = document.getElementById('login-password');
+    if (passInput) passInput.type = 'password';
+    const toggleIcon = loginForm ? loginForm.querySelector('.btn-toggle-password i') : null;
+    if (toggleIcon) toggleIcon.className = 'fas fa-eye';
+    if (loginModal) {
+        loginModal.style.display = 'block';
+        setTimeout(() => {
+            const emailInput = document.getElementById('login-email');
+            if (emailInput) emailInput.focus();
+        }, 100);
+    }
 };
 
 window.closeLoginModal = () => {
     if (loginModal) loginModal.style.display = 'none';
 };
+
+// Fechar modal ao clicar fora ou ao teclar Escape
+if (loginModal) {
+    loginModal.addEventListener('click', (e) => {
+        if (e.target === loginModal) window.closeLoginModal();
+    });
+}
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && loginModal && loginModal.style.display === 'block') {
+        window.closeLoginModal();
+    }
+});
 
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -191,7 +224,7 @@ if (loginForm) {
             window.showNotification(`Falha no login: ${error.code}`, 'danger');
         } finally {
             btn.disabled = false;
-            btn.textContent = 'Entrar';
+            btn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Entrar';
         }
     });
 }
@@ -293,6 +326,15 @@ function loadData() {
         jsonData.professores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         extractPresenceInfo(jsonData.professores);
         renderTable();
+
+        if (cruzamentoState.rawPresencas && cruzamentoState.rawPresencas.length > 0) {
+            computeCruzamentoData();
+            if (cruzamentoState.activeTab === 'cruzamento') {
+                renderCruzamentoUI();
+            }
+        } else {
+            syncCruzamentoData(false);
+        }
     }, (error) => {
         console.error("Erro no Real-time de Professores:", error);
         window.showNotification(`Erro de Permissão ou Conexão: ${error.message}`, 'danger');
@@ -1073,5 +1115,1101 @@ window.addEventListener('load', () => {
     if (params.toString()) debouncedRenderTable();
 });
 
+// ==========================================================================
+// ABA DE CRUZAMENTO DE INFORMAÇÕES & AUDITORIA DE FALTAS
+// ==========================================================================
+
+const DEFAULT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQng9IxPZEAbQsrdWBqfNi5FMTdXOKAzySIgw8zMtHk0LeiD2A9BRc71m7GSnWyCD7IHGMDVCNR9mqY/pub?output=csv";
+
+const ALL_STANDARDIZED_SCHOOLS = [
+    "ALZIRA ACRA",
+    "ANNA BONAGURA",
+    "BRAGA MORATO",
+    "CAIC",
+    "CÉLIA BUENO",
+    "ESTHER VIANNA",
+    "PADRE BENITO"
+];
+
+const cruzamentoState = {
+    activeTab: 'professores',
+    sheetUrl: localStorage.getItem('cruzamento_sheet_url') || DEFAULT_SHEET_CSV_URL,
+    rawPresencas: [],
+    cruzamentoList: [],
+    lastSyncTime: null,
+    isSyncing: false,
+    selectedStatus: 'faltas',
+    selectedSchool: '',
+    searchTerm: '',
+    currentPage: 1,
+    rowsPerPage: 15,
+    viewMode: localStorage.getItem('cruzViewMode') || 'table',
+    sortConfig: { key: 'nome', direction: 'asc' }
+};
+
+// Funções de Normalização
+function normalizeText(text) {
+    if (!text) return '';
+    return text.toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9\s]/g, ' ')
+        .toUpperCase()
+        .trim()
+        .replace(/\s+/g, ' ');
+}
+
+function normalizeSchoolName(school) {
+    if (!school) return '';
+    const norm = normalizeText(school);
+    if (norm.includes('ALZIRA')) return 'ALZIRA ACRA';
+    if (norm.includes('ANNA') || norm.includes('BONAGURA')) return 'ANNA BONAGURA';
+    if (norm.includes('BRAGA') || norm.includes('MORATO')) return 'BRAGA MORATO';
+    if (norm.includes('CAIC')) return 'CAIC';
+    if (norm.includes('CELIA') || norm.includes('BUENO')) return 'CÉLIA BUENO';
+    if (norm.includes('ESTHER') || norm.includes('VIANNA')) return 'ESTHER VIANNA';
+    if (norm.includes('PADRE') || norm.includes('BENITO')) return 'PADRE BENITO';
+    return school.trim().toUpperCase();
+}
+
+// Alternar Abas Principais
+window.switchMainTab = (tabName) => {
+    cruzamentoState.activeTab = tabName;
+    
+    const tabProfBtn = document.getElementById('tab-btn-professores');
+    const tabCruzBtn = document.getElementById('tab-btn-cruzamento');
+    const viewProf = document.getElementById('view-tab-professores');
+    const viewCruz = document.getElementById('view-tab-cruzamento');
+
+    if (tabName === 'professores') {
+        if (tabProfBtn) tabProfBtn.classList.add('active');
+        if (tabCruzBtn) tabCruzBtn.classList.remove('active');
+        if (viewProf) viewProf.style.display = 'flex';
+        if (viewCruz) viewCruz.style.display = 'none';
+        renderTable();
+    } else {
+        if (tabProfBtn) tabProfBtn.classList.remove('active');
+        if (tabCruzBtn) tabCruzBtn.classList.add('active');
+        if (viewProf) viewProf.style.display = 'none';
+        if (viewCruz) viewCruz.style.display = 'flex';
+        
+        if (cruzamentoState.rawPresencas.length === 0) {
+            syncCruzamentoData(false);
+        } else {
+            computeCruzamentoData();
+            renderCruzamentoUI();
+        }
+    }
+};
+
+// Parser CSV Robusto
+function parseCSV(text) {
+    const rows = [];
+    let currentRow = [];
+    let currentCell = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+        
+        if (char === '"') {
+            if (inQuotes && nextChar === '"') {
+                currentCell += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (char === ',' && !inQuotes) {
+            currentRow.push(currentCell.trim());
+            currentCell = '';
+        } else if ((char === '\r' || char === '\n') && !inQuotes) {
+            if (char === '\r' && nextChar === '\n') i++;
+            currentRow.push(currentCell.trim());
+            if (currentRow.some(c => c !== '')) rows.push(currentRow);
+            currentRow = [];
+            currentCell = '';
+        } else {
+            currentCell += char;
+        }
+    }
+    if (currentCell || currentRow.length > 0) {
+        currentRow.push(currentCell.trim());
+        if (currentRow.some(c => c !== '')) rows.push(currentRow);
+    }
+    return rows;
+}
+
+// Sincronização com Google Sheets CSV
+window.syncCruzamentoData = async (showFeedback = true) => {
+    if (cruzamentoState.isSyncing) return;
+    cruzamentoState.isSyncing = true;
+
+    const pulseDot = document.getElementById('cruzamentoPulseDot');
+    const statusTitle = document.getElementById('cruzamentoStatusTitle');
+    const statusDesc = document.getElementById('cruzamentoStatusDesc');
+
+    if (pulseDot) pulseDot.className = 'status-pulse-dot warning';
+    if (statusTitle) statusTitle.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando com Google Planilhas...';
+    if (statusDesc) statusDesc.textContent = 'Baixando respostas do formulário em tempo real';
+
+    try {
+        const url = cruzamentoState.sheetUrl || DEFAULT_SHEET_CSV_URL;
+        const separator = url.includes('?') ? '&' : '?';
+        const fetchUrl = `${url}${separator}_t=${Date.now()}`;
+
+        const res = await fetch(fetchUrl, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`Falha de conexão: Status ${res.status}`);
+
+        const text = await res.text();
+        const rows = parseCSV(text);
+
+        if (rows.length <= 1) {
+            throw new Error("Planilha vazia ou sem linhas de dados");
+        }
+
+        // Detectar colunas da planilha
+        const headerRow = rows[0].map(h => normalizeText(h));
+        let idxTime = headerRow.findIndex(h => h.includes('CARIMBO') || h.includes('DATA') || h.includes('HORA'));
+        let idxEmail = headerRow.findIndex(h => h.includes('EMAIL') || h.includes('CORREIO'));
+        let idxEscola = headerRow.findIndex(h => h.includes('ESCOLA') || h.includes('UNIDADE'));
+        let idxNome = headerRow.findIndex(h => h.includes('NOME') || h.includes('PROFESSOR'));
+
+        if (idxTime === -1) idxTime = 0;
+        if (idxEmail === -1) idxEmail = 1;
+        if (idxEscola === -1) idxEscola = 2;
+        if (idxNome === -1) idxNome = 3;
+
+        const presencas = [];
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const nome = row[idxNome] || '';
+            if (!nome.trim()) continue;
+
+            presencas.push({
+                timestamp: row[idxTime] || '',
+                email: row[idxEmail] || '',
+                escolaRaw: row[idxEscola] || '',
+                escola: normalizeSchoolName(row[idxEscola] || ''),
+                nome: nome.trim()
+            });
+        }
+
+        cruzamentoState.rawPresencas = presencas;
+        cruzamentoState.lastSyncTime = new Date();
+
+        computeCruzamentoData();
+        renderCruzamentoUI();
+
+        updateSheetUrlUI();
+
+        const timeStr = cruzamentoState.lastSyncTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        if (pulseDot) pulseDot.className = 'status-pulse-dot';
+        if (statusTitle) statusTitle.textContent = `Conectado ao Google Planilhas (${presencas.length} presenças registradas)`;
+        if (statusDesc) statusDesc.textContent = `Última sincronização em tempo real às ${timeStr}`;
+
+        if (showFeedback) {
+            window.showNotification(`Cruzamento atualizado! ${presencas.length} registros de presença processados.`, 'success');
+        }
+    } catch (err) {
+        console.error("Erro na sincronização do cruzamento:", err);
+        const badge = document.getElementById('sheetUrlStatusBadge');
+        if (badge) {
+            badge.innerHTML = `<i class="fas fa-triangle-exclamation text-danger"></i> Erro de Conexão`;
+        }
+        if (pulseDot) pulseDot.className = 'status-pulse-dot danger';
+        if (statusTitle) statusTitle.textContent = 'Erro ao conectar à Planilha Google';
+        if (statusDesc) statusDesc.textContent = 'Verifique se a planilha foi publicada como CSV na Web (Arquivo > Publicar na Web)';
+
+        if (showFeedback) {
+            window.showNotification("Não foi possível carregar a planilha. Verifique a URL.", 'danger');
+        }
+    } finally {
+        cruzamentoState.isSyncing = false;
+    }
+};
+
+// Algoritmo de Cruzamento Inteligente (Multi-Pass Match)
+function computeCruzamentoData() {
+    const cadastrados = jsonData.professores || [];
+    const presencas = cruzamentoState.rawPresencas || [];
+
+    const matchedCadastrados = new Map(); // cadIndex -> formRecord
+    const matchedPresencas = new Set();  // formIndex
+
+    const stopWords = new Set(['DE', 'DA', 'DO', 'DOS', 'DAS', 'E', 'SILVA', 'SOUZA', 'SOUSA']);
+
+    // Pass 1: Correspondência Exata de Nome
+    presencas.forEach((p, pIdx) => {
+        if (matchedPresencas.has(pIdx)) return;
+        const pNorm = normalizeText(p.nome);
+        const pEscNorm = normalizeSchoolName(p.escolaRaw);
+
+        cadastrados.forEach((c, cIdx) => {
+            if (matchedCadastrados.has(cIdx)) return;
+            const cNorm = normalizeText(c.nome);
+            const cEscNorm = normalizeSchoolName(c.escola);
+
+            if (pNorm === cNorm && (pEscNorm === cEscNorm || !pEscNorm || !cEscNorm)) {
+                matchedCadastrados.set(cIdx, p);
+                matchedPresencas.add(pIdx);
+            }
+        });
+    });
+
+    // Pass 2: Correspondência com Iniciais / Abreviações e Primeiro/Último Nome
+    presencas.forEach((p, pIdx) => {
+        if (matchedPresencas.has(pIdx)) return;
+        const pNorm = normalizeText(p.nome);
+        const pEscNorm = normalizeSchoolName(p.escolaRaw);
+        const pWords = pNorm.split(' ').filter(w => !stopWords.has(w));
+        const pParts = pNorm.split(' ');
+
+        let bestMatchIdx = -1;
+        let bestScore = 0;
+
+        cadastrados.forEach((c, cIdx) => {
+            if (matchedCadastrados.has(cIdx)) return;
+            const cNorm = normalizeText(c.nome);
+            const cEscNorm = normalizeSchoolName(c.escola);
+
+            // Se escolas forem conhecidas e diferentes, não faz match
+            if (pEscNorm && cEscNorm && pEscNorm !== cEscNorm) return;
+
+            const cWords = cNorm.split(' ').filter(w => !stopWords.has(w));
+            const cParts = cNorm.split(' ');
+
+            // Match por primeiro e último nome
+            if (pParts.length >= 2 && cParts.length >= 2) {
+                if (pParts[0] === cParts[0] && pParts[pParts.length - 1] === cParts[cParts.length - 1]) {
+                    bestMatchIdx = cIdx;
+                    bestScore = 100;
+                    return;
+                }
+            }
+
+            // Match por contagem de palavras significativas
+            const intersection = pWords.filter(w => cWords.includes(w)).length;
+            if (intersection >= 2 && intersection > bestScore) {
+                bestScore = intersection;
+                bestMatchIdx = cIdx;
+            }
+        });
+
+        if (bestMatchIdx !== -1) {
+            matchedCadastrados.set(bestMatchIdx, p);
+            matchedPresencas.add(pIdx);
+        }
+    });
+
+    // Montar Lista Consolidada do Cruzamento
+    const results = [];
+
+    // 1. Docentes Cadastrados (Presentes ou Faltas)
+    cadastrados.forEach((c, idx) => {
+        const formRecord = matchedCadastrados.get(idx);
+        const standardizedSchool = normalizeSchoolName(c.escola);
+
+        if (formRecord) {
+            results.push({
+                id: c.id || `cad_${idx}`,
+                status: 'presente',
+                nome: c.nome,
+                escola: standardizedSchool,
+                escolaOriginal: c.escola,
+                disciplina: c.disciplina || 'EDM',
+                ano: c.ano || 'N/A',
+                turma: c.turma || 'N/A',
+                turno: c.turno || 'N/A',
+                telefone: c.telefone || '',
+                formTimestamp: formRecord.timestamp,
+                formEmail: formRecord.email,
+                formNome: formRecord.nome,
+                formEscola: formRecord.escola,
+                isCadastrado: true
+            });
+        } else {
+            results.push({
+                id: c.id || `cad_${idx}`,
+                status: 'falta',
+                nome: c.nome,
+                escola: standardizedSchool,
+                escolaOriginal: c.escola,
+                disciplina: c.disciplina || 'EDM',
+                ano: c.ano || 'N/A',
+                turma: c.turma || 'N/A',
+                turno: c.turno || 'N/A',
+                telefone: c.telefone || '',
+                formTimestamp: null,
+                formEmail: null,
+                formNome: null,
+                formEscola: null,
+                isCadastrado: true
+            });
+        }
+    });
+
+    // 2. Registros Avulsos / Extras na Planilha (Não encontrados no cadastro oficial)
+    presencas.forEach((p, idx) => {
+        if (!matchedPresencas.has(idx)) {
+            const standardizedSchool = normalizeSchoolName(p.escolaRaw);
+            results.push({
+                id: `extra_${idx}`,
+                status: 'extra',
+                nome: p.nome,
+                escola: standardizedSchool || 'NÃO IDENTIFICADA',
+                escolaOriginal: p.escolaRaw,
+                disciplina: 'EDM (Avulso)',
+                ano: 'N/A',
+                turma: 'N/A',
+                turno: 'N/A',
+                telefone: '',
+                formTimestamp: p.timestamp,
+                formEmail: p.email,
+                formNome: p.nome,
+                formEscola: p.escola,
+                isCadastrado: false
+            });
+        }
+    });
+
+    cruzamentoState.cruzamentoList = results;
+
+    // Atualizar badge de alertas na aba
+    const totalFaltas = results.filter(r => r.status === 'falta').length;
+    const tabBadge = document.getElementById('tab-faltas-badge');
+    if (tabBadge) {
+        tabBadge.textContent = totalFaltas;
+        tabBadge.style.display = totalFaltas > 0 ? 'inline-block' : 'none';
+    }
+}
+
+// Renderização Completa da Interface do Cruzamento
+function renderCruzamentoUI() {
+    const allRecords = cruzamentoState.cruzamentoList;
+    const totalCadastrados = (jsonData.professores || []).length;
+    const totalPresentes = allRecords.filter(r => r.status === 'presente').length;
+    const totalFaltas = allRecords.filter(r => r.status === 'falta').length;
+    const totalExtras = allRecords.filter(r => r.status === 'extra').length;
+    const pctPresente = totalCadastrados > 0 ? Math.round((totalPresentes / totalCadastrados) * 100) : 0;
+    const pctFalta = totalCadastrados > 0 ? Math.round((totalFaltas / totalCadastrados) * 100) : 0;
+
+    // Atualizar KPIs
+    const elTotal = document.getElementById('kpi-cadastrados-total');
+    const elPres = document.getElementById('kpi-presentes-total');
+    const elPresPct = document.getElementById('kpi-presentes-pct');
+    const elFaltas = document.getElementById('kpi-faltas-total');
+    const elFaltasPct = document.getElementById('kpi-faltas-pct');
+    const elExtras = document.getElementById('kpi-extras-total');
+
+    if (elTotal) elTotal.textContent = totalCadastrados;
+    if (elPres) elPres.textContent = totalPresentes;
+    if (elPresPct) elPresPct.textContent = `${pctPresente}% de comparecimento`;
+    if (elFaltas) elFaltas.textContent = totalFaltas;
+    if (elFaltasPct) elFaltasPct.textContent = `${pctFalta}% de ausência (${totalFaltas} docentes)`;
+    if (elExtras) elExtras.textContent = totalExtras;
+
+    // Popular Dropdown de Escolas do Cruzamento se estiver vazio
+    const cruzSchoolSelect = document.getElementById('cruzamento-school-filter');
+    if (cruzSchoolSelect && cruzSchoolSelect.options.length <= 1) {
+        cruzSchoolSelect.innerHTML = '<option value="">Todas as Escolas</option>';
+        ALL_STANDARDIZED_SCHOOLS.forEach(s => {
+            cruzSchoolSelect.add(new Option(s, s));
+        });
+    }
+
+    // Renderizar Pílulas de Escolas com Contagem Individual
+    const pillsContainer = document.getElementById('cruzamentoSchoolsPills');
+    if (pillsContainer) {
+        const schoolFaltasMap = {};
+        const schoolPresMap = {};
+        ALL_STANDARDIZED_SCHOOLS.forEach(s => {
+            schoolFaltasMap[s] = 0;
+            schoolPresMap[s] = 0;
+        });
+
+        allRecords.forEach(r => {
+            const sName = r.escola;
+            if (r.status === 'falta' && schoolFaltasMap[sName] !== undefined) {
+                schoolFaltasMap[sName]++;
+            } else if (r.status === 'presente' && schoolPresMap[sName] !== undefined) {
+                schoolPresMap[sName]++;
+            }
+        });
+
+        let pillsHTML = `
+            <div class="cruz-school-pill ${!cruzamentoState.selectedSchool ? 'active' : ''}" onclick="filterCruzamentoBySchool('')">
+                <span>🏫 Todas</span>
+                <span class="${totalFaltas > 0 ? 'pill-falta-badge' : 'pill-ok-badge'}">${totalFaltas > 0 ? totalFaltas + ' faltas' : '100%'}</span>
+            </div>
+        `;
+
+        ALL_STANDARDIZED_SCHOOLS.forEach(school => {
+            const fCount = schoolFaltasMap[school] || 0;
+            const pCount = schoolPresMap[school] || 0;
+            const isActive = cruzamentoState.selectedSchool === school;
+            const badgeClass = fCount > 0 ? 'pill-falta-badge' : 'pill-ok-badge';
+            const badgeText = fCount > 0 ? `${fCount} falta${fCount > 1 ? 's' : ''}` : `${pCount} pres.`;
+
+            pillsHTML += `
+                <div class="cruz-school-pill ${isActive ? 'active' : ''}" onclick="filterCruzamentoBySchool('${escapeHTML(school)}')">
+                    <span>${escapeHTML(school)}</span>
+                    <span class="${badgeClass}">${badgeText}</span>
+                </div>
+            `;
+        });
+
+        pillsContainer.innerHTML = pillsHTML;
+    }
+
+    renderCruzamentoTable();
+}
+
+// Filtro Rápido por Pílula de Escola
+window.filterCruzamentoBySchool = (school) => {
+    cruzamentoState.selectedSchool = school;
+    const select = document.getElementById('cruzamento-school-filter');
+    if (select) select.value = school;
+    cruzamentoState.currentPage = 1;
+    renderCruzamentoUI();
+};
+
+window.clearCruzamentoFilters = () => {
+    cruzamentoState.searchTerm = '';
+    cruzamentoState.selectedStatus = 'todos';
+    cruzamentoState.selectedSchool = '';
+    cruzamentoState.currentPage = 1;
+
+    const sInput = document.getElementById('cruzamento-search');
+    const sStatus = document.getElementById('cruzamento-status-filter');
+    const sSchool = document.getElementById('cruzamento-school-filter');
+
+    if (sInput) sInput.value = '';
+    if (sStatus) sStatus.value = 'todos';
+    if (sSchool) sSchool.value = '';
+
+    renderCruzamentoUI();
+};
+
+window.setCruzamentoViewMode = (mode) => {
+    cruzamentoState.viewMode = mode;
+    localStorage.setItem('cruzViewMode', mode);
+    
+    const btnTable = document.getElementById('btn-cruz-view-table');
+    const btnCards = document.getElementById('btn-cruz-view-cards');
+    if (btnTable) btnTable.classList.toggle('active', mode === 'table');
+    if (btnCards) btnCards.classList.toggle('active', mode === 'cards');
+    
+    renderCruzamentoTable();
+};
+
+window.setCruzamentoSort = (key) => {
+    if (cruzamentoState.sortConfig.key === key) {
+        cruzamentoState.sortConfig.direction = cruzamentoState.sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        cruzamentoState.sortConfig.key = key;
+        cruzamentoState.sortConfig.direction = 'asc';
+    }
+    renderCruzamentoTable();
+};
+
+function renderCruzamentoPagination(totalItems) {
+    const paginationEl = document.getElementById('cruzamento-pagination');
+    if (!paginationEl) return;
+    const totalPages = Math.ceil(totalItems / cruzamentoState.rowsPerPage);
+    paginationEl.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = 'Anterior';
+    prevBtn.disabled = cruzamentoState.currentPage === 1;
+    prevBtn.onclick = () => { cruzamentoState.currentPage--; renderCruzamentoTable(); };
+    paginationEl.appendChild(prevBtn);
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        if (i === cruzamentoState.currentPage) btn.classList.add('active');
+        btn.onclick = () => { cruzamentoState.currentPage = i; renderCruzamentoTable(); };
+        paginationEl.appendChild(btn);
+    }
+
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Próximo';
+    nextBtn.disabled = cruzamentoState.currentPage === totalPages;
+    nextBtn.onclick = () => { cruzamentoState.currentPage++; renderCruzamentoTable(); };
+    paginationEl.appendChild(nextBtn);
+}
+
+function renderCruzamentoTable() {
+    const container = document.getElementById('cruzamento-list');
+    const countSpan = document.getElementById('cruzamento-results-count');
+    if (!container) return;
+
+    const search = cruzamentoState.searchTerm.toLowerCase();
+    const statusFilter = cruzamentoState.selectedStatus;
+    const schoolFilter = cruzamentoState.selectedSchool;
+
+    const filtered = cruzamentoState.cruzamentoList.filter(item => {
+        const safeVal = (v) => (v || '').toString().toLowerCase();
+        const matchesSearch = (
+            safeVal(item.nome).includes(search) ||
+            safeVal(item.escola).includes(search) ||
+            safeVal(item.formEmail).includes(search) ||
+            safeVal(item.formNome).includes(search) ||
+            safeVal(item.disciplina).includes(search)
+        );
+
+        let matchesStatus = true;
+        if (statusFilter === 'faltas') matchesStatus = (item.status === 'falta');
+        else if (statusFilter === 'presentes') matchesStatus = (item.status === 'presente');
+        else if (statusFilter === 'extras') matchesStatus = (item.status === 'extra');
+
+        const matchesSchool = !schoolFilter || item.escola === schoolFilter;
+
+        return matchesSearch && matchesStatus && matchesSchool;
+    });
+
+    if (countSpan) {
+        countSpan.innerHTML = `Mostrando <strong>${filtered.length}</strong> registro(s) no cruzamento filtrado`;
+    }
+
+    // Ordenação
+    filtered.sort((a, b) => {
+        let valA = a[cruzamentoState.sortConfig.key] || '';
+        let valB = b[cruzamentoState.sortConfig.key] || '';
+
+        if (cruzamentoState.sortConfig.key === 'status') {
+            const order = { 'falta': 1, 'extra': 2, 'presente': 3 };
+            valA = order[a.status] || 9;
+            valB = order[b.status] || 9;
+        }
+
+        if (valA < valB) return cruzamentoState.sortConfig.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return cruzamentoState.sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="no-results-message"><i class="fas fa-filter-circle-xmark"></i> Nenhum registro corresponde aos filtros selecionados no cruzamento.</p>';
+        renderCruzamentoPagination(0);
+        return;
+    }
+
+    const start = (cruzamentoState.currentPage - 1) * cruzamentoState.rowsPerPage;
+    const end = start + cruzamentoState.rowsPerPage;
+    const paginated = filtered.slice(start, end);
+
+    if (cruzamentoState.viewMode === 'cards') {
+        container.className = 'cards-container-wrapper';
+        let html = '<div class="cards-grid">';
+
+        paginated.forEach(item => {
+            const initials = getInitials(item.nome);
+            let badgeHTML = '';
+
+            if (item.status === 'falta') {
+                badgeHTML = `<span class="badge badge-falta"><i class="fas fa-circle-xmark"></i> FALTA</span>`;
+            } else if (item.status === 'presente') {
+                badgeHTML = `<span class="badge badge-presente-live"><i class="fas fa-circle-check"></i> PRESENTE</span>`;
+            } else {
+                badgeHTML = `<span class="badge badge-extra"><i class="fas fa-user-plus"></i> AVULSO</span>`;
+            }
+
+            let formInfoHTML = '';
+            if (item.formTimestamp) {
+                formInfoHTML = `
+                    <div class="prof-card-detail-item" style="border-top: 1px dashed var(--border-color); padding-top: 6px; margin-top: 6px;">
+                        <i class="fas fa-clipboard-check text-primary"></i> 
+                        <div class="form-sheet-tag">
+                            <span class="form-timestamp"><i class="far fa-clock"></i> ${escapeHTML(item.formTimestamp)}</span>
+                            <span class="form-email"><i class="far fa-envelope"></i> ${escapeHTML(item.formEmail || 'N/A')}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                formInfoHTML = `
+                    <div class="prof-card-detail-item" style="color: var(--text-secondary); font-style: italic; border-top: 1px dashed var(--border-color); padding-top: 6px; margin-top: 6px;">
+                        <i class="fas fa-ban text-danger"></i> <span>Sem registro no Google Forms</span>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="prof-card ${item.status === 'falta' ? 'card-falta' : ''}">
+                    <div class="prof-card-header">
+                        <div class="prof-avatar">${initials}</div>
+                        <div class="prof-card-title">
+                            <h3>${escapeHTML(item.nome)}</h3>
+                            <span class="prof-card-sub">${escapeHTML(item.escola)}</span>
+                        </div>
+                        <div>${badgeHTML}</div>
+                    </div>
+                    <div class="prof-card-body">
+                        <div class="prof-card-detail-item">
+                            <i class="fas fa-graduation-cap"></i> <span>Ano: ${escapeHTML(item.ano)} | Turma: ${escapeHTML(item.turma)}</span>
+                        </div>
+                        <div class="prof-card-detail-item">
+                            <i class="fas fa-clock"></i> ${getTurnoBadge(item.turno)}
+                        </div>
+                        ${formInfoHTML}
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+    } else {
+        container.className = 'table-responsive';
+        const headers = [
+            { label: 'Status', key: 'status' },
+            { label: 'Professor(a)', key: 'nome' },
+            { label: 'Escola', key: 'escola' },
+            { label: 'Turma / Turno', key: 'turno' },
+            { label: 'Registro no Formulário (Data/Hora & E-mail)', key: 'formTimestamp' }
+        ];
+
+        let html = '<table><thead><tr>';
+        headers.forEach(h => {
+            let icon = '<i class="fas fa-sort" style="opacity: 0.2; margin-left: 5px;"></i>';
+            if (cruzamentoState.sortConfig.key === h.key) {
+                icon = cruzamentoState.sortConfig.direction === 'asc' 
+                    ? ' <i class="fas fa-sort-up" style="margin-left: 5px;"></i>' 
+                    : ' <i class="fas fa-sort-down" style="margin-left: 5px;"></i>';
+            }
+            html += `<th onclick="setCruzamentoSort('${h.key}')">${h.label}${icon}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        paginated.forEach(item => {
+            let badgeHTML = '';
+            let rowStyle = '';
+
+            if (item.status === 'falta') {
+                badgeHTML = `<span class="badge badge-falta"><i class="fas fa-circle-xmark"></i> FALTA</span>`;
+                rowStyle = 'style="background-color: rgba(239, 68, 68, 0.03);"';
+            } else if (item.status === 'presente') {
+                badgeHTML = `<span class="badge badge-presente-live"><i class="fas fa-circle-check"></i> PRESENTE</span>`;
+            } else {
+                badgeHTML = `<span class="badge badge-extra"><i class="fas fa-user-plus"></i> AVULSO</span>`;
+                rowStyle = 'style="background-color: rgba(168, 85, 247, 0.03);"';
+            }
+
+            let formCellHTML = '';
+            if (item.formTimestamp) {
+                formCellHTML = `
+                    <div class="form-sheet-tag">
+                        <span class="form-timestamp"><i class="fas fa-calendar-check" style="color: #10b981; margin-right: 4px;"></i> ${escapeHTML(item.formTimestamp)}</span>
+                        <span class="form-email"><i class="far fa-envelope" style="margin-right: 4px;"></i> ${escapeHTML(item.formEmail || 'N/A')}</span>
+                    </div>
+                `;
+            } else {
+                formCellHTML = `<span style="color: var(--text-secondary); font-size: 0.8rem; font-style: italic;"><i class="fas fa-minus" style="margin-right: 4px;"></i> Não compareceu</span>`;
+            }
+
+            html += `
+                <tr ${rowStyle}>
+                    <td>${badgeHTML}</td>
+                    <td><strong>${escapeHTML(item.nome)}</strong> ${item.status === 'extra' ? '<small class="tag-turno tag-noite" style="font-size:0.65rem;">Não cadastrado</small>' : ''}</td>
+                    <td>${escapeHTML(item.escola)}</td>
+                    <td>Ano: ${escapeHTML(item.ano)} (${escapeHTML(item.turma)}) • ${getTurnoBadge(item.turno)}</td>
+                    <td>${formCellHTML}</td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    renderCruzamentoPagination(filtered.length);
+}
+
+// Funções de Controle Direto da URL da Planilha
+function updateSheetUrlUI() {
+    const input = document.getElementById('cruzamento-sheet-input');
+    const badge = document.getElementById('sheetUrlStatusBadge');
+    if (input) {
+        input.value = cruzamentoState.sheetUrl || DEFAULT_SHEET_CSV_URL;
+    }
+    if (badge) {
+        const count = cruzamentoState.rawPresencas ? cruzamentoState.rawPresencas.length : 0;
+        if (count > 0) {
+            badge.innerHTML = `<i class="fas fa-circle-check text-success"></i> ${count} registros conectados`;
+        } else {
+            badge.innerHTML = `<i class="fas fa-link text-primary"></i> Pronto para carregar`;
+        }
+    }
+}
+
+window.applySheetUrlFromInput = () => {
+    const input = document.getElementById('cruzamento-sheet-input');
+    if (!input || !input.value.trim()) {
+        window.showNotification("Por favor, cole a URL da planilha.", 'warning');
+        return;
+    }
+
+    const newUrl = input.value.trim();
+    cruzamentoState.sheetUrl = newUrl;
+    localStorage.setItem('cruzamento_sheet_url', newUrl);
+    window.showNotification("URL da planilha atualizada! Carregando dados...");
+    syncCruzamentoData(true);
+};
+
+window.resetDefaultSheetInput = () => {
+    const input = document.getElementById('cruzamento-sheet-input');
+    cruzamentoState.sheetUrl = DEFAULT_SHEET_CSV_URL;
+    localStorage.setItem('cruzamento_sheet_url', DEFAULT_SHEET_CSV_URL);
+    if (input) input.value = DEFAULT_SHEET_CSV_URL;
+    window.showNotification("URL padrão da formação restaurada! Carregando dados...");
+    syncCruzamentoData(true);
+};
+
+window.openCurrentSheetInBrowser = () => {
+    const url = cruzamentoState.sheetUrl || DEFAULT_SHEET_CSV_URL;
+    window.open(url, '_blank');
+};
+
+// Configuração do Link da Planilha (Modal)
+window.openConfigSheetModal = () => {
+    const modal = document.getElementById('configSheetModal');
+    const input = document.getElementById('sheet-csv-url');
+    if (input) input.value = cruzamentoState.sheetUrl || DEFAULT_SHEET_CSV_URL;
+    if (modal) modal.style.display = 'block';
+};
+
+window.closeConfigSheetModal = () => {
+    const modal = document.getElementById('configSheetModal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.restoreDefaultSheetUrl = () => {
+    const input = document.getElementById('sheet-csv-url');
+    if (input) input.value = DEFAULT_SHEET_CSV_URL;
+};
+
+window.handleSaveSheetConfig = (e) => {
+    e.preventDefault();
+    const input = document.getElementById('sheet-csv-url');
+    if (!input || !input.value.trim()) return;
+
+    cruzamentoState.sheetUrl = input.value.trim();
+    localStorage.setItem('cruzamento_sheet_url', cruzamentoState.sheetUrl);
+    updateSheetUrlUI();
+    window.closeConfigSheetModal();
+    window.showNotification("URL da planilha atualizada! Sincronizando dados...");
+    syncCruzamentoData(true);
+};
+
+// Gravar Presenças no Firestore (Admin)
+window.salvarPresencasNoFirestore = async () => {
+    if (!auth.currentUser) {
+        window.showNotification("Acesso restrito. Faça login como administrador para gravar dados no banco.", 'danger');
+        return;
+    }
+
+    const faltasCount = cruzamentoState.cruzamentoList.filter(r => r.status === 'falta').length;
+    const presCount = cruzamentoState.cruzamentoList.filter(r => r.status === 'presente').length;
+
+    const confirmed = await window.showConfirmDialog(
+        "Gravar Presenças no Banco",
+        `Deseja registrar no Firestore as presenças da chamada atual? (${presCount} presentes e ${faltasCount} faltas)`,
+        { okClass: 'btn-primary', icon: 'fa-cloud-arrow-up' }
+    );
+
+    if (!confirmed) return;
+
+    const btn = document.getElementById('btnSalvarPresencasFirestore');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gravando...';
+    }
+
+    try {
+        // Detectar data da chamada a partir do primeiro registro
+        let formDateKey = 'presenca_chamada_recente';
+        const sampleRecord = cruzamentoState.rawPresencas.find(p => p.timestamp);
+        if (sampleRecord && sampleRecord.timestamp) {
+            const dateParts = sampleRecord.timestamp.split(' ')[0].split('/');
+            if (dateParts.length === 3) {
+                formDateKey = `presenca_${dateParts[2]}_${dateParts[1]}_${dateParts[0]}`;
+            }
+        }
+
+        let updatedCount = 0;
+        for (const item of cruzamentoState.cruzamentoList) {
+            if (item.isCadastrado && item.id && !item.id.startsWith('cad_')) {
+                const docRef = doc(db, "professores", item.id);
+                const isPresent = (item.status === 'presente');
+                await updateDoc(docRef, {
+                    [formDateKey]: isPresent,
+                    ultima_alteracao: new Date().toISOString()
+                });
+                updatedCount++;
+            }
+        }
+
+        window.showNotification(`Sucesso! ${updatedCount} docentes foram atualizados no Firestore sob a chave "${formDateKey}".`, 'success');
+    } catch (err) {
+        console.error("Erro ao gravar no Firestore:", err);
+        window.showNotification(`Erro ao gravar no banco: ${err.message}`, 'danger');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+};
+
+// Exportar PDF do Cruzamento
+window.exportCruzamentoPDF = () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const totalPagesExp = '{total_pages_count_string}';
+
+    const selectedSchool = cruzamentoState.selectedSchool;
+    const allRecords = cruzamentoState.cruzamentoList;
+    const filtered = allRecords.filter(r => !selectedSchool || r.escola === selectedSchool);
+
+    const totalCad = filtered.filter(r => r.isCadastrado).length;
+    const totalPres = filtered.filter(r => r.status === 'presente').length;
+    const totalFaltas = filtered.filter(r => r.status === 'falta').length;
+    const pct = totalCad > 0 ? Math.round((totalPres / totalCad) * 100) : 0;
+
+    doc.setFontSize(16);
+    doc.text('Relatório de Frequência & Cruzamento Docente (EDM)', 14, 18);
+    doc.setFontSize(10);
+    doc.text(`Escola: ${selectedSchool || 'Consolidado (Todas as Escolas)'}`, 14, 24);
+    doc.text(`Total Cadastrados: ${totalCad}  |  Presentes: ${totalPres} (${pct}%)  |  Faltas: ${totalFaltas}`, 14, 29);
+    doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 34);
+
+    const tableHead = ['Status', 'Professor(a)', 'Escola', 'Ano/Turma', 'Horário Registro (Forms)', 'E-mail'];
+    const tableData = filtered.map(r => {
+        let statusStr = 'PRESENTE';
+        if (r.status === 'falta') statusStr = 'FALTA';
+        else if (r.status === 'extra') statusStr = 'AVULSO';
+
+        return [
+            statusStr,
+            r.nome,
+            r.escola,
+            `${r.ano} (${r.turma})`,
+            r.formTimestamp || 'Não compareceu',
+            r.formEmail || '-'
+        ];
+    });
+
+    doc.autoTable({
+        startY: 38,
+        head: [tableHead],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [0, 86, 179], textColor: [255, 255, 255], fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [248, 249, 250] },
+        styles: { fontSize: 8, cellPadding: 3 },
+        didParseCell: function(data) {
+            if (data.section === 'body' && data.column.index === 0) {
+                if (data.cell.raw === 'FALTA') {
+                    data.cell.styles.textColor = [220, 38, 38];
+                    data.cell.styles.fontStyle = 'bold';
+                } else if (data.cell.raw === 'PRESENTE') {
+                    data.cell.styles.textColor = [5, 150, 105];
+                    data.cell.styles.fontStyle = 'bold';
+                } else {
+                    data.cell.styles.textColor = [147, 51, 234];
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        },
+        didDrawPage: function(data) {
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text("Sistema EDM Professor - Auditoria de Frequência", data.settings.margin.left, doc.internal.pageSize.height - 10);
+            let pageStr = "Página " + doc.internal.getCurrentPageInfo().pageNumber;
+            if (typeof doc.putTotalPages === 'function') pageStr += " de " + totalPagesExp;
+            doc.text(pageStr, doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 10, { align: 'right' });
+        }
+    });
+
+    if (typeof doc.putTotalPages === 'function') {
+        doc.putTotalPages(totalPagesExp);
+    }
+
+    doc.save(`cruzamento_faltas_${(selectedSchool || 'todas').toLowerCase().replace(/\s+/g, '_')}.pdf`);
+    window.showNotification("Relatório de Faltas gerado em PDF!");
+};
+
+// Exportar CSV do Cruzamento
+window.exportCruzamentoCSV = () => {
+    const records = cruzamentoState.cruzamentoList;
+    if (records.length === 0) {
+        window.showNotification("Nenhum dado disponível para exportar.", 'warning');
+        return;
+    }
+
+    let csvContent = "\uFEFFStatus;Professor;Escola;Disciplina;Ano;Turma;Turno;Carimbo_Forms;Email_Forms\n";
+    records.forEach(r => {
+        const escapeCsv = (str) => `"${(str || '').replace(/"/g, '""')}"`;
+        const row = [
+            escapeCsv(r.status.toUpperCase()),
+            escapeCsv(r.nome),
+            escapeCsv(r.escola),
+            escapeCsv(r.disciplina),
+            escapeCsv(r.ano),
+            escapeCsv(r.turma),
+            escapeCsv(r.turno),
+            escapeCsv(r.formTimestamp || ''),
+            escapeCsv(r.formEmail || '')
+        ];
+        csvContent += row.join(';') + '\n';
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `cruzamento_frequencia_edm_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    window.showNotification("Arquivo CSV baixado com sucesso!");
+};
+
+// Modal WhatsApp
+window.openWhatsAppModal = () => {
+    const modal = document.getElementById('whatsAppModal');
+    const select = document.getElementById('whatsapp-school-select');
+    if (select && select.options.length <= 1) {
+        select.innerHTML = '<option value="">Todas as Escolas (Consolidado)</option>';
+        ALL_STANDARDIZED_SCHOOLS.forEach(s => select.add(new Option(s, s)));
+    }
+    if (select) select.value = cruzamentoState.selectedSchool || '';
+    updateWhatsAppPreview();
+    if (modal) modal.style.display = 'block';
+};
+
+window.closeWhatsAppModal = () => {
+    const modal = document.getElementById('whatsAppModal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.updateWhatsAppPreview = () => {
+    const select = document.getElementById('whatsapp-school-select');
+    const textarea = document.getElementById('whatsapp-message-text');
+    if (!textarea) return;
+
+    const schoolFilter = select ? select.value : '';
+    const records = cruzamentoState.cruzamentoList.filter(r => !schoolFilter || r.escola === schoolFilter);
+
+    const faltas = records.filter(r => r.status === 'falta');
+    const presentes = records.filter(r => r.status === 'presente');
+    const extras = records.filter(r => r.status === 'extra');
+    const totalCad = records.filter(r => r.isCadastrado).length;
+    const pct = totalCad > 0 ? Math.round((presentes.length / totalCad) * 100) : 0;
+
+    let msg = `📋 *RELATÓRIO DE FREQUÊNCIA - ENCONTRO EDM*\n`;
+    msg += `🏫 *Escola:* ${schoolFilter || 'Consolidado Geral (Todas as Escolas)'}\n`;
+    msg += `👥 *Docentes Cadastrados:* ${totalCad}\n`;
+    msg += `✅ *Presentes:* ${presentes.length} (${pct}%)\n`;
+    msg += `❌ *Faltas:* ${faltas.length}\n`;
+    if (extras.length > 0) msg += `➕ *Registros Avulsos:* ${extras.length}\n`;
+    msg += `⏱️ *Emissão:* ${new Date().toLocaleString('pt-BR')}\n\n`;
+
+    if (!schoolFilter) {
+        msg += `📌 *RESUMO POR ESCOLA:*\n`;
+        ALL_STANDARDIZED_SCHOOLS.forEach(s => {
+            const sFaltas = records.filter(r => r.escola === s && r.status === 'falta').length;
+            const sPres = records.filter(r => r.escola === s && r.status === 'presente').length;
+            if (sFaltas > 0) {
+                msg += `• *${s}:* ${sPres} presentes | ❌ ${sFaltas} falta(s)\n`;
+            } else {
+                msg += `• *${s}:* ${sPres} presentes | ✅ 100%\n`;
+            }
+        });
+        msg += `\n`;
+    }
+
+    if (faltas.length > 0) {
+        msg += `❌ *RELAÇÃO DE FALTAS (${faltas.length}):*\n`;
+        faltas.sort((a, b) => a.escola.localeCompare(b.escola) || a.nome.localeCompare(b.nome));
+        faltas.forEach((f, i) => {
+            msg += `${i + 1}. *${f.nome}* - ${f.escola} (${f.ano || 'N/A'})\n`;
+        });
+        msg += `\n`;
+    } else {
+        msg += `🎉 *Nenhuma falta registrada! 100% de presença.*\n\n`;
+    }
+
+    if (extras.length > 0) {
+        msg += `➕ *REGISTROS AVULSOS / NÃO CADASTRADOS (${extras.length}):*\n`;
+        extras.forEach((e, i) => {
+            msg += `${i + 1}. ${e.nome} - ${e.escola} (${e.formTimestamp})\n`;
+        });
+        msg += `\n`;
+    }
+
+    msg += `_Sistema de Gestão Docente EDM Professor 2026_`;
+    textarea.value = msg;
+};
+
+window.copyWhatsAppMessage = () => {
+    const textarea = document.getElementById('whatsapp-message-text');
+    if (!textarea) return;
+    navigator.clipboard.writeText(textarea.value).then(() => {
+        window.showNotification("Mensagem copiada para a área de transferência!");
+    });
+};
+
+window.sendWhatsAppDirect = () => {
+    const textarea = document.getElementById('whatsapp-message-text');
+    if (!textarea) return;
+    const textEncoded = encodeURIComponent(textarea.value);
+    window.open(`https://api.whatsapp.com/send?text=${textEncoded}`, '_blank');
+};
+
+// Event Listeners dos Filtros do Cruzamento
+const cruzSearchInput = document.getElementById('cruzamento-search');
+const cruzStatusSelect = document.getElementById('cruzamento-status-filter');
+const cruzSchoolSelect = document.getElementById('cruzamento-school-filter');
+
+if (cruzSearchInput) {
+    cruzSearchInput.addEventListener('input', (e) => {
+        cruzamentoState.searchTerm = e.target.value;
+        cruzamentoState.currentPage = 1;
+        renderCruzamentoTable();
+    });
+}
+
+if (cruzStatusSelect) {
+    cruzStatusSelect.addEventListener('change', (e) => {
+        cruzamentoState.selectedStatus = e.target.value;
+        cruzamentoState.currentPage = 1;
+        renderCruzamentoTable();
+    });
+}
+
+if (cruzSchoolSelect) {
+    cruzSchoolSelect.addEventListener('change', (e) => {
+        cruzamentoState.selectedSchool = e.target.value;
+        cruzamentoState.currentPage = 1;
+        renderCruzamentoUI();
+    });
+}
+
+const cruzSheetInput = document.getElementById('cruzamento-sheet-input');
+if (cruzSheetInput) {
+    cruzSheetInput.value = cruzamentoState.sheetUrl || DEFAULT_SHEET_CSV_URL;
+    cruzSheetInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            window.applySheetUrlFromInput();
+        }
+    });
+}
+
 // Iniciar carregamento dos dados
 loadData();
+updateSheetUrlUI();
+
+
