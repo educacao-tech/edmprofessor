@@ -15,76 +15,96 @@
 <body>
     <div id="notification-area"></div>
     <div class="container">
-        <div class="theme-switch-wrapper" style="display: flex; gap: 10px;">
-            <button id="auth-toggle" onclick="handleAuthClick()" title="Login Administrativo"><i class="fas fa-sign-in-alt"></i> Login</button>
-            <button id="theme-toggle" title="Alternar Modo Escuro/Claro" aria-label="Alternar Tema"><i class="fas fa-moon"></i></button>
-        </div>
-        <div class="header-section">
-            <h1>Lista de Professores</h1>
-            <div class="header-content">
-                <p class="header-subtitle">Sistema de Gestão e Monitoramento de Frequência Acadêmica</p>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="exportToPDF()" title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
-                    <button class="btn btn-secondary" onclick="copyShareLink()" title="Copiar link desta visualização"><i class="fas fa-share-nodes"></i> Compartilhar Vista</button>
-                    <button class="btn btn-secondary admin-only" id="btn-sync-emails" onclick="syncEmailsFromPresenca()" title="Buscar e-mails da lista de presença oficial"><i class="fas fa-envelope-circle-check"></i> Sincronizar E-mails</button>
-                    <button class="btn btn-primary admin-only" onclick="openProfessorModal()"><i class="fas fa-plus"></i> Novo Professor</button>
+        <!-- Barra de Cabeçalho Superior -->
+        <header class="header-section header-unified">
+            <div class="header-left">
+                <div class="header-brand">
+                    <span class="header-badge">EDM</span>
+                    <h1>Lista de Professores</h1>
+                </div>
+                <span class="header-subtitle-inline">Gestão e Frequência Acadêmica</span>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="exportToPDF()" title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyShareLink()" title="Copiar link desta visualização"><i class="fas fa-share-nodes"></i> Compartilhar</button>
+                <button type="button" class="btn btn-secondary btn-sm admin-only" id="btn-sync-emails" onclick="syncEmailsFromPresenca()" title="Buscar e-mails da lista de presença oficial"><i class="fas fa-envelope-circle-check"></i> Sincronizar</button>
+                <button type="button" class="btn btn-primary btn-sm admin-only" onclick="openProfessorModal()"><i class="fas fa-plus"></i> Novo</button>
+                <div class="header-auth-group">
+                    <button type="button" id="auth-toggle" class="btn-icon" onclick="handleAuthClick()" title="Login Administrativo"><i class="fas fa-sign-in-alt"></i></button>
+                    <button type="button" id="theme-toggle" class="btn-icon" title="Alternar Modo Escuro/Claro" aria-label="Alternar Tema"><i class="fas fa-moon"></i></button>
                 </div>
             </div>
-        </div>
+        </header>
 
+        <!-- Barra de Filtros -->
         <div class="filters">
-            <div>
+            <div class="filter-item filter-search">
                 <label for="search-input">Pesquisa Geral</label>
                 <div class="search-wrapper">
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" id="search-input" placeholder="Nome, escola, disciplina...">
                 </div>
             </div>
-            <div>
+            <div class="filter-item">
                 <label for="school-filter">Escola</label>
-                <div style="display: flex; gap: 8px;">
+                <div class="input-with-action">
                     <select id="school-filter">
                         <option value="">Todas as Escolas</option>
                     </select>
-                    <button class="btn-clear admin-only" onclick="manageMetadata('escolas')" title="Adicionar Escola"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('escolas')" title="Adicionar Escola"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
-            <div>
+            <div class="filter-item">
                 <label for="discipline-filter">Disciplina</label>
-                <div style="display: flex; gap: 8px;">
+                <div class="input-with-action">
                     <select id="discipline-filter">
                         <option value="">Todas as Disciplinas</option>
                     </select>
-                    <button class="btn-clear admin-only" onclick="manageMetadata('disciplinas')" title="Adicionar Disciplina"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('disciplinas')" title="Adicionar Disciplina"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
-            <div style="min-width: 180px; position: relative;">
+            <div class="filter-item filter-year">
                 <label for="year-filter-btn">Ano(s)</label>
-                <div style="display: flex; gap: 8px;">
-                    <div class="custom-multiselect" id="year-multiselect" style="flex: 1;">
+                <div class="input-with-action">
+                    <div class="custom-multiselect" id="year-multiselect">
                         <button type="button" class="multiselect-btn" id="year-filter-btn" onclick="toggleYearDropdown(event)">
                             <span id="year-filter-label">Todos os Anos</span>
                             <i class="fas fa-chevron-down multiselect-arrow"></i>
                         </button>
-                        <div class="multiselect-dropdown" id="year-dropdown-menu">
-                            <!-- As opções de anos serão carregadas aqui pelo JS -->
-                        </div>
+                        <div class="multiselect-dropdown" id="year-dropdown-menu"></div>
                     </div>
-                    <button class="btn-clear admin-only" onclick="manageMetadata('anos')" title="Adicionar Ano"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('anos')" title="Adicionar Ano"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
-            <div style="flex: 0; min-width: auto;">
-                <label>&nbsp;</label>
-                <button class="btn-clear" id="btn-clear-filters" title="Limpar todos os filtros"><i class="fas fa-filter-circle-xmark"></i></button>
+            <div class="filter-item filter-action">
+                <button type="button" class="btn-clear" id="btn-clear-filters" title="Limpar todos os filtros"><i class="fas fa-filter-circle-xmark"></i></button>
             </div>
         </div>
+
+        <!-- Linha de Estatísticas e Controles de Visualização -->
         <div class="results-info">
-            <span id="results-count">Carregando dados...</span>
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span>Ano Letivo: 2026</span>
+            <div class="results-count-wrap">
+                <span id="results-count">Carregando dados...</span>
+            </div>
+            <div class="controls-toolbar">
+                <div class="density-toggle" title="Densidade das Linhas">
+                    <button type="button" id="btn-density-compact" class="btn-toggle active" onclick="setDensity('compact')" title="Modo Compacto (cabe mais professores)">
+                        <i class="fas fa-bars"></i> Compacto
+                    </button>
+                    <button type="button" id="btn-density-comfort" class="btn-toggle" onclick="setDensity('comfort')" title="Modo Confortável (mais espaçado)">
+                        <i class="fas fa-grip-lines"></i> Confortável
+                    </button>
+                </div>
+                <button type="button" id="btn-toggle-expand" class="btn-toggle" onclick="toggleExpandMode()" title="Recolher/Exibir filtros para modo tela cheia">
+                    <i class="fas fa-expand"></i> Expandir
+                </button>
                 <div class="view-mode-toggle">
-                    <button id="btn-view-table" class="btn-toggle active" onclick="setViewMode('table')" title="Visualização em Tabela"><i class="fas fa-table-list"></i> Tabela</button>
-                    <button id="btn-view-cards" class="btn-toggle" onclick="setViewMode('cards')" title="Visualização em Cartões"><i class="fas fa-id-card"></i> Cartões</button>
+                    <button type="button" id="btn-view-table" class="btn-toggle active" onclick="setViewMode('table')" title="Visualização em Tabela">
+                        <i class="fas fa-table-list"></i> Tabela
+                    </button>
+                    <button type="button" id="btn-view-cards" class="btn-toggle" onclick="setViewMode('cards')" title="Visualização em Cartões">
+                        <i class="fas fa-id-card"></i> Cartões
+                    </button>
                 </div>
             </div>
         </div>

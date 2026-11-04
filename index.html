@@ -15,10 +15,7 @@
 <body>
     <div id="notification-area"></div>
     <div class="container">
-        <div class="theme-switch-wrapper" style="display: flex; gap: 10px;">
-            <button id="auth-toggle" onclick="handleAuthClick()" title="Login Administrativo"><i class="fas fa-sign-in-alt"></i> Login</button>
-            <button id="theme-toggle" title="Alternar Modo Escuro/Claro" aria-label="Alternar Tema"><i class="fas fa-moon"></i></button>
-        </div>
+        <!-- Theme/Auth buttons integrated into header actions -->
         <div class="header-section">
             <div class="header-title-row">
                 <div>
@@ -97,15 +94,19 @@
                 </div>
             </div>
             <div class="results-info">
-                <span id="results-count">Carregando dados...</span>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span>Ano Letivo: 2026</span>
-                    <div class="view-mode-toggle">
-                        <button id="btn-view-table" class="btn-toggle active" onclick="setViewMode('table')" title="Visualização em Tabela"><i class="fas fa-table-list"></i> Tabela</button>
-                        <button id="btn-view-cards" class="btn-toggle" onclick="setViewMode('cards')" title="Visualização em Cartões"><i class="fas fa-id-card"></i> Cartões</button>
-                    </div>
+            <span id="results-count">Carregando dados...</span>
+            <div class="controls-toolbar">
+                <div class="density-toggle" title="Densidade das Linhas">
+                    <button type="button" id="btn-density-compact" class="btn-toggle active" onclick="setDensity('compact')" title="Modo Compacto (cabe mais professores)"><i class="fas fa-bars"></i> Compacto</button>
+                    <button type="button" id="btn-density-comfort" class="btn-toggle" onclick="setDensity('comfort')" title="Modo Confortável (mais espaçado)"><i class="fas fa-grip-lines"></i> Confortável</button>
+                </div>
+                <button type="button" id="btn-toggle-expand" class="btn-toggle" onclick="toggleExpandMode()" title="Recolher/Exibir filtros para modo tela cheia"><i class="fas fa-expand"></i> Expandir</button>
+                <div class="view-mode-toggle">
+                    <button type="button" id="btn-view-table" class="btn-toggle active" onclick="setViewMode('table')" title="Visualização em Tabela"><i class="fas fa-table-list"></i> Tabela</button>
+                    <button type="button" id="btn-view-cards" class="btn-toggle" onclick="setViewMode('cards')" title="Visualização em Cartões"><i class="fas fa-id-card"></i> Cartões</button>
                 </div>
             </div>
+        </div>
             <div id="professores-list" class="table-responsive">
                 <!-- A lista de professores será carregada aqui pelo JavaScript -->
             </div>

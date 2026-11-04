@@ -946,7 +946,35 @@ let sortConfig = {
 };
 
 let currentPage = 1;
-const rowsPerPage = 15;
+
+function getDynamicRowsPerPage(totalItems) {
+    if (currentViewMode === 'cards') return 12;
+
+    const container = document.getElementById('professores-list');
+    if (!container) return 20;
+
+    const containerHeight = container.clientHeight;
+    if (containerHeight <= 0) return 20;
+
+    const thead = container.querySelector('thead');
+    const theadHeight = thead && thead.offsetHeight > 0 ? thead.offsetHeight : 28;
+    const availableHeight = containerHeight - theadHeight - 2;
+
+    const sampleRow = container.querySelector('tbody tr');
+    const rowHeight = sampleRow && sampleRow.offsetHeight > 0 ? sampleRow.offsetHeight : 26;
+
+    if (availableHeight <= 0 || rowHeight <= 0) return 18;
+
+    const fitCount = Math.floor(availableHeight / rowHeight);
+
+    // Se todos os professores couberem na tela atual, mostra todos na mesma página sem precisar paginar!
+    if (totalItems && totalItems <= fitCount) {
+        return totalItems;
+    }
+
+    return Math.max(fitCount, 5);
+}
+
 
 let currentViewMode = localStorage.getItem('viewMode') || 'table';
 
@@ -1047,7 +1075,8 @@ const debouncedRenderTable = debounce(renderTable, 300);
 
 function renderPagination(totalItems) {
     if (!paginationDiv) return;
-    const totalPages = Math.ceil(totalItems / rowsPerPage);
+    const currentRows = getDynamicRowsPerPage(totalItems);
+    const totalPages = Math.ceil(totalItems / currentRows);
     paginationDiv.innerHTML = '';
 
     if (totalPages <= 1) return;
@@ -1144,8 +1173,13 @@ function renderTable() {
     });
 
     if (filteredProfessores.length > 0) {
-        const start = (currentPage - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
+        const currentRows = getDynamicRowsPerPage(filteredProfessores.length);
+        const totalPages = Math.ceil(filteredProfessores.length / currentRows);
+        if (currentPage > totalPages && totalPages > 0) {
+            currentPage = 1;
+        }
+        const start = (currentPage - 1) * currentRows;
+        const end = start + currentRows;
         const paginatedItems = filteredProfessores.slice(start, end);
 
         if (paginatedItems.length > 0) {
@@ -2630,3 +2664,74 @@ window.syncEmailsFromPresenca = async () => {
         }
     }
 };
+
+// Recalcula a quantidade de linhas que cabem na tela fixa ao redimensionar
+window.addEventListener('resize', debounce(() => {
+    if (typeof renderTable === 'function' && document.getElementById('professores-list')) {
+        renderTable();
+    }
+}, 150));
+
+
+// ==========================================
+// CONTROLE DE DENSIDADE E MODO EXPANDIDO
+// ==========================================
+let currentDensity = localStorage.getItem('tableDensity') || 'compact';
+let isExpanded = localStorage.getItem('tableExpanded') === 'true';
+
+window.updateDensityUI = () => {
+    const btnCompact = document.getElementById('btn-density-compact');
+    const btnComfort = document.getElementById('btn-density-comfort');
+    if (btnCompact) btnCompact.classList.toggle('active', currentDensity === 'compact');
+    if (btnComfort) btnComfort.classList.toggle('active', currentDensity === 'comfort');
+
+    const container = document.querySelector('.container') || document.body;
+    container.classList.toggle('density-comfort', currentDensity === 'comfort');
+    container.classList.toggle('density-compact', currentDensity === 'compact');
+    document.body.classList.toggle('density-comfort', currentDensity === 'comfort');
+    document.body.classList.toggle('density-compact', currentDensity === 'compact');
+};
+
+window.setDensity = (density) => {
+    currentDensity = density;
+    localStorage.setItem('tableDensity', density);
+    window.updateDensityUI();
+    if (typeof renderTable === 'function') renderTable();
+};
+
+window.updateExpandUI = () => {
+    const container = document.querySelector('.container');
+    const btnExpand = document.getElementById('btn-toggle-expand');
+    const filters = document.querySelector('.filters');
+
+    if (container) container.classList.toggle('is-expanded', isExpanded);
+    if (filters) filters.style.display = isExpanded ? 'none' : 'flex';
+
+    if (btnExpand) {
+        btnExpand.classList.toggle('active', isExpanded);
+        btnExpand.innerHTML = isExpanded 
+            ? '<i class="fas fa-compress"></i> Filtros' 
+            : '<i class="fas fa-expand"></i> Expandir';
+        btnExpand.title = isExpanded 
+            ? 'Exibir filtros da tabela' 
+            : 'Recolher filtros para modo tela cheia';
+    }
+};
+
+window.toggleExpandMode = () => {
+    isExpanded = !isExpanded;
+    localStorage.setItem('tableExpanded', isExpanded);
+    window.updateExpandUI();
+    if (typeof renderTable === 'function') renderTable();
+};
+
+// Inicialização imediata de interface
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.updateDensityUI();
+        window.updateExpandUI();
+    });
+} else {
+    window.updateDensityUI();
+    window.updateExpandUI();
+}
