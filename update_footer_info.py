@@ -7,21 +7,21 @@ def get_git_info():
         # Obter hash do commit
         hash_cmd = subprocess.run(
             ['git', 'rev-parse', '--short', 'HEAD'],
-            capture_output=True, text=True, check=True
+            capture_output=True, text=True, encoding='utf-8', check=True
         )
         commit_hash = hash_cmd.stdout.strip()
 
         # Obter data formatada
         date_cmd = subprocess.run(
             ['git', 'log', '-1', '--format=%cd', '--date=format:%d/%m/%Y às %H:%M'],
-            capture_output=True, text=True, check=True
+            capture_output=True, text=True, encoding='utf-8', check=True
         )
         commit_date = date_cmd.stdout.strip()
 
         # Obter última mensagem de commit
         msg_cmd = subprocess.run(
             ['git', 'log', '-1', '--format=%s'],
-            capture_output=True, text=True, check=True
+            capture_output=True, text=True, encoding='utf-8', check=True
         )
         commit_msg = msg_cmd.stdout.strip()
 
