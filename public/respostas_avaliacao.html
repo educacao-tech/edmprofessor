@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Respostas da Avaliação Anual EDM 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        html, body {
+            height: auto !important;
+            min-height: 100% !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
+
+        body {
+            padding: 20px 10px 40px 10px !important;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .answers-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        }
+
+        @media (max-width: 768px) {
+            .answers-container {
+                padding: 16px;
+            }
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .kpis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background-color: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .kpi-icon.blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .kpi-icon.green { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .kpi-icon.purple { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+        .kpi-icon.amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+
+        .kpi-data h3 {
+            margin: 0 0 2px 0;
+            font-size: 1.55rem;
+            font-weight: 800;
+        }
+
+        .kpi-data p {
+            margin: 0;
+            font-size: 0.80rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Barra de Filtros */
+        .filters-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1 1 300px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .search-box input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px 10px 38px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 0.88rem;
+        }
+
+        .school-filter-select {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 0.88rem;
+        }
+
+        /* Tabela de Respostas */
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--card-bg);
+            margin-bottom: 24px;
+        }
+
+        table.answers-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.86rem;
+            min-width: 900px;
+        }
+
+        table.answers-table th {
+            background-color: var(--zebra-bg);
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table.answers-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        table.answers-table tr:hover {
+            background-color: var(--zebra-bg);
+        }
+
+        .protocol-badge {
+            font-family: monospace;
+            font-size: 0.80rem;
+            font-weight: 700;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .presence-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            padding: 2px 7px;
+            border-radius: 5px;
+        }
+
+        /* Modal de Detalhes da Avaliação */
+        .modal-details {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+            padding: 24px 12px;
+            box-sizing: border-box;
+        }
+
+        .modal-details-card {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 28px 32px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .modal-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            gap: 16px;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-close-btn:hover {
+            color: var(--text-color);
+        }
+
+        .doc-meta-banner {
+            background: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            font-size: 0.85rem;
+        }
+
+        .doc-meta-item strong {
+            display: block;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .eval-section-title {
+            background: rgba(37, 99, 235, 0.08);
+            border-left: 4px solid var(--primary-color);
+            padding: 8px 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin: 24px 0 14px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .answer-item-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+        }
+
+        .answer-q-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-color);
+        }
+
+        .answer-q-val {
+            font-size: 0.88rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            white-space: pre-wrap;
+            line-height: 1.45;
+            background: var(--zebra-bg);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .answer-q-val.empty {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="answers-container">
+        <!-- Barra de Navegação Superior -->
+        <div class="top-nav">
+            <div class="nav-links">
+                <a href="index.html" class="btn btn-secondary btn-sm" style="text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Painel de Professores
+                </a>
+                <a href="avaliacao.html" class="btn btn-secondary btn-sm" style="text-decoration: none;">
+                    <i class="fas fa-clipboard-check"></i> Formulário de Avaliação
+                </a>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="exportToCSV()" title="Baixar todas as respostas em formato Excel / CSV">
+                    <i class="fas fa-file-excel"></i> Exportar Planilha (CSV)
+                </button>
+                <a href="https://console.firebase.google.com/project/edmprofessor-1542b/firestore/databases/-default-/data/~2Favaliacoes_2026" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration: none;" title="Ver banco de dados Firestore no Console Google">
+                    <i class="fas fa-database"></i> Firestore Console
+                </a>
+                <button type="button" id="theme-toggle" class="btn-icon" title="Alternar Modo Escuro/Claro">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Título Institucional -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+            <div>
+                <h1 style="margin: 0 0 4px 0; font-size: 1.55rem; font-weight: 800;">
+                    <i class="fas fa-clipboard-list text-primary"></i> Respostas da Avaliação Anual EDM 2026
+                </h1>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.88rem;">
+                    Relatório consolidado de reflexões pedagógicas e presenças confirmadas no Encontro de EDM.
+                </p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="loadAvaliacoes()" title="Recarregar dados">
+                <i class="fas fa-rotate"></i> Atualizar
+            </button>
+        </div>
+
+        <!-- Indicadores (KPIs) -->
+        <div class="kpis-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon blue"><i class="fas fa-file-signature"></i></div>
+                <div class="kpi-data">
+                    <h3 id="kpiTotal">0</h3>
+                    <p>Avaliações Recebidas</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon green"><i class="fas fa-check-double"></i></div>
+                <div class="kpi-data">
+                    <h3 id="kpiPresencas">0</h3>
+                    <p>Presenças Confirmadas</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon purple"><i class="fas fa-school"></i></div>
+                <div class="kpi-data">
+                    <h3 id="kpiEscolas">0</h3>
+                    <p>Escolas Representadas</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon amber"><i class="fas fa-clock"></i></div>
+                <div class="kpi-data">
+                    <h3 id="kpiUltimoEnvio" style="font-size: 1.05rem;">-</h3>
+                    <p>Último Registro</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-bar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Pesquisar por professor, e-mail ou protocolo..." oninput="filterTable()">
+            </div>
+            <select id="schoolFilter" class="school-filter-select" onchange="filterTable()">
+                <option value="">Todas as Escolas</option>
+                <option value="ALZIRA">ALZIRA</option>
+                <option value="ANNA">ANNA</option>
+                <option value="BRAGA">BRAGA</option>
+                <option value="CAIC">CAIC</option>
+                <option value="CÉLIA">CÉLIA</option>
+                <option value="ESTHER">ESTHER</option>
+                <option value="PADRE">PADRE</option>
+                <option value="OUTRA">OUTRA</option>
+            </select>
+        </div>
+
+        <!-- Tabela -->
+        <div class="table-wrap">
+            <table class="answers-table" id="answersTable">
+                <thead>
+                    <tr>
+                        <th>Protocolo</th>
+                        <th>Data / Horário</th>
+                        <th>Professor(a)</th>
+                        <th>Escola</th>
+                        <th>Turmas</th>
+                        <th>Situação</th>
+                        <th style="text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="answersTbody">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando avaliações gravadas...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal de Visualização das Respostas Completas -->
+    <div id="modalDetails" class="modal-details">
+        <div class="modal-details-card">
+            <div class="modal-details-header">
+                <div>
+                    <h2 style="margin: 0 0 4px 0; font-size: 1.3rem;">
+                        <i class="fas fa-file-lines text-primary"></i> Espelho da Avaliação Anual
+                    </h2>
+                    <span id="detailProtocolBadge" class="protocol-badge">EDM-2026-XXXXXX</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="printEvaluationModal()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button type="button" class="modal-close-btn" onclick="closeDetailsModal()">&times;</button>
+                </div>
+            </div>
+
+            <!-- Dados do Docente -->
+            <div class="doc-meta-banner">
+                <div class="doc-meta-item">
+                    <strong>Professor(a):</strong>
+                    <span id="detailProfNome" style="font-weight: 700;">-</span>
+                </div>
+                <div class="doc-meta-item">
+                    <strong>E-mail:</strong>
+                    <span id="detailProfEmail">-</span>
+                </div>
+                <div class="doc-meta-item">
+                    <strong>Escola:</strong>
+                    <span id="detailProfEscola">-</span>
+                </div>
+                <div class="doc-meta-item">
+                    <strong>Turmas:</strong>
+                    <span id="detailProfTurmas">-</span>
+                </div>
+                <div class="doc-meta-item">
+                    <strong>Data de Envio:</strong>
+                    <span id="detailDataEnvio">-</span>
+                </div>
+            </div>
+
+            <!-- Respostas das 28 Questões -->
+            <div id="detailAnswersContainer"></div>
+        </div>
+    </div>
+
+    <!-- Scripts do Firebase e Lógica de Visualização -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwWtrJSuwx_wwXRIie2KVq-5USYTQBM2g",
+            authDomain: "edmprofessor-1542b.firebaseapp.com",
+            projectId: "edmprofessor-1542b",
+            storageBucket: "edmprofessor-1542b.firebasestorage.app",
+            messagingSenderId: "225511245642",
+            appId: "1:225511245642:web:c021e0760fde3d51f6e3b3",
+            measurementId: "G-MT07NMRYXJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let allAvaliacoes = [];
+
+        // Dicionário Oficial das Perguntas para o Relatório
+        const QUESTIONS_MAP = {
+            q1: { bloco: "Bloco 1 – Planejamento e Organização", title: "1. Como você avalia o planejamento das aulas de Educação Digital e Midiática desenvolvido durante o ano?" },
+            q2: { bloco: "Bloco 1 – Planejamento e Organização", title: "2. Os conteúdos e as habilidades trabalhados foram adequados à faixa etária e às necessidades dos alunos?" },
+            q3: { bloco: "Bloco 1 – Planejamento e Organização", title: "3. O tempo destinado às aulas foi suficiente para desenvolver as propostas planejadas?" },
+            q4: { bloco: "Bloco 1 – Planejamento e Organização", title: "4. Quais foram as principais dificuldades encontradas na organização e no planejamento das aulas?" },
+
+            q5: { bloco: "Bloco 2 – Desenvolvimento e Práticas Pedagógicas", title: "5. Como você avalia as propostas e metodologias utilizadas nas aulas?" },
+            q6: { bloco: "Bloco 2 – Desenvolvimento e Práticas Pedagógicas", title: "6. Quais estratégias despertaram maior interesse e participação dos alunos?" },
+            q7: { bloco: "Bloco 2 – Desenvolvimento e Práticas Pedagógicas", title: "7. Os recursos tecnológicos disponíveis atenderam às necessidades das aulas?" },
+            q8: { bloco: "Bloco 2 – Desenvolvimento e Práticas Pedagógicas", title: "8. Quais atividades ou experiências você considera que tiveram maior sucesso durante o ano? Por quê?" },
+
+            q9: { bloco: "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos", title: "9. De maneira geral, como você avalia o aproveitamento dos alunos nas aulas de EDM?" },
+            q10: { bloco: "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos", title: "10. Você percebeu avanços dos alunos em relação às habilidades e aos conhecimentos trabalhados?" },
+            q11: { bloco: "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos", title: "11. Em quais aspectos você percebeu maior desenvolvimento dos alunos?" },
+            q12: { bloco: "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos", title: "12. Os alunos demonstraram interesse e envolvimento nas propostas desenvolvidas?" },
+            q13: { bloco: "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos", title: "13. Quais aprendizagens você considera mais significativas para os alunos neste ano?" },
+
+            q14: { bloco: "Bloco 4 – Desafios e Necessidades", title: "14. Quais foram os principais desafios enfrentados durante as aulas?" },
+            q15: { bloco: "Bloco 4 – Desafios e Necessidades", title: "15. Você considera que recebeu orientações e materiais suficientes para desenvolver as aulas?" },
+            q16: { bloco: "Bloco 4 – Desafios e Necessidades", title: "16. Que recursos, materiais, formações ou orientações poderiam contribuir para melhorar seu trabalho em 2027?" },
+
+            q17: { bloco: "Bloco 5 – Autoavaliação Docente", title: "17. Como você avalia seu envolvimento e comprometimento com as aulas de EDM?" },
+            q18: { bloco: "Bloco 5 – Autoavaliação Docente", title: "18. Você se sentiu preparado(a) e seguro(a) para desenvolver os conteúdos propostos?" },
+            q19: { bloco: "Bloco 5 – Autoavaliação Docente", title: "19. Durante o ano, você buscou diversificar as estratégias de ensino para atender às necessidades?" },
+            q20: { bloco: "Bloco 5 – Autoavaliação Docente", title: "20. Você conseguiu acompanhar e identificar as dificuldades e os avanços individuais e coletivos?" },
+            q21: { bloco: "Bloco 5 – Autoavaliação Docente", title: "21. Suas intervenções contribuíram para o desenvolvimento da autonomia, criatividade e pensamento crítico?" },
+            q22: { bloco: "Bloco 5 – Autoavaliação Docente", title: "22. Olhando para sua trajetória neste ano, o que considera que realizou bem? O que faria diferente?" },
+            q23: { bloco: "Bloco 5 – Autoavaliação Docente", title: "23. Em qual aspecto da sua prática pedagógica gostaria de investir mais para o próximo ano?" },
+
+            q24: { bloco: "Bloco 6 – Perspectivas e Propostas para 2027", title: "24. Que mudanças você considera necessárias para tornar as aulas mais significativas e eficientes?" },
+            q25: { bloco: "Bloco 6 – Perspectivas e Propostas para 2027", title: "25. Deixe uma sugestão ou contribuição para fortalecer o trabalho de EDM em nossa rede de ensino." },
+            q26: { bloco: "Bloco 6 – Perspectivas e Propostas para 2027", title: "26. Em poucas palavras, como você definiria sua experiência como professor(a) de EDM em 2026?" },
+            q27: { bloco: "Bloco 6 – Perspectivas e Propostas para 2027", title: "27. Você pretende continuar ministrando as aulas de Educação Digital e Midiática no próximo ano?" },
+            q28: { bloco: "Bloco 6 – Perspectivas e Propostas para 2027", title: "28. Caso tenha marcado 'Não' ou 'Em dúvida', qual o principal motivo?" }
+        };
+
+        // Carregar avaliações do Firestore
+        window.loadAvaliacoes = async () => {
+            const tbody = document.getElementById('answersTbody');
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Atualizando dados...</td></tr>`;
+
+            try {
+                const snap = await getDocs(collection(db, "avaliacoes_2026"));
+                allAvaliacoes = [];
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    allAvaliacoes.push({ id: docSnap.id, ...data });
+                });
+
+                // Ordenar do mais recente para o mais antigo
+                allAvaliacoes.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+                updateKPIs();
+                renderTable(allAvaliacoes);
+            } catch (err) {
+                console.error("Erro ao carregar do Firestore:", err);
+                // Fallback para backup local no localStorage
+                const local = JSON.parse(localStorage.getItem('edm_avaliacoes_submetidas') || '[]');
+                allAvaliacoes = local;
+                updateKPIs();
+                renderTable(allAvaliacoes);
+            }
+        };
+
+        function updateKPIs() {
+            document.getElementById('kpiTotal').textContent = allAvaliacoes.length;
+            
+            const presencasCount = allAvaliacoes.filter(a => a.presencaEncontro !== false).length;
+            document.getElementById('kpiPresencas').textContent = presencasCount;
+
+            const escolasSet = new Set(allAvaliacoes.map(a => (a.escola || '').trim().toUpperCase()).filter(Boolean));
+            document.getElementById('kpiEscolas').textContent = escolasSet.size;
+
+            if (allAvaliacoes.length > 0) {
+                const ultimo = allAvaliacoes[0];
+                const d = ultimo.createdAt ? new Date(ultimo.createdAt) : new Date();
+                document.getElementById('kpiUltimoEnvio').textContent = `${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })}`;
+            } else {
+                document.getElementById('kpiUltimoEnvio').textContent = '-';
+            }
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('answersTbody');
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 36px; color: var(--text-secondary);"><i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 8px; display: block;"></i>Nenhuma avaliação encontrada com os filtros selecionados.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((item, index) => {
+                const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleString('pt-BR') : (item.dataAvaliacao || '-');
+                const prof = item.professor || 'Docente Não Informado';
+                const escola = item.escola || '-';
+                const turmas = item.turmas || '-';
+                const protocolo = item.protocolo || `EDM-2026-${index+1}`;
+
+                return `
+                    <tr>
+                        <td><span class="protocol-badge">${protocolo}</span></td>
+                        <td><i class="far fa-clock"></i> ${dateStr}</td>
+                        <td>
+                            <strong>${escapeHtml(prof)}</strong>
+                            <div style="font-size: 0.76rem; color: var(--text-secondary);">${escapeHtml(item.email || '')}</div>
+                        </td>
+                        <td><strong>${escapeHtml(escola)}</strong></td>
+                        <td>${escapeHtml(turmas)}</td>
+                        <td>
+                            <span class="presence-tag">
+                                <i class="fas fa-check-circle"></i> Presença Registrada
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="openDetails('${item.id || index}')" title="Visualizar respostas completas">
+                                <i class="fas fa-eye"></i> Ver Respostas
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        window.filterTable = () => {
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const school = document.getElementById('schoolFilter').value.toUpperCase().trim();
+
+            const filtered = allAvaliacoes.filter(item => {
+                const matchSearch = !search || 
+                    (item.professor || '').toLowerCase().includes(search) || 
+                    (item.email || '').toLowerCase().includes(search) || 
+                    (item.protocolo || '').toLowerCase().includes(search);
+
+                const matchSchool = !school || (item.escola || '').toUpperCase().includes(school);
+
+                return matchSearch && matchSchool;
+            });
+
+            renderTable(filtered);
+        };
+
+        // Abrir Detalhes da Avaliação
+        window.openDetails = (docId) => {
+            const item = allAvaliacoes.find((a, idx) => (a.id === docId || String(idx) === String(docId)));
+            if (!item) return;
+
+            document.getElementById('detailProtocolBadge').textContent = item.protocolo || 'EDM-2026';
+            document.getElementById('detailProfNome').textContent = item.professor || '-';
+            document.getElementById('detailProfEmail').textContent = item.email || '-';
+            document.getElementById('detailProfEscola').textContent = item.escola || '-';
+            document.getElementById('detailProfTurmas').textContent = item.turmas || '-';
+            document.getElementById('detailDataEnvio').textContent = item.createdAt ? new Date(item.createdAt).toLocaleString('pt-BR') : (item.dataAvaliacao || '-');
+
+            const container = document.getElementById('detailAnswersContainer');
+            const respostas = item.respostas || {};
+
+            let html = '';
+            let currentBloco = '';
+
+            for (let i = 1; i <= 28; i++) {
+                const key = `q${i}`;
+                const qInfo = QUESTIONS_MAP[key] || { bloco: "Bloco", title: `Questão ${i}` };
+
+                if (qInfo.bloco !== currentBloco) {
+                    currentBloco = qInfo.bloco;
+                    html += `<div class="eval-section-title">${currentBloco}</div>`;
+                }
+
+                let val = respostas[key];
+                if (val === undefined || val === null || val === '') {
+                    // Verifica campos de "Outros"
+                    if (respostas[`${key}_outros`]) val = `Outros: ${respostas[`${key}_outros`]}`;
+                    else val = '<span class="empty">Não respondida / Sem observações</span>';
+                } else if (Array.isArray(val)) {
+                    val = val.join(' • ');
+                }
+
+                html += `
+                    <div class="answer-item-card">
+                        <div class="answer-q-title">${qInfo.title}</div>
+                        <div class="answer-q-val">${typeof val === 'string' && val.includes('<span') ? val : escapeHtml(String(val))}</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+            document.getElementById('modalDetails').style.display = 'block';
+        };
+
+        window.closeDetailsModal = () => {
+            document.getElementById('modalDetails').style.display = 'none';
+        };
+
+        window.printEvaluationModal = () => {
+            window.print();
+        };
+
+        // Exportar Todas as Respostas para Planilha (CSV com UTF-8 BOM para Excel)
+        window.exportToCSV = () => {
+            if (allAvaliacoes.length === 0) {
+                alert("Nenhuma avaliação para exportar.");
+                return;
+            }
+
+            const headers = [
+                "Protocolo", "Data de Envio", "Professor", "Email", "Escola", "Turmas",
+                "Q1 (Planejamento)", "Q2 (Adequação)", "Q3 (Tempo)", "Q4 (Dificuldades)",
+                "Q5 (Metodologias)", "Q6 (Estratégias)", "Q7 (Tecnologias)", "Q8 (Sucesso)",
+                "Q9 (Aproveitamento)", "Q10 (Avanços)", "Q11 (Aspectos desenvolvidos)", "Q12 (Interesse)", "Q13 (Aprendizagens)",
+                "Q14 (Desafios)", "Q15 (Materiais)", "Q16 (Necessidades 2027)",
+                "Q17 (Envolvimento)", "Q18 (Segurança)", "Q19 (Diversificação)", "Q20 (Acompanhamento)", "Q21 (Autonomia)", "Q22 (Realizou bem/Diferente)", "Q23 (Investir 2027)",
+                "Q24 (Mudanças 2027)", "Q25 (Sugestão para a Rede)", "Q26 (Definição da Experiência)", "Q27 (Continuidade)", "Q28 (Motivo da Dúvida/Não)"
+            ];
+
+            const rows = allAvaliacoes.map(item => {
+                const resp = item.respostas || {};
+                const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleString('pt-BR') : (item.dataAvaliacao || '');
+
+                const row = [
+                    item.protocolo || '',
+                    dateStr,
+                    item.professor || '',
+                    item.email || '',
+                    item.escola || '',
+                    item.turmas || ''
+                ];
+
+                for (let i = 1; i <= 28; i++) {
+                    let v = resp[`q${i}`];
+                    if (Array.isArray(v)) v = v.join('; ');
+                    if (!v && resp[`q${i}_outros`]) v = `Outros: ${resp[`q${i}_outros`]}`;
+                    row.push(v || '');
+                }
+
+                return row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(';');
+            });
+
+            const csvContent = "\uFEFF" + headers.map(h => `"${h}"`).join(';') + "\n" + rows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Avaliacoes_EDM_2026_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+        }
+
+        // Alternador de tema
+        const themeBtn = document.getElementById('theme-toggle');
+        if (themeBtn) {
+            themeBtn.onclick = () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', nextTheme);
+                localStorage.setItem('theme', nextTheme);
+                const icon = themeBtn.querySelector('i');
+                if (icon) icon.className = nextTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            };
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                const icon = themeBtn.querySelector('i');
+                if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        // Inicializar
+        loadAvaliacoes();
+    </script>
+</body>
+</html>
