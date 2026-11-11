@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <!-- Efeito de Confetes ao Confirmar Presença -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
     <style>
         /* Estilos Customizados para o Formulário de Avaliação */
         html, body {
@@ -143,7 +145,7 @@
         /* Seção de Identificação */
         .ident-grid {
             display: grid;
-            grid-template-columns: 1.2fr 1.5fr 1.3fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 34px;
             background: var(--card-bg);
@@ -152,15 +154,291 @@
             border: 1px solid var(--border-color);
         }
 
-        @media (max-width: 860px) {
-            .ident-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        @media (max-width: 520px) {
+        @media (max-width: 600px) {
             .ident-grid {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* Banner de Chamada Aberta & Presença */
+        .chamada-banner {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+            border: 1.5px solid rgba(37, 99, 235, 0.25);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .chamada-banner-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chamada-pulse-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulseDot 1.8s infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulseDot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .chamada-banner-text h4 {
+            margin: 0 0 3px 0;
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .chamada-banner-text p {
+            margin: 0;
+            font-size: 0.80rem;
+            color: var(--text-secondary);
+        }
+
+        /* Card de Docente Autenticado */
+        .docente-connected-card {
+            background-color: var(--zebra-bg);
+            border: 1.5px solid rgba(16, 185, 129, 0.35);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .docente-profile-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .docente-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #10b981;
+        }
+
+        .docente-avatar-fallback {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #10b981);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .docente-info h4 {
+            margin: 0 0 2px 0;
+            font-size: 0.98rem;
+            font-weight: 800;
+        }
+
+        .docente-info p {
+            margin: 0 0 5px 0;
+            font-size: 0.80rem;
+            color: var(--text-secondary);
+        }
+
+        .badge-presenca-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            font-size: 0.74rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        html[data-theme="dark"] .badge-presenca-link {
+            background-color: rgba(16, 185, 129, 0.25);
+            color: #34d399;
+        }
+
+        /* Botão Oficial Google */
+        .btn-google-auth {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: #ffffff;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-google-auth:hover {
+            background-color: #f9fafb;
+            border-color: #9ca3af;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        html[data-theme="dark"] .btn-google-auth {
+            background-color: #1f2937;
+            color: #f3f4f6;
+            border-color: #374151;
+        }
+
+        html[data-theme="dark"] .btn-google-auth:hover {
+            background-color: #374151;
+        }
+
+        .btn-google-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 0.70rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+
+        html[data-theme="dark"] .btn-google-badge {
+            background: rgba(3, 105, 161, 0.3);
+            color: #7dd3fc;
+        }
+
+        /* Modal de Autenticação / Portão de Entrada */
+        .auth-gate-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            overflow-y: auto;
+            padding: 20px 12px;
+            box-sizing: border-box;
+        }
+
+        .auth-gate-card {
+            max-width: 480px;
+            margin: 40px auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalScaleIn {
+            from { opacity: 0; transform: scale(0.94) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 18px 0;
+            color: var(--text-secondary);
+            font-size: 0.74rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .auth-divider::before, .auth-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .auth-divider span {
+            padding: 0 10px;
+        }
+
+        .quick-profiles-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .quick-profile-chip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 12px;
+            background: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: left;
+            width: 100%;
+            font-family: inherit;
+            color: var(--text-color);
+        }
+
+        .quick-profile-chip:hover {
+            border-color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.06);
+        }
+
+        .quick-chip-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .quick-chip-name {
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        .quick-chip-email {
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+        }
+
+        .quick-chip-action {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .ident-field {
@@ -500,6 +778,38 @@
             <p>Reflexão sobre as práticas pedagógicas, aprendizagem dos alunos e planejamento para 2027</p>
         </div>
 
+        <!-- Card 1: Banner de Chamada Aberta (quando não autenticado) -->
+        <div id="chamadaBanner" class="chamada-banner">
+            <div class="chamada-banner-left">
+                <span class="chamada-pulse-dot"></span>
+                <div class="chamada-banner-text">
+                    <h4>Chamada Oficial Aberta • Encontro Formativo de EDM</h4>
+                    <p>O preenchimento desta avaliação computará automaticamente a sua <strong>presença oficial no próximo encontro</strong>. Identifique-se com sua Conta Google.</p>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="window.openAuthGateModal()">
+                <i class="fas fa-sign-in-alt"></i> Identificar Docente
+            </button>
+        </div>
+
+        <!-- Card 2: Card de Docente Autenticado (quando conectado) -->
+        <div id="docenteConnectedCard" class="docente-connected-card" style="display: none;">
+            <div class="docente-profile-wrap">
+                <img id="docenteAvatarImg" class="docente-avatar" src="" alt="Foto Docente" style="display: none;">
+                <div id="docenteAvatarFallback" class="docente-avatar-fallback">P</div>
+                <div class="docente-info">
+                    <h4 id="docenteNome">Docente Conectado</h4>
+                    <p><span id="docenteEmail">email@educacao.batatais.sp.gov.br</span> • <span id="docenteEscolaTag">Escola</span></p>
+                    <span class="badge-presenca-link">
+                        <i class="fas fa-check-circle"></i> Presença Oficial Vinculada ao Encontro de EDM
+                    </span>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.handleLogout()" title="Sair ou trocar de conta">
+                <i class="fas fa-arrow-right-from-bracket"></i> Trocar Docente
+            </button>
+        </div>
+
         <!-- Apresentação -->
         <div class="eval-presentation-card">
             <h3><i class="fas fa-bullhorn"></i> Apresentação</h3>
@@ -512,6 +822,15 @@
         <form id="evaluationForm">
             <!-- Identificação -->
             <div class="ident-grid">
+                <div class="ident-field">
+                    <label for="eval-professor">Professor(a) <span style="color:#e11d48">*</span></label>
+                    <input type="text" id="eval-professor" placeholder="Nome completo do(a) docente" required list="professoresDatalist">
+                    <datalist id="professoresDatalist"></datalist>
+                </div>
+                <div class="ident-field">
+                    <label for="eval-email">E-mail (Google / Institucional) <span style="color:#e11d48">*</span></label>
+                    <input type="email" id="eval-email" placeholder="seuemail@gmail.com" required readonly style="background-color: var(--zebra-bg); cursor: not-allowed;" title="Identificado automaticamente pela sua conta">
+                </div>
                 <div class="ident-field">
                     <label for="eval-escola">Escola <span style="color:#e11d48">*</span></label>
                     <select id="eval-escola" required>
@@ -527,12 +846,7 @@
                     </select>
                 </div>
                 <div class="ident-field">
-                    <label for="eval-professor">Professor(a) <span style="color:#e11d48">*</span></label>
-                    <input type="text" id="eval-professor" placeholder="Nome completo do(a) docente" required list="professoresDatalist">
-                    <datalist id="professoresDatalist"></datalist>
-                </div>
-                <div class="ident-field">
-                    <label for="eval-turmas">Ano(s) / Turma(s) <span style="color:#e11d48">*</span></label>
+                    <label for="eval-turmas">Ano(s) / Turma(s) em que atuou <span style="color:#e11d48">*</span></label>
                     <input type="text" id="eval-turmas" placeholder="Ex: 1º A, 2º B, 3º ano..." required>
                 </div>
                 <div class="ident-field">
@@ -885,14 +1199,23 @@
     <!-- Modal de Confirmação de Envio -->
     <div id="successModal" class="modal">
         <div class="modal-content modal-success-content">
-            <i class="fas fa-check-circle"></i>
-            <h2 style="margin: 0 0 10px 0;">Avaliação Enviada com Sucesso!</h2>
+            <i class="fas fa-check-circle" style="color: #10b981; font-size: 3.2rem; margin-bottom: 12px;"></i>
+            <h2 style="margin: 0 0 10px 0;">Avaliação Enviada e Presença Confirmada!</h2>
             <p style="color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px;">
-                Muito obrigado por dedicar seu tempo e reflexão. Suas contribuições foram gravadas e ajudarão a construir a Educação Digital e Midiática de 2027.
+                Muito obrigado por sua dedicação e reflexão pedagógica. Suas respostas foram salvas e sua frequência no <strong>Encontro Formativo de EDM</strong> foi computada com sucesso.
             </p>
-            <div style="background: var(--zebra-bg); padding: 12px; border-radius: 8px; margin-bottom: 24px; font-size: 0.85rem;">
-                Protocolo: <strong id="successProtocol">EDM-2026-XXXX</strong><br>
-                Docente: <strong id="successTeacher">Docente</strong>
+            <div style="background: var(--zebra-bg); padding: 14px 18px; border-radius: 10px; margin-bottom: 24px; font-size: 0.88rem; text-align: left; border: 1px solid var(--border-color);">
+                <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <span>Protocolo Oficial:</span>
+                    <strong id="successProtocol" style="font-family: monospace; font-size: 1.05rem; color: var(--primary-color);">EDM-2026-XXXX</strong>
+                </div>
+                <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <span>Docente:</span>
+                    <strong id="successTeacher">Docente</strong>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; color: #10b981; font-weight: 700; padding-top: 6px; border-top: 1px dashed var(--border-color);">
+                    <i class="fas fa-check-double"></i> Presença Oficial Registrada no Encontro de EDM
+                </div>
             </div>
             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                 <button type="button" class="btn btn-secondary" onclick="window.print()">
@@ -905,10 +1228,89 @@
         </div>
     </div>
 
+    <!-- Modal de Identificação Obrigatória / Chamada Oficial -->
+    <div id="authGateModal" class="auth-gate-modal">
+        <div class="auth-gate-card">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(37,99,235,0.1); color: var(--primary-color); padding: 4px 12px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">
+                    <span class="chamada-pulse-dot" style="width: 8px; height: 8px;"></span>
+                    Chamada Oficial • Encontro de EDM
+                </div>
+                <h2 style="margin: 0 0 6px 0; font-size: 1.35rem; font-weight: 800;">Identificação do(a) Professor(a)</h2>
+                <p style="margin: 0; font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45;">
+                    O preenchimento desta avaliação computará automaticamente a sua <strong>presença no próximo encontro formativo</strong> de Educação Digital e Midiática.
+                </p>
+            </div>
+
+            <!-- Botão de Conexão com Google -->
+            <button type="button" id="btnGoogleAuthAction" class="btn-google-auth" onclick="window.handleGoogleSignIn()">
+                <svg viewBox="0 0 48 48" width="20" height="20" style="flex-shrink:0;">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                <span>Entrar com a <strong>Conta Google</strong></span>
+                <span class="btn-google-badge"><i class="fas fa-bolt"></i> 1 Toque</span>
+            </button>
+
+            <!-- Seção de Perfis Recentes (aparece se houver histórico local) -->
+            <div id="quickRecentProfilesWrap" style="display: none; margin-top: 18px;">
+                <span style="display: block; font-size: 0.74rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px;">
+                    <i class="fas fa-clock-rotate-left"></i> Perfis Recentes neste Dispositivo:
+                </span>
+                <div id="quickRecentProfilesList" class="quick-profiles-list"></div>
+            </div>
+
+            <div class="auth-divider">
+                <span>ou identificação rápida</span>
+            </div>
+
+            <!-- Formulário Manual Alternativo -->
+            <form id="quickAuthForm" onsubmit="window.handleQuickAuthSubmit(event)">
+                <div style="margin-bottom: 12px; text-align: left;">
+                    <label for="quickEmail" style="display: block; font-size: 0.80rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">
+                        <i class="fas fa-envelope"></i> E-mail (@gmail.com ou institucional) <span style="color:#e11d48">*</span>
+                    </label>
+                    <input type="email" id="quickEmail" placeholder="seuemail@gmail.com" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-size: 0.90rem; font-family: inherit;">
+                </div>
+
+                <div style="margin-bottom: 12px; text-align: left;">
+                    <label for="quickNome" style="display: block; font-size: 0.80rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">
+                        <i class="fas fa-user-graduate"></i> Nome Completo Oficial <span style="color:#e11d48">*</span>
+                    </label>
+                    <input type="text" id="quickNome" placeholder="Selecione ou digite seu nome" required list="professoresDatalist" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-size: 0.90rem; font-family: inherit;">
+                </div>
+
+                <div style="margin-bottom: 20px; text-align: left;">
+                    <label for="quickEscola" style="display: block; font-size: 0.80rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">
+                        <i class="fas fa-school"></i> Escola de Atuação <span style="color:#e11d48">*</span>
+                    </label>
+                    <select id="quickEscola" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-size: 0.90rem; font-family: inherit;">
+                        <option value="">Selecione a Escola...</option>
+                        <option value="ALZIRA">ALZIRA</option>
+                        <option value="ANNA">ANNA</option>
+                        <option value="BRAGA">BRAGA</option>
+                        <option value="CAIC">CAIC</option>
+                        <option value="CÉLIA">CÉLIA</option>
+                        <option value="ESTHER">ESTHER</option>
+                        <option value="PADRE">PADRE</option>
+                        <option value="OUTRA">OUTRA</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 11px; font-weight: 700; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.92rem;">
+                    <i class="fas fa-circle-check"></i> Salvar e Acessar Avaliação
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts do Firebase e Lógica da Avaliação -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCwWtrJSuwx_wwXRIie2KVq-5USYTQBM2g",
@@ -922,6 +1324,14 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Estado da Sessão do Docente
+        let currentDocente = null;
+        let professoresListCache = [];
+        const RECENT_PROFILES_KEY = 'edm_recent_profiles';
+        const AUTH_SESSION_KEY = 'edm_docente_session';
+        const DRAFT_KEY = 'edm_avaliacao_2026_draft';
 
         // Preenchimento de Data padrão (Hoje)
         const dateInput = document.getElementById('eval-data');
@@ -929,23 +1339,325 @@
             dateInput.value = new Date().toISOString().split('T')[0];
         }
 
-        // Carregar lista de professores para auto-complete
+        // Helper para normalizar strings
+        function normalizeStr(str) {
+            if (!str) return '';
+            return str.toString()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toUpperCase()
+                .trim()
+                .replace(/\s+/g, ' ');
+        }
+
+        // Carregar lista de professores para autocompletar e validação
         async function loadProfessorsList() {
             const datalist = document.getElementById('professoresDatalist');
-            if (!datalist) return;
             try {
-                // Tenta carregar do backup local primeiro
                 const resp = await fetch('backup_professores_2026-05-18.json');
                 if (resp.ok) {
                     const data = await resp.json();
-                    const profs = Array.from(new Set(data.professores.map(p => p.nome).filter(Boolean))).sort();
-                    datalist.innerHTML = profs.map(name => `<option value="${name}">`).join('');
+                    professoresListCache = data.professores || [];
+                    if (datalist) {
+                        const profs = Array.from(new Set(professoresListCache.map(p => p.nome).filter(Boolean))).sort();
+                        datalist.innerHTML = profs.map(name => `<option value="${name}">`).join('');
+                    }
                 }
             } catch (e) {
-                console.warn("Datalist fallback error:", e);
+                console.warn("Aviso ao carregar lista de professores:", e);
             }
         }
         loadProfessorsList();
+
+        // Localiza professor na base de dados por e-mail ou nome
+        function findTeacherInCache(email, nome) {
+            const cleanEmail = (email || '').toLowerCase().trim();
+            const cleanNome = normalizeStr(nome);
+
+            if (cleanEmail && professoresListCache.length > 0) {
+                const matchByEmail = professoresListCache.find(p => (p.email || '').toLowerCase().trim() === cleanEmail);
+                if (matchByEmail) return matchByEmail;
+            }
+
+            if (cleanNome && professoresListCache.length > 0) {
+                const matchByNome = professoresListCache.find(p => normalizeStr(p.nome) === cleanNome);
+                if (matchByNome) return matchByNome;
+            }
+
+            return null;
+        }
+
+        // Atualiza a interface com o Docente Autenticado
+        function setAuthenticatedTeacher(profile) {
+            if (!profile || !profile.email) return;
+
+            currentDocente = profile;
+            localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(profile));
+
+            // Salva na lista de perfis recentes do aparelho
+            try {
+                let recents = JSON.parse(localStorage.getItem(RECENT_PROFILES_KEY) || '[]');
+                recents = recents.filter(r => (r.email || '').toLowerCase() !== profile.email.toLowerCase());
+                recents.unshift({
+                    nome: profile.nome,
+                    email: profile.email,
+                    escola: profile.escola || ''
+                });
+                localStorage.setItem(RECENT_PROFILES_KEY, JSON.stringify(recents.slice(0, 5)));
+            } catch (e) {
+                console.warn("Aviso ao salvar perfil recente:", e);
+            }
+
+            // Atualiza Card de Perfil na página
+            const chamadaBanner = document.getElementById('chamadaBanner');
+            const docenteCard = document.getElementById('docenteConnectedCard');
+            const docenteNome = document.getElementById('docenteNome');
+            const docenteEmail = document.getElementById('docenteEmail');
+            const docenteEscolaTag = document.getElementById('docenteEscolaTag');
+            const docenteAvatarImg = document.getElementById('docenteAvatarImg');
+            const docenteAvatarFallback = document.getElementById('docenteAvatarFallback');
+
+            if (chamadaBanner) chamadaBanner.style.display = 'none';
+            if (docenteCard) docenteCard.style.display = 'flex';
+            if (docenteNome) docenteNome.textContent = profile.nome;
+            if (docenteEmail) docenteEmail.textContent = profile.email;
+            if (docenteEscolaTag) docenteEscolaTag.textContent = profile.escola ? `Escola ${profile.escola}` : 'Escola vinculada';
+
+            if (profile.photoURL && docenteAvatarImg) {
+                docenteAvatarImg.src = profile.photoURL;
+                docenteAvatarImg.style.display = 'block';
+                if (docenteAvatarFallback) docenteAvatarFallback.style.display = 'none';
+            } else if (docenteAvatarFallback) {
+                const initials = profile.nome ? profile.nome.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('') : 'P';
+                docenteAvatarFallback.textContent = initials;
+                docenteAvatarFallback.style.display = 'flex';
+                if (docenteAvatarImg) docenteAvatarImg.style.display = 'none';
+            }
+
+            // Preenche os campos de identificação do formulário
+            const inputProf = document.getElementById('eval-professor');
+            const inputEmail = document.getElementById('eval-email');
+            const selectEscola = document.getElementById('eval-escola');
+            const inputTurmas = document.getElementById('eval-turmas');
+
+            if (inputProf) inputProf.value = profile.nome;
+            if (inputEmail) inputEmail.value = profile.email;
+            if (selectEscola && profile.escola) {
+                // Tenta selecionar a escola no select
+                const options = Array.from(selectEscola.options);
+                const matchingOpt = options.find(opt => profile.escola.toUpperCase().includes(opt.value.toUpperCase()));
+                if (matchingOpt) selectEscola.value = matchingOpt.value;
+            }
+            if (inputTurmas && !inputTurmas.value && profile.turmas) {
+                inputTurmas.value = profile.turmas;
+            }
+
+            // Fecha modal de identificação
+            window.closeAuthGateModal();
+            saveDraft();
+        }
+
+        // Renderiza perfis recentes no modal de identificação rápida
+        function renderRecentProfiles() {
+            const wrap = document.getElementById('quickRecentProfilesWrap');
+            const list = document.getElementById('quickRecentProfilesList');
+            if (!wrap || !list) return;
+
+            try {
+                const recents = JSON.parse(localStorage.getItem(RECENT_PROFILES_KEY) || '[]');
+                if (recents && recents.length > 0) {
+                    wrap.style.display = 'block';
+                    list.innerHTML = recents.map(r => `
+                        <button type="button" class="quick-profile-chip" onclick="window.selectQuickProfile('${escapeHtml(r.nome)}', '${escapeHtml(r.email)}', '${escapeHtml(r.escola || '')}')">
+                            <div class="quick-chip-info">
+                                <span class="quick-chip-name">${escapeHtml(r.nome)}</span>
+                                <span class="quick-chip-email">${escapeHtml(r.email)} ${r.escola ? '• ' + escapeHtml(r.escola) : ''}</span>
+                            </div>
+                            <span class="quick-chip-action"><i class="fas fa-arrow-right"></i> Usar</span>
+                        </button>
+                    `).join('');
+                } else {
+                    wrap.style.display = 'none';
+                }
+            } catch (e) {
+                wrap.style.display = 'none';
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+        }
+
+        // Abertura e Fechamento do Modal
+        window.openAuthGateModal = () => {
+            const modal = document.getElementById('authGateModal');
+            if (modal) modal.style.display = 'block';
+            renderRecentProfiles();
+        };
+
+        window.closeAuthGateModal = () => {
+            const modal = document.getElementById('authGateModal');
+            if (modal) modal.style.display = 'none';
+        };
+
+        // Selecionar perfil rápido
+        window.selectQuickProfile = (nome, email, escola) => {
+            const matched = findTeacherInCache(email, nome);
+            setAuthenticatedTeacher({
+                nome: (matched?.nome || nome).toUpperCase(),
+                email: (email || '').toLowerCase(),
+                escola: matched?.escola || escola || '',
+                turmas: matched?.turma ? `${matched.ano || ''} ${matched.turma}` : '',
+                isGoogle: false
+            });
+        };
+
+        // Login Oficial com a Conta Google
+        window.handleGoogleSignIn = async () => {
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            provider.addScope('email');
+            provider.addScope('profile');
+
+            const btn = document.getElementById('btnGoogleAuthAction');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando à Conta Google...';
+            }
+
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                const matched = findTeacherInCache(user.email, user.displayName);
+
+                const profile = {
+                    nome: (matched?.nome || user.displayName || 'Professor(a)').toUpperCase(),
+                    email: (user.email || '').toLowerCase(),
+                    escola: matched?.escola || '',
+                    turmas: matched?.turma ? `${matched.ano || ''} ${matched.turma}` : '',
+                    photoURL: user.photoURL || null,
+                    isGoogle: true
+                };
+
+                setAuthenticatedTeacher(profile);
+            } catch (err) {
+                console.error("Erro no login Google:", err);
+                if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
+                    console.warn("Popup bloqueado, acionando redirect...");
+                    await signInWithRedirect(auth, provider);
+                    return;
+                }
+                if (err.code !== 'auth/popup-closed-by-user') {
+                    alert("Aviso de Login Google: " + (err.message || err.code) + "\nVocê pode usar a identificação rápida abaixo se preferir.");
+                }
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            }
+        };
+
+        // Envio do Formulário de Identificação Rápida
+        window.handleQuickAuthSubmit = (e) => {
+            e.preventDefault();
+            const email = document.getElementById('quickEmail').value.trim();
+            const nome = document.getElementById('quickNome').value.trim();
+            const escola = document.getElementById('quickEscola').value;
+
+            if (!email || !nome) {
+                alert("Por favor, preencha seu e-mail e nome completo.");
+                return;
+            }
+
+            const matched = findTeacherInCache(email, nome);
+            const profile = {
+                nome: (matched?.nome || nome).toUpperCase(),
+                email: email.toLowerCase(),
+                escola: matched?.escola || escola || '',
+                turmas: matched?.turma ? `${matched.ano || ''} ${matched.turma}` : '',
+                isGoogle: false
+            };
+
+            setAuthenticatedTeacher(profile);
+        };
+
+        // Logout / Trocar de Conta
+        window.handleLogout = async () => {
+            try {
+                await signOut(auth);
+            } catch (e) {
+                console.warn("Aviso no signOut:", e);
+            }
+
+            currentDocente = null;
+            localStorage.removeItem(AUTH_SESSION_KEY);
+
+            const chamadaBanner = document.getElementById('chamadaBanner');
+            const docenteCard = document.getElementById('docenteConnectedCard');
+            if (chamadaBanner) chamadaBanner.style.display = 'flex';
+            if (docenteCard) docenteCard.style.display = 'none';
+
+            const inputProf = document.getElementById('eval-professor');
+            const inputEmail = document.getElementById('eval-email');
+            const selectEscola = document.getElementById('eval-escola');
+            if (inputProf) inputProf.value = '';
+            if (inputEmail) inputEmail.value = '';
+            if (selectEscola) selectEscola.value = '';
+
+            window.openAuthGateModal();
+        };
+
+        // Verificar resultado de redirect (se aplicável para celulares)
+        try {
+            const redirectResult = await getRedirectResult(auth);
+            if (redirectResult && redirectResult.user) {
+                const user = redirectResult.user;
+                const matched = findTeacherInCache(user.email, user.displayName);
+                setAuthenticatedTeacher({
+                    nome: (matched?.nome || user.displayName || 'Professor(a)').toUpperCase(),
+                    email: (user.email || '').toLowerCase(),
+                    escola: matched?.escola || '',
+                    turmas: matched?.turma ? `${matched.ano || ''} ${matched.turma}` : '',
+                    photoURL: user.photoURL || null,
+                    isGoogle: true
+                });
+            }
+        } catch (e) {
+            console.warn("Aviso getRedirectResult:", e);
+        }
+
+        // Monitorar estado de autenticação do Firebase
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const matched = findTeacherInCache(user.email, user.displayName);
+                setAuthenticatedTeacher({
+                    nome: (matched?.nome || user.displayName || 'Professor(a)').toUpperCase(),
+                    email: (user.email || '').toLowerCase(),
+                    escola: matched?.escola || '',
+                    turmas: matched?.turma ? `${matched.ano || ''} ${matched.turma}` : '',
+                    photoURL: user.photoURL || null,
+                    isGoogle: true
+                });
+            } else {
+                // Se não há usuário do Firebase Auth, verifica se há sessão local recente
+                const savedSession = localStorage.getItem(AUTH_SESSION_KEY);
+                if (savedSession) {
+                    try {
+                        const parsed = JSON.parse(savedSession);
+                        if (parsed && parsed.email) {
+                            setAuthenticatedTeacher(parsed);
+                            return;
+                        }
+                    } catch (e) {}
+                }
+
+                // Se não estiver logado, abre o modal de identificação
+                window.openAuthGateModal();
+            }
+        });
 
         // Estilização interativa das opções (checked visual)
         document.querySelectorAll('.option-label input').forEach(input => {
@@ -977,7 +1689,6 @@
         };
 
         // Rascunho Automático (LocalStorage)
-        const DRAFT_KEY = 'edm_avaliacao_2026_draft';
         const draftStatus = document.getElementById('draftStatus');
 
         function saveDraft() {
@@ -993,6 +1704,8 @@
                     data[k] = v;
                 }
             }
+            if (currentDocente) data['_docente'] = currentDocente;
+
             localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
             if (draftStatus) {
                 draftStatus.innerHTML = '<i class="fas fa-check"></i> Rascunho salvo';
@@ -1009,6 +1722,7 @@
                 if (!form) return;
 
                 Object.keys(data).forEach(k => {
+                    if (k.startsWith('_')) return;
                     const val = data[k];
                     const elements = form.querySelectorAll(`[name="${k}"]`);
                     elements.forEach(el => {
@@ -1032,9 +1746,14 @@
                 // IDs diretos
                 if (data['eval-escola']) document.getElementById('eval-escola').value = data['eval-escola'];
                 if (data['eval-professor']) document.getElementById('eval-professor').value = data['eval-professor'];
+                if (data['eval-email']) document.getElementById('eval-email').value = data['eval-email'];
                 if (data['eval-turmas']) document.getElementById('eval-turmas').value = data['eval-turmas'];
                 if (data['eval-data']) document.getElementById('eval-data').value = data['eval-data'];
                 if (data['q27']) handleQ27Change(data['q27']);
+
+                if (data['_docente'] && !currentDocente) {
+                    setAuthenticatedTeacher(data['_docente']);
+                }
             } catch (e) {
                 console.warn("Erro ao restaurar rascunho:", e);
             }
@@ -1053,58 +1772,114 @@
             });
         });
 
-        // Envio do Formulário
+        // Envio do Formulário: Salva Avaliação 2026 E Computa Presença Oficial do Encontro
         const evalForm = document.getElementById('evaluationForm');
         evalForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Validação de Identificação Obrigatória para Presença
+            if (!currentDocente || !currentDocente.email) {
+                alert("Identificação Obrigatória:\nPara que sua presença no Encontro de EDM seja validada, por favor identifique-se com sua Conta Google.");
+                window.openAuthGateModal();
+                return;
+            }
+
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando e Confirmando Presença...';
 
-            // Coleta de dados
+            const now = new Date();
+            const dateStrBR = now.toLocaleDateString('pt-BR');
+            const timeStrBR = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const timestampFormatted = `${dateStrBR} às ${timeStrBR}`;
+            const protocoloCode = 'EDM-2026-' + Math.floor(100000 + Math.random() * 900000);
+
+            // Coleta de dados da avaliação
             const formData = new FormData(evalForm);
-            const payload = {
-                escola: document.getElementById('eval-escola').value,
-                professor: document.getElementById('eval-professor').value,
-                turmas: document.getElementById('eval-turmas').value,
-                dataAvaliacao: document.getElementById('eval-data').value,
-                createdAt: new Date().toISOString(),
-                protocolo: 'EDM-2026-' + Math.floor(100000 + Math.random() * 900000),
+            const escolaVal = (document.getElementById('eval-escola').value || currentDocente.escola || '').toUpperCase().trim();
+            const professorVal = (document.getElementById('eval-professor').value || currentDocente.nome || '').toUpperCase().trim();
+            const emailVal = (document.getElementById('eval-email').value || currentDocente.email || '').toLowerCase().trim();
+            const turmasVal = document.getElementById('eval-turmas').value;
+            const dataAvaliacaoVal = document.getElementById('eval-data').value;
+
+            const payloadAvaliacao = {
+                escola: escolaVal,
+                professor: professorVal,
+                email: emailVal,
+                turmas: turmasVal,
+                dataAvaliacao: dataAvaliacaoVal,
+                createdAt: now.toISOString(),
+                protocolo: protocoloCode,
+                presencaEncontro: true,
+                isGoogleAuth: !!currentDocente.isGoogle,
+                tipo: 'avaliacao_e_presenca',
                 respostas: {}
             };
 
             for (let [k, v] of formData.entries()) {
-                if (['eval-escola', 'eval-professor', 'eval-turmas', 'eval-data'].includes(k)) continue;
-                if (payload.respostas[k]) {
-                    if (Array.isArray(payload.respostas[k])) payload.respostas[k].push(v);
-                    else payload.respostas[k] = [payload.respostas[k], v];
+                if (['eval-escola', 'eval-professor', 'eval-email', 'eval-turmas', 'eval-data'].includes(k)) continue;
+                if (payloadAvaliacao.respostas[k]) {
+                    if (Array.isArray(payloadAvaliacao.respostas[k])) payloadAvaliacao.respostas[k].push(v);
+                    else payloadAvaliacao.respostas[k] = [payloadAvaliacao.respostas[k], v];
                 } else {
-                    payload.respostas[k] = v;
+                    payloadAvaliacao.respostas[k] = v;
                 }
             }
 
+            // Payload para a Coleção de Presença Oficial de EDM
+            const payloadPresenca = {
+                professor: professorVal,
+                email: emailVal,
+                escola: escolaVal,
+                data: dateStrBR,
+                timestamp: timestampFormatted,
+                authCode: protocoloCode,
+                origem: 'avaliacao_anual_edm',
+                tipo: 'avaliacao_e_presenca',
+                isGoogleAuth: !!currentDocente.isGoogle,
+                createdAt: now.toISOString()
+            };
+
             try {
-                // Tenta salvar no Firestore
-                await addDoc(collection(db, "avaliacoes_2026"), payload);
-                console.log("Salvo no Firestore com sucesso!");
+                // 1. Salva Avaliação Anual em avaliacoes_2026
+                await addDoc(collection(db, "avaliacoes_2026"), payloadAvaliacao);
+                console.log("Avaliação salva com sucesso!");
+
+                // 2. Registra Presença Oficial na coleção presencas (compatível com lista_presenca)
+                try {
+                    await addDoc(collection(db, "presencas"), payloadPresenca);
+                    console.log("Presença oficial no Encontro computada com sucesso!");
+                } catch (presencaErr) {
+                    console.warn("Aviso ao registrar presença oficial:", presencaErr);
+                }
             } catch (firestoreErr) {
-                console.warn("Firestore bloqueado ou offline, guardando backup local:", firestoreErr);
-                // Salva backup localmente
+                console.warn("Firestore offline ou restrito, guardando backup local:", firestoreErr);
                 const savedAll = JSON.parse(localStorage.getItem('edm_avaliacoes_submetidas') || '[]');
-                savedAll.push(payload);
+                savedAll.push(payloadAvaliacao);
                 localStorage.setItem('edm_avaliacoes_submetidas', JSON.stringify(savedAll));
             }
 
             // Limpa rascunho
             localStorage.removeItem(DRAFT_KEY);
 
-            // Exibe modal de confirmação
-            document.getElementById('successProtocol').textContent = payload.protocolo;
-            document.getElementById('successTeacher').textContent = payload.professor + ' (' + payload.escola + ')';
+            // Exibe modal de confirmação comemorativo
+            document.getElementById('successProtocol').textContent = protocoloCode;
+            document.getElementById('successTeacher').textContent = `${professorVal} (${escolaVal})`;
             document.getElementById('successModal').style.display = 'block';
 
+            // Efeito de confetes festivos
+            if (typeof confetti === 'function') {
+                try {
+                    confetti({
+                        particleCount: 90,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                } catch (confettiErr) {}
+            }
+
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check"></i> Enviado!';
+            btn.innerHTML = '<i class="fas fa-check-double"></i> Enviado & Presença Confirmada!';
         });
 
         // Alternador de tema
