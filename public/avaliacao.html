@@ -805,9 +805,10 @@
     <div class="eval-container">
         <!-- Barra de Navegação Superior -->
         <div class="eval-top-nav">
-            <a href="index.html" class="eval-back-link">
-                <i class="fas fa-arrow-left"></i> Voltar ao Sistema de Professores
-            </a>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 600; color: var(--text-secondary);">
+                <i class="fas fa-graduation-cap text-primary" style="font-size: 1.1rem;"></i>
+                <span>Educação Digital e Midiática • <strong>Batatais</strong></span>
+            </div>
             <div class="eval-top-actions">
                 <span class="draft-status-pill" id="draftStatus">
                     <i class="fas fa-cloud-arrow-up"></i> Rascunho salvo
@@ -1292,9 +1293,9 @@
                 <button type="button" class="btn btn-secondary" onclick="window.print()">
                     <i class="fas fa-print"></i> Imprimir Comprovante
                 </button>
-                <a href="index.html" class="btn btn-primary" style="text-decoration: none;">
-                    <i class="fas fa-home"></i> Voltar à Lista
-                </a>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('successModal').style.display = 'none'; window.scrollTo({top: 0, behavior: 'smooth'});">
+                    <i class="fas fa-check"></i> Concluir
+                </button>
             </div>
         </div>
     </div>
