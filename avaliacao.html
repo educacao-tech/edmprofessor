@@ -441,6 +441,61 @@
             gap: 4px;
         }
 
+        /* Barra de Progresso de Preenchimento */
+        .eval-progress-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+
+        .eval-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .eval-progress-track {
+            width: 100%;
+            height: 9px;
+            background: var(--zebra-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .eval-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f59e0b, #3b82f6, #10b981);
+            border-radius: 10px;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Destaque para Questão Não Preenchida */
+        .unanswered-highlight {
+            outline: 2.5px solid #ef4444 !important;
+            outline-offset: 4px;
+            background-color: rgba(239, 68, 68, 0.06) !important;
+            border-radius: 8px;
+            animation: shakeHighlight 0.4s ease-in-out;
+        }
+
+        @keyframes shakeHighlight {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
         .ident-field {
             display: flex;
             flex-direction: column;
@@ -783,8 +838,8 @@
             <div class="chamada-banner-left">
                 <span class="chamada-pulse-dot"></span>
                 <div class="chamada-banner-text">
-                    <h4>Chamada Oficial Aberta • Encontro Formativo de EDM</h4>
-                    <p>O preenchimento desta avaliação computará automaticamente a sua <strong>presença oficial no próximo encontro</strong>. Identifique-se com sua Conta Google.</p>
+                    <h4>Chamada Oficial • Encontro Formativo de EDM</h4>
+                    <p><strong>Atenção:</strong> Sua presença oficial <strong>somente será registrada após você preencher e enviar este formulário de avaliação</strong>. Identifique-se com sua Conta Google para começar.</p>
                 </div>
             </div>
             <button type="button" class="btn btn-primary btn-sm" onclick="window.openAuthGateModal()">
@@ -800,8 +855,8 @@
                 <div class="docente-info">
                     <h4 id="docenteNome">Docente Conectado</h4>
                     <p><span id="docenteEmail">email@educacao.batatais.sp.gov.br</span> • <span id="docenteEscolaTag">Escola</span></p>
-                    <span class="badge-presenca-link">
-                        <i class="fas fa-check-circle"></i> Presença Oficial Vinculada ao Encontro de EDM
+                    <span class="badge-presenca-link" id="presenceStatusBadge" style="background-color: rgba(245, 158, 11, 0.15); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.3);">
+                        <i class="fas fa-clock"></i> Presença no Encontro: PENDENTE (Responda e envie a avaliação abaixo)
                     </span>
                 </div>
             </div>
@@ -816,6 +871,22 @@
             <p>Esta avaliação tem como objetivo refletir sobre o desenvolvimento das aulas de Educação Digital e Midiática ao longo do ano letivo de 2026, considerando as práticas pedagógicas, o envolvimento dos alunos, as aprendizagens construídas e os desafios encontrados durante o percurso.</p>
             <p>As respostas contribuirão para identificar aspectos positivos, reconhecer necessidades e aprimorar o planejamento e as propostas pedagógicas para o ano letivo de 2027.</p>
             <p>Este é também um momento de autoavaliação, no qual cada professor poderá refletir sobre suas escolhas, ações e intervenções pedagógicas.</p>
+        </div>
+
+        <!-- Barra de Progresso de Preenchimento -->
+        <div class="eval-progress-container" id="evalProgressBox">
+            <div class="eval-progress-header">
+                <div>
+                    <strong style="font-size: 0.88rem; color: var(--text-color);"><i class="fas fa-tasks"></i> Progresso do Preenchimento:</strong>
+                    <span id="evalProgressText" style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 6px;">0 de 28 respondidas (0%)</span>
+                </div>
+                <span id="evalProgressStatusBadge" class="badge-status-progresso" style="font-size: 0.76rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; background-color: rgba(245, 158, 11, 0.15); color: #b45309;">
+                    <i class="fas fa-hourglass-half"></i> Presença só é confirmada com 100% preenchido
+                </span>
+            </div>
+            <div class="eval-progress-track">
+                <div class="eval-progress-bar" id="evalProgressBar" style="width: 0%;"></div>
+            </div>
         </div>
 
         <!-- Formulário Principal -->
@@ -896,8 +967,8 @@
 
                 <!-- Q4 -->
                 <div class="question-item">
-                    <p class="question-title"><span class="q-num">4.</span> Quais foram as principais dificuldades encontradas na organização e no planejamento das aulas?</p>
-                    <textarea class="eval-textarea" name="q4" rows="3" placeholder="Descreva aqui as dificuldades encontradas ou deixe em branco se não houver..."></textarea>
+                    <p class="question-title"><span class="q-num">4.</span> Quais foram as principais dificuldades encontradas na organização e no planejamento das aulas? <span style="color:#e11d48">*</span></p>
+                    <textarea class="eval-textarea" name="q4" rows="3" placeholder="Descreva aqui as dificuldades encontradas ou 'Nenhuma' se correu tudo bem..." required></textarea>
                 </div>
             </div>
 
@@ -948,8 +1019,8 @@
 
                 <!-- Q8 -->
                 <div class="question-item">
-                    <p class="question-title"><span class="q-num">8.</span> Quais atividades ou experiências você considera que tiveram maior sucesso durante o ano? Por quê?</p>
-                    <textarea class="eval-textarea" name="q8" rows="3" placeholder="Compartilhe as atividades que mais deram certo e o motivo..."></textarea>
+                    <p class="question-title"><span class="q-num">8.</span> Quais atividades ou experiências você considera que tiveram maior sucesso durante o ano? Por quê? <span style="color:#e11d48">*</span></p>
+                    <textarea class="eval-textarea" name="q8" rows="3" placeholder="Compartilhe as atividades que mais deram certo e o motivo..." required></textarea>
                 </div>
             </div>
 
@@ -1013,8 +1084,8 @@
 
                 <!-- Q13 -->
                 <div class="question-item">
-                    <p class="question-title"><span class="q-num">13.</span> Quais aprendizagens você considera mais significativas para os alunos neste ano? Há alguma habilidade que precisa ser retomada ou fortalecida?</p>
-                    <textarea class="eval-textarea" name="q13" rows="3" placeholder="Sua reflexão sobre as aprendizagens construídas e pontos a fortalecer..."></textarea>
+                    <p class="question-title"><span class="q-num">13.</span> Quais aprendizagens você considera mais significativas para os alunos neste ano? Há alguma habilidade que precisa ser retomada ou fortalecida? <span style="color:#e11d48">*</span></p>
+                    <textarea class="eval-textarea" name="q13" rows="3" placeholder="Sua reflexão sobre as aprendizagens construídas e pontos a fortalecer..." required></textarea>
                 </div>
             </div>
 
@@ -1054,8 +1125,8 @@
 
                 <!-- Q16 -->
                 <div class="question-item">
-                    <p class="question-title"><span class="q-num">16.</span> Que recursos, materiais, formações ou orientações poderiam contribuir para melhorar seu trabalho em 2027?</p>
-                    <textarea class="eval-textarea" name="q16" rows="3" placeholder="Sugestões de formações, equipamentos ou materiais de apoio..."></textarea>
+                    <p class="question-title"><span class="q-num">16.</span> Que recursos, materiais, formações ou orientações poderiam contribuir para melhorar seu trabalho em 2027? <span style="color:#e11d48">*</span></p>
+                    <textarea class="eval-textarea" name="q16" rows="3" placeholder="Sugestões de formações, equipamentos ou materiais de apoio..." required></textarea>
                 </div>
             </div>
 
@@ -1125,14 +1196,14 @@
 
                 <!-- Q22 -->
                 <div class="question-item">
-                    <p class="question-title"><span class="q-num">22.</span> Olhando para sua trajetória neste ano, o que você considera que realizou bem? O que faria diferente se pudesse recomeçar?</p>
-                    <textarea class="eval-textarea" name="q22" rows="3" placeholder="Destaque seus pontos fortes e o que gostaria de aprimorar..."></textarea>
+                    <p class="question-title"><span class="q-num">22.</span> Olhando para sua trajetória neste ano, o que você considera que realizou bem? O que faria diferente se pudesse recomeçar? <span style="color:#e11d48">*</span></p>
+                    <textarea class="eval-textarea" name="q22" rows="3" placeholder="Destaque seus pontos fortes e o que gostaria de aprimorar..." required></textarea>
                 </div>
 
                 <!-- Q23 -->
                 <div class="question-item">
-                    <p class="question-title"><span class="q-num">23.</span> Em qual aspecto da sua prática pedagógica você gostaria de investir mais para o próximo ano?</p>
-                    <textarea class="eval-textarea" name="q23" rows="3" placeholder="Áreas de formação, recursos, metodologias..."></textarea>
+                    <p class="question-title"><span class="q-num">23.</span> Em qual aspecto da sua prática pedagógica você gostaria de investir mais para o próximo ano? <span style="color:#e11d48">*</span></p>
+                    <textarea class="eval-textarea" name="q23" rows="3" placeholder="Áreas de formação, recursos, metodologias..." required></textarea>
                 </div>
             </div>
 
@@ -1145,20 +1216,20 @@
 
                 <!-- Q24 -->
                 <div class="question-item">
-                    <p class="question-title"><span class="q-num">24.</span> Que mudanças você considera necessárias para tornar as aulas mais significativas, atrativas e eficientes?</p>
-                    <textarea class="eval-textarea" name="q24" rows="3" placeholder="Propostas para o currículo, rotina, materiais..."></textarea>
+                    <p class="question-title"><span class="q-num">24.</span> Que mudanças você considera necessárias para tornar as aulas mais significativas, atrativas e eficientes? <span style="color:#e11d48">*</span></p>
+                    <textarea class="eval-textarea" name="q24" rows="3" placeholder="Propostas para o currículo, rotina, materiais..." required></textarea>
                 </div>
 
                 <!-- Q25 -->
                 <div class="question-item">
-                    <p class="question-title"><span class="q-num">25.</span> Deixe uma sugestão ou contribuição que possa colaborar com a organização e o fortalecimento do trabalho de Educação Digital e Midiática em nossa rede de ensino.</p>
-                    <textarea class="eval-textarea" name="q25" rows="3" placeholder="Sua contribuição para a rede de ensino..."></textarea>
+                    <p class="question-title"><span class="q-num">25.</span> Deixe uma sugestão ou contribuição que possa colaborar com a organização e o fortalecimento do trabalho de Educação Digital e Midiática em nossa rede de ensino. <span style="color:#e11d48">*</span></p>
+                    <textarea class="eval-textarea" name="q25" rows="3" placeholder="Sua contribuição para a rede de ensino..." required></textarea>
                 </div>
 
                 <!-- Q26 -->
                 <div class="question-item">
-                    <p class="question-title"><span class="q-num">26.</span> Em poucas palavras, como você definiria sua experiência como professor(a) de Educação Digital e Midiática em 2026?</p>
-                    <textarea class="eval-textarea" name="q26" rows="2" placeholder="Uma frase ou síntese da sua experiência..."></textarea>
+                    <p class="question-title"><span class="q-num">26.</span> Em poucas palavras, como você definiria sua experiência como professor(a) de Educação Digital e Midiática em 2026? <span style="color:#e11d48">*</span></p>
+                    <textarea class="eval-textarea" name="q26" rows="2" placeholder="Uma frase ou síntese da sua experiência..." required></textarea>
                 </div>
 
                 <!-- Q27 -->
@@ -1659,6 +1730,166 @@
             }
         });
 
+        // ==========================================================================
+        // CONTROLE DE PERGUNTAS, PROGRESSO E VALIDAÇÃO ESTRITA DE PREENCHIMENTO
+        // A PRESENÇA SÓ É REGISTRADA SE O FORMULÁRIO FOR 100% PREENCHIDO
+        // ==========================================================================
+
+        const ALL_QUESTION_KEYS = [
+            { key: 'q1', type: 'radio', label: 'Questão 1 (Planejamento)' },
+            { key: 'q2', type: 'radio', label: 'Questão 2 (Conteúdos e Habilidades)' },
+            { key: 'q3', type: 'radio', label: 'Questão 3 (Tempo de Aula)' },
+            { key: 'q4', type: 'text', label: 'Questão 4 (Dificuldades no Planejamento)' },
+            { key: 'q5', type: 'radio', label: 'Questão 5 (Propostas e Metodologias)' },
+            { key: 'q6', type: 'checkbox', label: 'Questão 6 (Estratégias de Maior Interesse)' },
+            { key: 'q7', type: 'radio', label: 'Questão 7 (Recursos Tecnológicos)' },
+            { key: 'q8', type: 'text', label: 'Questão 8 (Experiências de Sucesso)' },
+            { key: 'q9', type: 'radio', label: 'Questão 9 (Aproveitamento dos Alunos)' },
+            { key: 'q10', type: 'radio', label: 'Questão 10 (Avanços dos Alunos)' },
+            { key: 'q11', type: 'checkbox', label: 'Questão 11 (Aspectos de Maior Desenvolvimento)' },
+            { key: 'q12', type: 'radio', label: 'Questão 12 (Interesse e Envolvimento)' },
+            { key: 'q13', type: 'text', label: 'Questão 13 (Aprendizagens mais Significativas)' },
+            { key: 'q14', type: 'checkbox', label: 'Questão 14 (Principais Desafios)' },
+            { key: 'q15', type: 'radio', label: 'Questão 15 (Orientações e Materiais)' },
+            { key: 'q16', type: 'text', label: 'Questão 16 (Recursos e Formações para 2027)' },
+            { key: 'q17', type: 'radio', label: 'Questão 17 (Envolvimento Docente)' },
+            { key: 'q18', type: 'radio', label: 'Questão 18 (Segurança e Preparo)' },
+            { key: 'q19', type: 'radio', label: 'Questão 19 (Diversificação de Estratégias)' },
+            { key: 'q20', type: 'radio', label: 'Questão 20 (Acompanhamento dos Alunos)' },
+            { key: 'q21', type: 'radio', label: 'Questão 21 (Contribuição para Autonomia)' },
+            { key: 'q22', type: 'text', label: 'Questão 22 (O que Realizou Bem / Faria Diferente)' },
+            { key: 'q23', type: 'text', label: 'Questão 23 (Aspecto a Investir em 2027)' },
+            { key: 'q24', type: 'text', label: 'Questão 24 (Mudanças Necessárias)' },
+            { key: 'q25', type: 'text', label: 'Questão 25 (Sugestão para a Rede)' },
+            { key: 'q26', type: 'text', label: 'Questão 26 (Definição da Experiência)' },
+            { key: 'q27', type: 'radio', label: 'Questão 27 (Continuidade em 2027)' },
+            { key: 'q28', type: 'conditional_text', label: 'Questão 28 (Motivo da Dúvida/Não)' }
+        ];
+
+        // Atualiza a Barra de Progresso Visual
+        function updateProgressUI() {
+            let answeredCount = 0;
+            let totalQuestions = 0;
+
+            ALL_QUESTION_KEYS.forEach(q => {
+                if (q.key === 'q28') {
+                    const q27Val = document.querySelector('input[name="q27"]:checked')?.value || '';
+                    if (q27Val.includes('Não') || q27Val.includes('dúvida')) {
+                        totalQuestions++;
+                        const text = document.querySelector('[name="q28"]')?.value.trim();
+                        if (text) answeredCount++;
+                    }
+                    return;
+                }
+
+                totalQuestions++;
+                if (q.type === 'radio') {
+                    if (document.querySelector(`input[name="${q.key}"]:checked`)) answeredCount++;
+                } else if (q.type === 'checkbox') {
+                    const checkedBoxes = document.querySelectorAll(`input[name="${q.key}"]:checked`);
+                    const outrosCheck = document.getElementById(`${q.key}-outros-check`);
+                    const outrosText = document.getElementById(`${q.key}-outros-text`);
+                    if (checkedBoxes.length > 0 || (outrosCheck && outrosCheck.checked && outrosText && outrosText.value.trim())) {
+                        answeredCount++;
+                    }
+                } else if (q.type === 'text') {
+                    const val = document.querySelector(`[name="${q.key}"]`)?.value.trim();
+                    if (val && val.length > 0) answeredCount++;
+                }
+            });
+
+            const pct = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
+            const bar = document.getElementById('evalProgressBar');
+            const txt = document.getElementById('evalProgressText');
+            const badge = document.getElementById('evalProgressStatusBadge');
+
+            if (bar) bar.style.width = pct + '%';
+            if (txt) txt.textContent = `${answeredCount} de ${totalQuestions} questões respondidas (${pct}%)`;
+
+            if (badge) {
+                if (pct >= 100) {
+                    badge.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+                    badge.style.color = '#059669';
+                    badge.innerHTML = '<i class="fas fa-check-circle"></i> 100% Preenchido! Pronto para enviar e confirmar presença.';
+                } else {
+                    badge.style.backgroundColor = 'rgba(245, 158, 11, 0.15)';
+                    badge.style.color = '#b45309';
+                    badge.innerHTML = '<i class="fas fa-hourglass-half"></i> Presença só é confirmada com 100% preenchido';
+                }
+            }
+        }
+
+        // Validação Estrita de Preenchimento Completo
+        function validateCompleteEvaluation() {
+            // 1. Identificação
+            const prof = document.getElementById('eval-professor')?.value.trim();
+            const email = document.getElementById('eval-email')?.value.trim();
+            const escola = document.getElementById('eval-escola')?.value;
+            const turmas = document.getElementById('eval-turmas')?.value.trim();
+
+            if (!prof || !email || !escola || !turmas) {
+                return {
+                    valid: false,
+                    message: "Por favor, complete todos os campos de identificação (Professor, E-mail, Escola e Turmas em que atuou).",
+                    element: document.querySelector('.ident-grid')
+                };
+            }
+
+            // 2. Validação questão por questão
+            for (let q of ALL_QUESTION_KEYS) {
+                if (q.key === 'q28') {
+                    const q27Val = document.querySelector('input[name="q27"]:checked')?.value || '';
+                    if (q27Val.includes('Não') || q27Val.includes('dúvida')) {
+                        const q28El = document.querySelector('[name="q28"]');
+                        if (!q28El || !q28El.value.trim()) {
+                            return {
+                                valid: false,
+                                message: `Por favor, responda à ${q.label} antes de enviar.`,
+                                element: q28El?.closest('.question-item') || q28El
+                            };
+                        }
+                    }
+                    continue;
+                }
+
+                if (q.type === 'radio') {
+                    const checked = document.querySelector(`input[name="${q.key}"]:checked`);
+                    if (!checked) {
+                        const container = document.querySelector(`input[name="${q.key}"]`)?.closest('.question-item');
+                        return {
+                            valid: false,
+                            message: `Por favor, selecione uma opção na ${q.label}.`,
+                            element: container
+                        };
+                    }
+                } else if (q.type === 'checkbox') {
+                    const checkedBoxes = document.querySelectorAll(`input[name="${q.key}"]:checked`);
+                    const outrosCheck = document.getElementById(`${q.key}-outros-check`);
+                    const outrosText = document.getElementById(`${q.key}-outros-text`);
+                    const hasOutros = outrosCheck && outrosCheck.checked && outrosText && outrosText.value.trim();
+                    if (checkedBoxes.length === 0 && !hasOutros) {
+                        const container = document.querySelector(`input[name="${q.key}"]`)?.closest('.question-item');
+                        return {
+                            valid: false,
+                            message: `Por favor, selecione ao menos uma opção na ${q.label}.`,
+                            element: container
+                        };
+                    }
+                } else if (q.type === 'text') {
+                    const textEl = document.querySelector(`[name="${q.key}"]`);
+                    if (!textEl || !textEl.value.trim()) {
+                        return {
+                            valid: false,
+                            message: `Por favor, responda à reflexão da ${q.label}.`,
+                            element: textEl?.closest('.question-item') || textEl
+                        };
+                    }
+                }
+            }
+
+            return { valid: true };
+        }
+
         // Estilização interativa das opções (checked visual)
         document.querySelectorAll('.option-label input').forEach(input => {
             input.addEventListener('change', () => {
@@ -1669,7 +1900,10 @@
                 } else {
                     input.closest('.option-label')?.classList.toggle('checked', input.checked);
                 }
+                // Remove destaque vermelho de questão respondida
+                input.closest('.question-item')?.classList.remove('unanswered-highlight');
                 saveDraft();
+                updateProgressUI();
             });
         });
 
@@ -1686,6 +1920,7 @@
             } else {
                 box.style.backgroundColor = 'rgba(245, 158, 11, 0.04)';
             }
+            updateProgressUI();
         };
 
         // Rascunho Automático (LocalStorage)
@@ -1754,6 +1989,8 @@
                 if (data['_docente'] && !currentDocente) {
                     setAuthenticatedTeacher(data['_docente']);
                 }
+
+                updateProgressUI();
             } catch (e) {
                 console.warn("Erro ao restaurar rascunho:", e);
             }
@@ -1761,32 +1998,49 @@
 
         restoreDraft();
 
-        // Salvar ao digitar em textareas / inputs
+        // Salvar e atualizar progresso ao digitar em textareas / inputs
         document.querySelectorAll('#evaluationForm input, #evaluationForm textarea, #evaluationForm select').forEach(el => {
             el.addEventListener('input', () => {
+                el.closest('.question-item')?.classList.remove('unanswered-highlight');
                 if (draftStatus) {
                     draftStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
                     draftStatus.style.color = 'var(--text-secondary)';
                 }
                 saveDraft();
+                updateProgressUI();
             });
         });
 
-        // Envio do Formulário: Salva Avaliação 2026 E Computa Presença Oficial do Encontro
+        // Envio do Formulário: Salva Avaliação 2026 E Registra Presença SOMENTE se 100% preenchido
         const evalForm = document.getElementById('evaluationForm');
         evalForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Validação de Identificação Obrigatória para Presença
+            // 1. Validação de Identificação Obrigatória
             if (!currentDocente || !currentDocente.email) {
                 alert("Identificação Obrigatória:\nPara que sua presença no Encontro de EDM seja validada, por favor identifique-se com sua Conta Google.");
                 window.openAuthGateModal();
                 return;
             }
 
+            // 2. Validação Estrita de Preenchimento Completo (somente registra presença se o formulário for preenchido!)
+            const validation = validateCompleteEvaluation();
+            if (!validation.valid) {
+                alert("Preenchimento Incompleto:\n\nPara que sua presença no Encontro Formativo de EDM seja confirmada, você deve responder a todas as questões da avaliação anual.\n\n" + validation.message);
+                
+                document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
+                if (validation.element) {
+                    validation.element.classList.add('unanswered-highlight');
+                    validation.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const focusable = validation.element.querySelector('input, textarea, select');
+                    if (focusable) focusable.focus();
+                }
+                return;
+            }
+
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando e Confirmando Presença...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando e Registrando Presença...';
 
             const now = new Date();
             const dateStrBR = now.toLocaleDateString('pt-BR');
@@ -1857,6 +2111,15 @@
                 const savedAll = JSON.parse(localStorage.getItem('edm_avaliacoes_submetidas') || '[]');
                 savedAll.push(payloadAvaliacao);
                 localStorage.setItem('edm_avaliacoes_submetidas', JSON.stringify(savedAll));
+            }
+
+            // Atualiza status do Card de Presença para Confirmado
+            const presenceBadge = document.getElementById('presenceStatusBadge');
+            if (presenceBadge) {
+                presenceBadge.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+                presenceBadge.style.color = '#059669';
+                presenceBadge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                presenceBadge.innerHTML = '<i class="fas fa-check-double"></i> Presença no Encontro CONFIRMADA';
             }
 
             // Limpa rascunho
