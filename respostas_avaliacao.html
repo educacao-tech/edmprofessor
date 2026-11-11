@@ -318,6 +318,44 @@
             color: var(--text-secondary);
             font-style: italic;
         }
+
+        /* Card de Autenticação Administrativa */
+        .admin-auth-card {
+            max-width: 440px;
+            margin: 50px auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 36px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .admin-lock-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.12);
+            color: var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 18px;
+        }
+
+        .admin-user-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -328,112 +366,160 @@
                 <a href="index.html" class="btn btn-secondary btn-sm" style="text-decoration: none;">
                     <i class="fas fa-arrow-left"></i> Painel de Professores
                 </a>
-                <a href="avaliacao.html" class="btn btn-secondary btn-sm" style="text-decoration: none;">
-                    <i class="fas fa-clipboard-check"></i> Formulário de Avaliação
-                </a>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
-                <button type="button" class="btn btn-primary btn-sm" onclick="exportToCSV()" title="Baixar todas as respostas em formato Excel / CSV">
-                    <i class="fas fa-file-excel"></i> Exportar Planilha (CSV)
-                </button>
-                <a href="https://console.firebase.google.com/project/edmprofessor-1542b/firestore/databases/-default-/data/~2Favaliacoes_2026" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration: none;" title="Ver banco de dados Firestore no Console Google">
-                    <i class="fas fa-database"></i> Firestore Console
-                </a>
+                <div id="adminUserSection" style="display: none; align-items: center; gap: 8px;">
+                    <span id="adminUserEmail" class="admin-user-pill"><i class="fas fa-shield-halved"></i> Admin</span>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="exportToCSV()" title="Baixar todas as respostas em formato Excel / CSV">
+                        <i class="fas fa-file-excel"></i> Exportar CSV
+                    </button>
+                    <a href="https://console.firebase.google.com/project/edmprofessor-1542b/firestore/databases/-default-/data/~2Favaliacoes_2026" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration: none;" title="Ver banco de dados Firestore no Console Google">
+                        <i class="fas fa-database"></i> Firestore
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="handleAdminLogout()" title="Sair do modo administrador">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
                 <button type="button" id="theme-toggle" class="btn-icon" title="Alternar Modo Escuro/Claro">
                     <i class="fas fa-moon"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Título Institucional -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
-            <div>
-                <h1 style="margin: 0 0 4px 0; font-size: 1.55rem; font-weight: 800;">
-                    <i class="fas fa-clipboard-list text-primary"></i> Respostas da Avaliação Anual EDM 2026
-                </h1>
-                <p style="margin: 0; color: var(--text-secondary); font-size: 0.88rem;">
-                    Relatório consolidado de reflexões pedagógicas e presenças confirmadas no Encontro de EDM.
-                </p>
+        <!-- Tela de Bloqueio para Usuários Não Autenticados como Administrador -->
+        <div id="adminAuthGate" class="admin-auth-card">
+            <div class="admin-lock-icon">
+                <i class="fas fa-lock"></i>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="loadAvaliacoes()" title="Recarregar dados">
-                <i class="fas fa-rotate"></i> Atualizar
+            <h2 style="margin: 0 0 8px 0; font-size: 1.35rem; font-weight: 800;">Acesso Administrativo Restrito</h2>
+            <p style="margin: 0 0 24px 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+                O espelho das respostas da Avaliação Anual contém dados pedagógicos individuais e é de <strong>acesso exclusivo da Coordenação de EDM e Secretaria Municipal de Educação</strong>.
+            </p>
+
+            <!-- Botão Google Admin -->
+            <button type="button" id="btnAdminGoogleLogin" class="btn-google-auth" onclick="handleAdminGoogleLogin()" style="margin-bottom: 16px;">
+                <svg viewBox="0 0 48 48" width="18" height="18" style="flex-shrink:0;">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                <span>Entrar com a <strong>Conta Google de Admin</strong></span>
             </button>
+
+            <div class="auth-divider">
+                <span>ou e-mail e senha</span>
+            </div>
+
+            <!-- Formulário E-mail / Senha -->
+            <form id="adminEmailPassForm" onsubmit="handleAdminEmailPasswordLogin(event)" style="text-align: left;">
+                <div style="margin-bottom: 12px;">
+                    <label for="adminEmail" style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">E-mail Administrativo</label>
+                    <input type="email" id="adminEmail" required placeholder="admin@educacao.batatais.sp.gov.br" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-family: inherit;">
+                </div>
+                <div style="margin-bottom: 18px;">
+                    <label for="adminPass" style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">Senha</label>
+                    <input type="password" id="adminPass" required placeholder="Sua senha" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-family: inherit;">
+                </div>
+                <button type="submit" id="btnAdminSubmit" class="btn btn-primary" style="width: 100%; padding: 11px; font-weight: 700; border-radius: 8px; justify-content: center;">
+                    <i class="fas fa-sign-in-alt"></i> Acessar Painel de Respostas
+                </button>
+            </form>
         </div>
 
-        <!-- Indicadores (KPIs) -->
-        <div class="kpis-grid">
-            <div class="kpi-card">
-                <div class="kpi-icon blue"><i class="fas fa-file-signature"></i></div>
-                <div class="kpi-data">
-                    <h3 id="kpiTotal">0</h3>
-                    <p>Avaliações Recebidas</p>
+        <!-- Conteúdo do Painel Administrativo (Exibido apenas quando autenticado) -->
+        <div id="adminPanelContent" style="display: none;">
+            <!-- Título Institucional -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+                <div>
+                    <h1 style="margin: 0 0 4px 0; font-size: 1.55rem; font-weight: 800;">
+                        <i class="fas fa-clipboard-list text-primary"></i> Respostas da Avaliação Anual EDM 2026
+                    </h1>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.88rem;">
+                        Relatório consolidado de reflexões pedagógicas e presenças confirmadas no Encontro de EDM.
+                    </p>
                 </div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="loadAvaliacoes()" title="Recarregar dados">
+                    <i class="fas fa-rotate"></i> Atualizar
+                </button>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon green"><i class="fas fa-check-double"></i></div>
-                <div class="kpi-data">
-                    <h3 id="kpiPresencas">0</h3>
-                    <p>Presenças Confirmadas</p>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon purple"><i class="fas fa-school"></i></div>
-                <div class="kpi-data">
-                    <h3 id="kpiEscolas">0</h3>
-                    <p>Escolas Representadas</p>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon amber"><i class="fas fa-clock"></i></div>
-                <div class="kpi-data">
-                    <h3 id="kpiUltimoEnvio" style="font-size: 1.05rem;">-</h3>
-                    <p>Último Registro</p>
-                </div>
-            </div>
-        </div>
 
-        <!-- Filtros -->
-        <div class="filters-bar">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Pesquisar por professor, e-mail ou protocolo..." oninput="filterTable()">
+            <!-- Indicadores (KPIs) -->
+            <div class="kpis-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon blue"><i class="fas fa-file-signature"></i></div>
+                    <div class="kpi-data">
+                        <h3 id="kpiTotal">0</h3>
+                        <p>Avaliações Recebidas</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon green"><i class="fas fa-check-double"></i></div>
+                    <div class="kpi-data">
+                        <h3 id="kpiPresencas">0</h3>
+                        <p>Presenças Confirmadas</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon purple"><i class="fas fa-school"></i></div>
+                    <div class="kpi-data">
+                        <h3 id="kpiEscolas">0</h3>
+                        <p>Escolas Representadas</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon amber"><i class="fas fa-clock"></i></div>
+                    <div class="kpi-data">
+                        <h3 id="kpiUltimoEnvio" style="font-size: 1.05rem;">-</h3>
+                        <p>Último Registro</p>
+                    </div>
+                </div>
             </div>
-            <select id="schoolFilter" class="school-filter-select" onchange="filterTable()">
-                <option value="">Todas as Escolas</option>
-                <option value="ALZIRA">ALZIRA</option>
-                <option value="ANNA">ANNA</option>
-                <option value="BRAGA">BRAGA</option>
-                <option value="CAIC">CAIC</option>
-                <option value="CÉLIA">CÉLIA</option>
-                <option value="ESTHER">ESTHER</option>
-                <option value="PADRE">PADRE</option>
-                <option value="OUTRA">OUTRA</option>
-            </select>
-        </div>
 
-        <!-- Tabela -->
-        <div class="table-wrap">
-            <table class="answers-table" id="answersTable">
-                <thead>
-                    <tr>
-                        <th>Protocolo</th>
-                        <th>Data / Horário</th>
-                        <th>Professor(a)</th>
-                        <th>Escola</th>
-                        <th>Turmas</th>
-                        <th>Situação</th>
-                        <th style="text-align: center;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="answersTbody">
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-secondary);">
-                            <i class="fas fa-spinner fa-spin"></i> Carregando avaliações gravadas...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Filtros -->
+            <div class="filters-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Pesquisar por professor, e-mail ou protocolo..." oninput="filterTable()">
+                </div>
+                <select id="schoolFilter" class="school-filter-select" onchange="filterTable()">
+                    <option value="">Todas as Escolas</option>
+                    <option value="ALZIRA">ALZIRA</option>
+                    <option value="ANNA">ANNA</option>
+                    <option value="BRAGA">BRAGA</option>
+                    <option value="CAIC">CAIC</option>
+                    <option value="CÉLIA">CÉLIA</option>
+                    <option value="ESTHER">ESTHER</option>
+                    <option value="PADRE">PADRE</option>
+                    <option value="OUTRA">OUTRA</option>
+                </select>
+            </div>
+
+            <!-- Tabela -->
+            <div class="table-wrap">
+                <table class="answers-table" id="answersTable">
+                    <thead>
+                        <tr>
+                            <th>Protocolo</th>
+                            <th>Data / Horário</th>
+                            <th>Professor(a)</th>
+                            <th>Escola</th>
+                            <th>Turmas</th>
+                            <th>Situação</th>
+                            <th style="text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="answersTbody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                                <i class="fas fa-spinner fa-spin"></i> Carregando avaliações gravadas...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
+    </div>
     </div>
 
     <!-- Modal de Visualização das Respostas Completas -->
@@ -487,6 +573,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCwWtrJSuwx_wwXRIie2KVq-5USYTQBM2g",
@@ -500,6 +587,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         let allAvaliacoes = [];
 
@@ -775,8 +863,81 @@
             }
         }
 
-        // Inicializar
-        loadAvaliacoes();
+        // Autenticação Administrativa
+        window.handleAdminGoogleLogin = async () => {
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                console.error("Erro no login Google:", err);
+                alert("Erro ao autenticar com Google: " + (err.message || err.code));
+            }
+        };
+
+        window.handleAdminEmailPasswordLogin = async (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            const email = document.getElementById('adminEmail').value.trim();
+            const pass = document.getElementById('adminPass').value;
+            const btn = document.getElementById('btnAdminSubmit');
+
+            if (!email || !pass) {
+                alert("Por favor, preencha o e-mail e a senha administrativa.");
+                return;
+            }
+
+            try {
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Entrando...`;
+                }
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (err) {
+                console.error("Erro no login com senha:", err);
+                const msg = (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found')
+                    ? "E-mail ou senha incorretos."
+                    : (err.message || err.code);
+                alert("Falha no login: " + msg);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-sign-in-alt"></i> Acessar Painel de Respostas`;
+                }
+            }
+        };
+
+        window.handleAdminLogout = async () => {
+            try {
+                await signOut(auth);
+            } catch (err) {
+                console.error("Erro ao deslogar:", err);
+            }
+        };
+
+        // Observador do Estado de Autenticação
+        onAuthStateChanged(auth, (user) => {
+            const gate = document.getElementById('adminAuthGate');
+            const panel = document.getElementById('adminPanelContent');
+            const userSection = document.getElementById('adminUserSection');
+            const userEmailSpan = document.getElementById('adminUserEmail');
+
+            if (user) {
+                if (gate) gate.style.display = 'none';
+                if (panel) panel.style.display = 'block';
+                if (userSection) userSection.style.display = 'flex';
+                if (userEmailSpan) {
+                    userEmailSpan.innerHTML = `<i class="fas fa-shield-halved"></i> ${escapeHtml(user.email || 'Admin')}`;
+                }
+                loadAvaliacoes();
+            } else {
+                if (gate) gate.style.display = 'block';
+                if (panel) panel.style.display = 'none';
+                if (userSection) userSection.style.display = 'none';
+                allAvaliacoes = [];
+                const tbody = document.getElementById('answersTbody');
+                if (tbody) tbody.innerHTML = '';
+            }
+        });
     </script>
 </body>
 </html>
+
