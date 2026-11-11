@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliação Anual 2026 – Educação Digital e Midiática (EDM)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilos Customizados para o Formulário de Avaliação */
+        body {
+            height: auto !important;
+            overflow-y: auto !important;
+            padding: 20px 10px 40px 10px !important;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .eval-container {
+            max-width: 920px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 36px 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .eval-container {
+                padding: 24px 18px;
+            }
+        }
+
+        /* Top Nav Bar */
+        .eval-top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .eval-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: transform 0.2s;
+        }
+        .eval-back-link:hover {
+            transform: translateX(-3px);
+        }
+
+        .eval-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Logos e Cabeçalho Institucional */
+        .eval-logos-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1.5px dashed var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .eval-logo-img {
+            max-height: 48px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .eval-header-title {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .eval-header-title h1 {
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 0 0 6px 0;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+
+        .eval-header-title p {
+            font-size: 0.96rem;
+            color: var(--text-secondary);
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Card de Apresentação */
+        .eval-presentation-card {
+            background-color: var(--zebra-bg);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 18px 22px;
+            margin-bottom: 30px;
+            font-size: 0.90rem;
+            line-height: 1.6;
+        }
+
+        .eval-presentation-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.02rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .eval-presentation-card p {
+            margin: 0 0 8px 0;
+            color: var(--text-color);
+        }
+        .eval-presentation-card p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Seção de Identificação */
+        .ident-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1.5fr 1.3fr 1fr;
+            gap: 16px;
+            margin-bottom: 34px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 860px) {
+            .ident-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 520px) {
+            .ident-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .ident-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ident-field label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+        }
+
+        .ident-field input,
+        .ident-field select {
+            height: 38px;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.88rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .ident-field input:focus,
+        .ident-field select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+        }
+
+        /* Blocos de Perguntas */
+        .eval-block {
+            margin-bottom: 36px;
+            padding: 26px 28px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            position: relative;
+        }
+
+        .eval-block-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 14px;
+            margin-bottom: 22px;
+            border-bottom: 2px solid rgba(0, 123, 255, 0.15);
+        }
+
+        .eval-block-badge {
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.76rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .eval-block-title {
+            margin: 0;
+            font-size: 1.12rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .eval-block-note {
+            font-size: 0.86rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin: -10px 0 20px 0;
+            padding: 10px 14px;
+            background: var(--zebra-bg);
+            border-radius: 8px;
+        }
+
+        /* Questões */
+        .question-item {
+            margin-bottom: 26px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .question-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .question-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0 0 12px 0;
+            line-height: 1.45;
+        }
+
+        .question-title .q-num {
+            color: var(--primary-color);
+            margin-right: 4px;
+        }
+
+        .question-hint {
+            font-size: 0.80rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-left: 6px;
+        }
+
+        /* Opções de Escolha Única (Radio) e Múltipla (Checkbox) */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 10px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            background-color: var(--card-bg);
+            user-select: none;
+            font-size: 0.88rem;
+        }
+
+        .option-label:hover {
+            background-color: var(--zebra-bg);
+            border-color: var(--primary-color);
+        }
+
+        .option-label input[type="radio"],
+        .option-label input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            accent-color: var(--primary-color);
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .option-label.checked {
+            border-color: var(--primary-color);
+            background-color: rgba(0, 123, 255, 0.06);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Campo de texto aberto para "Outros" */
+        .other-input-wrap {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .other-input-wrap input {
+            flex: 1;
+            height: 36px;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.86rem;
+            outline: none;
+        }
+        .other-input-wrap input:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Textarea para respostas abertas */
+        .eval-textarea {
+            width: 100%;
+            min-height: 90px;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.88rem;
+            font-family: inherit;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .eval-textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+        }
+
+        /* Questão Condicional 28 */
+        .q28-conditional-box {
+            padding: 14px 16px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1.5px dashed #f59e0b;
+            border-radius: 8px;
+            margin-top: 14px;
+            transition: all 0.3s;
+        }
+
+        /* Barra de Ações Inferior */
+        .eval-footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 0 10px 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 30px;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .btn-submit-eval {
+            padding: 12px 28px;
+            font-size: 1.02rem;
+            font-weight: 700;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 14px rgba(0, 123, 255, 0.28);
+            transition: all 0.2s;
+        }
+
+        .btn-submit-eval:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(0, 123, 255, 0.38);
+        }
+
+        .draft-status-pill {
+            font-size: 0.80rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Sucesso Modal */
+        .modal-success-content {
+            max-width: 500px;
+            text-align: center;
+            padding: 36px 30px;
+        }
+
+        .modal-success-content i.fa-check-circle {
+            font-size: 4rem;
+            color: #16a34a;
+            margin-bottom: 16px;
+        }
+
+        /* Estilos de Impressão */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+            .eval-container {
+                max-width: 100% !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            .eval-top-nav,
+            .eval-footer-actions,
+            #theme-toggle {
+                display: none !important;
+            }
+            .eval-block {
+                border: 1px solid #ccc !important;
+                page-break-inside: avoid;
+                margin-bottom: 20px !important;
+            }
+            .option-label {
+                border: 1px solid #ddd !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="notification-area"></div>
+
+    <div class="eval-container">
+        <!-- Barra de Navegação Superior -->
+        <div class="eval-top-nav">
+            <a href="index.html" class="eval-back-link">
+                <i class="fas fa-arrow-left"></i> Voltar ao Sistema de Professores
+            </a>
+            <div class="eval-top-actions">
+                <span class="draft-status-pill" id="draftStatus">
+                    <i class="fas fa-cloud-arrow-up"></i> Rascunho salvo
+                </span>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()" title="Imprimir formulário em branco ou preenchido">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+                <button type="button" id="theme-toggle" class="btn-icon" title="Alternar Modo Escuro/Claro">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Cabeçalho Institucional com Logos -->
+        <div class="eval-logos-row">
+            <img src="batatais.png" alt="Prefeitura de Batatais" class="eval-logo-img">
+            <img src="secretaria.png" alt="Secretaria Municipal de Educação" class="eval-logo-img">
+            <img src="edm.png" alt="Educação Digital e Midiática" class="eval-logo-img">
+        </div>
+
+        <div class="eval-header-title">
+            <h1>Avaliação Anual – Educação Digital e Midiática</h1>
+            <p>Reflexão sobre as práticas pedagógicas, aprendizagem dos alunos e planejamento para 2027</p>
+        </div>
+
+        <!-- Apresentação -->
+        <div class="eval-presentation-card">
+            <h3><i class="fas fa-bullhorn"></i> Apresentação</h3>
+            <p>Esta avaliação tem como objetivo refletir sobre o desenvolvimento das aulas de Educação Digital e Midiática ao longo do ano letivo de 2026, considerando as práticas pedagógicas, o envolvimento dos alunos, as aprendizagens construídas e os desafios encontrados durante o percurso.</p>
+            <p>As respostas contribuirão para identificar aspectos positivos, reconhecer necessidades e aprimorar o planejamento e as propostas pedagógicas para o ano letivo de 2027.</p>
+            <p>Este é também um momento de autoavaliação, no qual cada professor poderá refletir sobre suas escolhas, ações e intervenções pedagógicas.</p>
+        </div>
+
+        <!-- Formulário Principal -->
+        <form id="evaluationForm">
+            <!-- Identificação -->
+            <div class="ident-grid">
+                <div class="ident-field">
+                    <label for="eval-escola">Escola <span style="color:#e11d48">*</span></label>
+                    <select id="eval-escola" required>
+                        <option value="">Selecione a Escola...</option>
+                        <option value="ALZIRA">ALZIRA</option>
+                        <option value="ANNA">ANNA</option>
+                        <option value="BRAGA">BRAGA</option>
+                        <option value="CAIC">CAIC</option>
+                        <option value="CÉLIA">CÉLIA</option>
+                        <option value="ESTHER">ESTHER</option>
+                        <option value="PADRE">PADRE</option>
+                        <option value="OUTRA">OUTRA</option>
+                    </select>
+                </div>
+                <div class="ident-field">
+                    <label for="eval-professor">Professor(a) <span style="color:#e11d48">*</span></label>
+                    <input type="text" id="eval-professor" placeholder="Nome completo do(a) docente" required list="professoresDatalist">
+                    <datalist id="professoresDatalist"></datalist>
+                </div>
+                <div class="ident-field">
+                    <label for="eval-turmas">Ano(s) / Turma(s) <span style="color:#e11d48">*</span></label>
+                    <input type="text" id="eval-turmas" placeholder="Ex: 1º A, 2º B, 3º ano..." required>
+                </div>
+                <div class="ident-field">
+                    <label for="eval-data">Data</label>
+                    <input type="date" id="eval-data" required>
+                </div>
+            </div>
+
+            <!-- BLOCO 1 – PLANEJAMENTO E ORGANIZAÇÃO DAS AULAS -->
+            <div class="eval-block">
+                <div class="eval-block-header">
+                    <span class="eval-block-badge">Bloco 1</span>
+                    <h2 class="eval-block-title">Planejamento e Organização das Aulas</h2>
+                </div>
+
+                <!-- Q1 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">1.</span> Como você avalia o planejamento das aulas de Educação Digital e Midiática desenvolvido durante o ano?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q1" value="Excelente" required> Excelente</label>
+                        <label class="option-label"><input type="radio" name="q1" value="Bom"> Bom</label>
+                        <label class="option-label"><input type="radio" name="q1" value="Regular"> Regular</label>
+                        <label class="option-label"><input type="radio" name="q1" value="Precisa melhorar"> Precisa melhorar</label>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">2.</span> Os conteúdos e as habilidades trabalhados foram adequados à faixa etária e às necessidades dos alunos?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q2" value="Sempre" required> Sempre</label>
+                        <label class="option-label"><input type="radio" name="q2" value="Na maioria das vezes"> Na maioria das vezes</label>
+                        <label class="option-label"><input type="radio" name="q2" value="Algumas vezes"> Algumas vezes</label>
+                        <label class="option-label"><input type="radio" name="q2" value="Raramente"> Raramente</label>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">3.</span> O tempo destinado às aulas foi suficiente para desenvolver as propostas planejadas?</p>
+                    <div class="options-list">
+                        <label class="option-label"><input type="radio" name="q3" value="Sim, foi suficiente." required> Sim, foi suficiente.</label>
+                        <label class="option-label"><input type="radio" name="q3" value="Parcialmente."> Parcialmente.</label>
+                        <label class="option-label"><input type="radio" name="q3" value="Não foi suficiente."> Não foi suficiente.</label>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">4.</span> Quais foram as principais dificuldades encontradas na organização e no planejamento das aulas?</p>
+                    <textarea class="eval-textarea" name="q4" rows="3" placeholder="Descreva aqui as dificuldades encontradas ou deixe em branco se não houver..."></textarea>
+                </div>
+            </div>
+
+            <!-- BLOCO 2 – DESENVOLVIMENTO DAS AULAS E PRÁTICAS PEDAGÓGICAS -->
+            <div class="eval-block">
+                <div class="eval-block-header">
+                    <span class="eval-block-badge">Bloco 2</span>
+                    <h2 class="eval-block-title">Desenvolvimento das Aulas e Práticas Pedagógicas</h2>
+                </div>
+
+                <!-- Q5 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">5.</span> Como você avalia as propostas e metodologias utilizadas nas aulas?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q5" value="Muito satisfatórias" required> Muito satisfatórias</label>
+                        <label class="option-label"><input type="radio" name="q5" value="Satisfatórias"> Satisfatórias</label>
+                        <label class="option-label"><input type="radio" name="q5" value="Pouco satisfatórias"> Pouco satisfatórias</label>
+                        <label class="option-label"><input type="radio" name="q5" value="Insatisfatórias"> Insatisfatórias</label>
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">6.</span> Quais estratégias despertaram maior interesse e participação dos alunos? <span class="question-hint">(Marque todas que se aplicam)</span></p>
+                    <div class="options-list">
+                        <label class="option-label"><input type="checkbox" name="q6" value="Jogos e atividades interativas."> Jogos e atividades interativas.</label>
+                        <label class="option-label"><input type="checkbox" name="q6" value="Atividades práticas no computador ou tablet."> Atividades práticas no computador ou tablet.</label>
+                        <label class="option-label"><input type="checkbox" name="q6" value="Atividades impressas e de registro."> Atividades impressas e de registro.</label>
+                        <label class="option-label"><input type="checkbox" name="q6" value="Produção de textos, imagens e conteúdos digitais."> Produção de textos, imagens e conteúdos digitais.</label>
+                        <label class="option-label"><input type="checkbox" name="q6" value="Pesquisas e trabalhos investigativos."> Pesquisas e trabalhos investigativos.</label>
+                        <label class="option-label"><input type="checkbox" name="q6" value="Projetos e atividades coletivas."> Projetos e atividades coletivas.</label>
+                        <div class="other-input-wrap">
+                            <label class="option-label" style="flex:0; white-space:nowrap;"><input type="checkbox" id="q6-outras-check" name="q6_outras_check"> Outras:</label>
+                            <input type="text" id="q6-outras-text" name="q6_outras" placeholder="Especifique outras estratégias...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q7 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">7.</span> Os recursos tecnológicos disponíveis atenderam às necessidades das aulas?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q7" value="Sim." required> Sim.</label>
+                        <label class="option-label"><input type="radio" name="q7" value="Parcialmente."> Parcialmente.</label>
+                        <label class="option-label"><input type="radio" name="q7" value="Não."> Não.</label>
+                    </div>
+                </div>
+
+                <!-- Q8 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">8.</span> Quais atividades ou experiências você considera que tiveram maior sucesso durante o ano? Por quê?</p>
+                    <textarea class="eval-textarea" name="q8" rows="3" placeholder="Compartilhe as atividades que mais deram certo e o motivo..."></textarea>
+                </div>
+            </div>
+
+            <!-- BLOCO 3 – APRENDIZAGEM E DESENVOLVIMENTO DOS ALUNOS -->
+            <div class="eval-block">
+                <div class="eval-block-header">
+                    <span class="eval-block-badge">Bloco 3</span>
+                    <h2 class="eval-block-title">Aprendizagem e Desenvolvimento dos Alunos</h2>
+                </div>
+
+                <!-- Q9 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">9.</span> De maneira geral, como você avalia o aproveitamento dos alunos nas aulas de Educação Digital e Midiática?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q9" value="Excelente" required> Excelente</label>
+                        <label class="option-label"><input type="radio" name="q9" value="Bom"> Bom</label>
+                        <label class="option-label"><input type="radio" name="q9" value="Regular"> Regular</label>
+                        <label class="option-label"><input type="radio" name="q9" value="Insatisfatório"> Insatisfatório</label>
+                    </div>
+                </div>
+
+                <!-- Q10 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">10.</span> Você percebeu avanços dos alunos em relação às habilidades e aos conhecimentos trabalhados?</p>
+                    <div class="options-list">
+                        <label class="option-label"><input type="radio" name="q10" value="Sim, avanços significativos." required> Sim, avanços significativos.</label>
+                        <label class="option-label"><input type="radio" name="q10" value="Sim, avanços parciais."> Sim, avanços parciais.</label>
+                        <label class="option-label"><input type="radio" name="q10" value="Poucos avanços."> Poucos avanços.</label>
+                        <label class="option-label"><input type="radio" name="q10" value="Não foi possível perceber avanços."> Não foi possível perceber avanços.</label>
+                    </div>
+                </div>
+
+                <!-- Q11 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">11.</span> Em quais aspectos você percebeu maior desenvolvimento dos alunos? <span class="question-hint">(Pode marcar mais de uma opção)</span></p>
+                    <div class="options-list">
+                        <label class="option-label"><input type="checkbox" name="q11" value="Uso consciente e responsável das tecnologias."> Uso consciente e responsável das tecnologias.</label>
+                        <label class="option-label"><input type="checkbox" name="q11" value="Segurança e proteção no ambiente digital."> Segurança e proteção no ambiente digital.</label>
+                        <label class="option-label"><input type="checkbox" name="q11" value="Identificação de informações confiáveis e falsas."> Identificação de informações confiáveis e falsas.</label>
+                        <label class="option-label"><input type="checkbox" name="q11" value="Criatividade e produção de conteúdos digitais."> Criatividade e produção de conteúdos digitais.</label>
+                        <label class="option-label"><input type="checkbox" name="q11" value="Pensamento computacional e resolução de problemas."> Pensamento computacional e resolução de problemas.</label>
+                        <label class="option-label"><input type="checkbox" name="q11" value="Autonomia no uso dos recursos tecnológicos."> Autonomia no uso dos recursos tecnológicos.</label>
+                        <label class="option-label"><input type="checkbox" name="q11" value="Colaboração e trabalho em equipe."> Colaboração e trabalho em equipe.</label>
+                        <div class="other-input-wrap">
+                            <label class="option-label" style="flex:0; white-space:nowrap;"><input type="checkbox" id="q11-outros-check" name="q11_outros_check"> Outros:</label>
+                            <input type="text" id="q11-outros-text" name="q11_outros" placeholder="Especifique outros aspectos...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q12 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">12.</span> Os alunos demonstraram interesse e envolvimento nas propostas desenvolvidas?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q12" value="Sempre." required> Sempre.</label>
+                        <label class="option-label"><input type="radio" name="q12" value="Na maioria das vezes."> Na maioria das vezes.</label>
+                        <label class="option-label"><input type="radio" name="q12" value="Algumas vezes."> Algumas vezes.</label>
+                        <label class="option-label"><input type="radio" name="q12" value="Raramente."> Raramente.</label>
+                    </div>
+                </div>
+
+                <!-- Q13 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">13.</span> Quais aprendizagens você considera mais significativas para os alunos neste ano? Há alguma habilidade que precisa ser retomada ou fortalecida?</p>
+                    <textarea class="eval-textarea" name="q13" rows="3" placeholder="Sua reflexão sobre as aprendizagens construídas e pontos a fortalecer..."></textarea>
+                </div>
+            </div>
+
+            <!-- BLOCO 4 – DESAFIOS E NECESSIDADES -->
+            <div class="eval-block">
+                <div class="eval-block-header">
+                    <span class="eval-block-badge">Bloco 4</span>
+                    <h2 class="eval-block-title">Desafios e Necessidades</h2>
+                </div>
+
+                <!-- Q14 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">14.</span> Quais foram os principais desafios enfrentados durante as aulas? <span class="question-hint">(Marque todos que se aplicam)</span></p>
+                    <div class="options-list">
+                        <label class="option-label"><input type="checkbox" name="q14" value="Falta ou insuficiência de equipamentos."> Falta ou insuficiência de equipamentos.</label>
+                        <label class="option-label"><input type="checkbox" name="q14" value="Problemas de conexão com a internet."> Problemas de conexão com a internet.</label>
+                        <label class="option-label"><input type="checkbox" name="q14" value="Tempo reduzido para as atividades."> Tempo reduzido para as atividades.</label>
+                        <label class="option-label"><input type="checkbox" name="q14" value="Dificuldade dos alunos em utilizar os recursos."> Dificuldade dos alunos em utilizar os recursos.</label>
+                        <label class="option-label"><input type="checkbox" name="q14" value="Diferenças nos níveis de aprendizagem das turmas."> Diferenças nos níveis de aprendizagem das turmas.</label>
+                        <label class="option-label"><input type="checkbox" name="q14" value="Dificuldade em ter apoio da Gestão Escolar."> Dificuldade em ter apoio da Gestão Escolar.</label>
+                        <div class="other-input-wrap">
+                            <label class="option-label" style="flex:0; white-space:nowrap;"><input type="checkbox" id="q14-outros-check" name="q14_outros_check"> Outros:</label>
+                            <input type="text" id="q14-outros-text" name="q14_outros" placeholder="Descreva outros desafios...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q15 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">15.</span> Você considera que recebeu orientações e materiais suficientes para desenvolver as aulas?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q15" value="Sim." required> Sim.</label>
+                        <label class="option-label"><input type="radio" name="q15" value="Parcialmente."> Parcialmente.</label>
+                        <label class="option-label"><input type="radio" name="q15" value="Não."> Não.</label>
+                    </div>
+                </div>
+
+                <!-- Q16 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">16.</span> Que recursos, materiais, formações ou orientações poderiam contribuir para melhorar seu trabalho em 2027?</p>
+                    <textarea class="eval-textarea" name="q16" rows="3" placeholder="Sugestões de formações, equipamentos ou materiais de apoio..."></textarea>
+                </div>
+            </div>
+
+            <!-- BLOCO 5 – AUTOAVALIAÇÃO DOCENTE -->
+            <div class="eval-block">
+                <div class="eval-block-header">
+                    <span class="eval-block-badge">Bloco 5</span>
+                    <h2 class="eval-block-title">Autoavaliação Docente</h2>
+                </div>
+                <div class="eval-block-note">
+                    <i class="fas fa-heart"></i> Neste bloco, convidamos você a olhar para sua própria prática, reconhecendo conquistas, dificuldades e possibilidades de crescimento profissional.
+                </div>
+
+                <!-- Q17 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">17.</span> Como você avalia seu envolvimento e comprometimento com as aulas de Educação Digital e Midiática?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q17" value="Excelente." required> Excelente.</label>
+                        <label class="option-label"><input type="radio" name="q17" value="Bom."> Bom.</label>
+                        <label class="option-label"><input type="radio" name="q17" value="Regular."> Regular.</label>
+                        <label class="option-label"><input type="radio" name="q17" value="Precisa melhorar."> Precisa melhorar.</label>
+                    </div>
+                </div>
+
+                <!-- Q18 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">18.</span> Você se sentiu preparado(a) e seguro(a) para desenvolver os conteúdos propostos?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q18" value="Sempre." required> Sempre.</label>
+                        <label class="option-label"><input type="radio" name="q18" value="Na maioria das vezes."> Na maioria das vezes.</label>
+                        <label class="option-label"><input type="radio" name="q18" value="Algumas vezes."> Algumas vezes.</label>
+                        <label class="option-label"><input type="radio" name="q18" value="Raramente."> Raramente.</label>
+                    </div>
+                </div>
+
+                <!-- Q19 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">19.</span> Durante o ano, você buscou diversificar as estratégias de ensino para atender às diferentes necessidades dos alunos?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q19" value="Sempre." required> Sempre.</label>
+                        <label class="option-label"><input type="radio" name="q19" value="Na maioria das vezes."> Na maioria das vezes.</label>
+                        <label class="option-label"><input type="radio" name="q19" value="Algumas vezes."> Algumas vezes.</label>
+                        <label class="option-label"><input type="radio" name="q19" value="Raramente."> Raramente.</label>
+                    </div>
+                </div>
+
+                <!-- Q20 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">20.</span> Você conseguiu acompanhar e identificar as dificuldades e os avanços individuais e coletivos dos alunos?</p>
+                    <div class="options-list">
+                        <label class="option-label"><input type="radio" name="q20" value="Sim, satisfatoriamente." required> Sim, satisfatoriamente.</label>
+                        <label class="option-label"><input type="radio" name="q20" value="Parcialmente."> Parcialmente.</label>
+                        <label class="option-label"><input type="radio" name="q20" value="Com dificuldades."> Com dificuldades.</label>
+                    </div>
+                </div>
+
+                <!-- Q21 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">21.</span> Você considera que suas intervenções contribuíram para o desenvolvimento da autonomia, da criatividade e do pensamento crítico dos alunos?</p>
+                    <div class="options-grid">
+                        <label class="option-label"><input type="radio" name="q21" value="Sim, significativamente." required> Sim, significativamente.</label>
+                        <label class="option-label"><input type="radio" name="q21" value="Sim, parcialmente."> Sim, parcialmente.</label>
+                        <label class="option-label"><input type="radio" name="q21" value="Pouco."> Pouco.</label>
+                        <label class="option-label"><input type="radio" name="q21" value="Não consigo avaliar."> Não consigo avaliar.</label>
+                    </div>
+                </div>
+
+                <!-- Q22 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">22.</span> Olhando para sua trajetória neste ano, o que você considera que realizou bem? O que faria diferente se pudesse recomeçar?</p>
+                    <textarea class="eval-textarea" name="q22" rows="3" placeholder="Destaque seus pontos fortes e o que gostaria de aprimorar..."></textarea>
+                </div>
+
+                <!-- Q23 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">23.</span> Em qual aspecto da sua prática pedagógica você gostaria de investir mais para o próximo ano?</p>
+                    <textarea class="eval-textarea" name="q23" rows="3" placeholder="Áreas de formação, recursos, metodologias..."></textarea>
+                </div>
+            </div>
+
+            <!-- BLOCO 6 – PERSPECTIVAS E PROPOSTAS PARA 2027 -->
+            <div class="eval-block">
+                <div class="eval-block-header">
+                    <span class="eval-block-badge">Bloco 6</span>
+                    <h2 class="eval-block-title">Perspectivas e Propostas para 2027</h2>
+                </div>
+
+                <!-- Q24 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">24.</span> Que mudanças você considera necessárias para tornar as aulas mais significativas, atrativas e eficientes?</p>
+                    <textarea class="eval-textarea" name="q24" rows="3" placeholder="Propostas para o currículo, rotina, materiais..."></textarea>
+                </div>
+
+                <!-- Q25 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">25.</span> Deixe uma sugestão ou contribuição que possa colaborar com a organização e o fortalecimento do trabalho de Educação Digital e Midiática em nossa rede de ensino.</p>
+                    <textarea class="eval-textarea" name="q25" rows="3" placeholder="Sua contribuição para a rede de ensino..."></textarea>
+                </div>
+
+                <!-- Q26 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">26.</span> Em poucas palavras, como você definiria sua experiência como professor(a) de Educação Digital e Midiática em 2026?</p>
+                    <textarea class="eval-textarea" name="q26" rows="2" placeholder="Uma frase ou síntese da sua experiência..."></textarea>
+                </div>
+
+                <!-- Q27 -->
+                <div class="question-item">
+                    <p class="question-title"><span class="q-num">27.</span> Você pretende continuar ministrando as aulas de Educação Digital e Midiática (EDM) no próximo ano?</p>
+                    <div class="options-list">
+                        <label class="option-label"><input type="radio" name="q27" value="Sim, com certeza." required onchange="handleQ27Change(this.value)"> Sim, com certeza.</label>
+                        <label class="option-label"><input type="radio" name="q27" value="Provavelmente sim, dependendo da atribuição/horários" onchange="handleQ27Change(this.value)"> Provavelmente sim, dependendo da atribuição/horários</label>
+                        <label class="option-label"><input type="radio" name="q27" value="Não pretendo pegar essas aulas no próximo ano." onchange="handleQ27Change(this.value)"> Não pretendo pegar essas aulas no próximo ano.</label>
+                        <label class="option-label"><input type="radio" name="q27" value="Ainda estou em dúvida." onchange="handleQ27Change(this.value)"> Ainda estou em dúvida.</label>
+                    </div>
+
+                    <!-- Q28 (com destaque condicional) -->
+                    <div class="q28-conditional-box" id="q28-container">
+                        <p class="question-title" style="margin-bottom:8px;"><span class="q-num">28.</span> Caso tenha marcado "Não" ou "Em dúvida" na pergunta anterior, poderia nos contar o principal motivo?</p>
+                        <textarea class="eval-textarea" name="q28" id="q28-textarea" rows="2" placeholder="Compartilhe seu motivo para podermos compreender melhor e aprimorar o suporte..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agradecimento & Ações de Envio -->
+            <div class="eval-presentation-card" style="border-left-color: #10b981; background: rgba(16, 185, 129, 0.08);">
+                <h3 style="color: #059669;"><i class="fas fa-check-circle"></i> Agradecemos sua participação e contribuição!</h3>
+                <p>Sua reflexão é fundamental para que possamos construir práticas pedagógicas cada vez mais significativas, inclusivas e alinhadas às necessidades dos nossos alunos.</p>
+            </div>
+
+            <div class="eval-footer-actions">
+                <button type="button" class="btn btn-secondary" onclick="exportEvaluationPDF()">
+                    <i class="fas fa-file-pdf"></i> Baixar / Gerar PDF
+                </button>
+                <button type="submit" class="btn-submit-eval" id="btnSubmit">
+                    <i class="fas fa-paper-plane"></i> Enviar Avaliação 2026
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal de Confirmação de Envio -->
+    <div id="successModal" class="modal">
+        <div class="modal-content modal-success-content">
+            <i class="fas fa-check-circle"></i>
+            <h2 style="margin: 0 0 10px 0;">Avaliação Enviada com Sucesso!</h2>
+            <p style="color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px;">
+                Muito obrigado por dedicar seu tempo e reflexão. Suas contribuições foram gravadas e ajudarão a construir a Educação Digital e Midiática de 2027.
+            </p>
+            <div style="background: var(--zebra-bg); padding: 12px; border-radius: 8px; margin-bottom: 24px; font-size: 0.85rem;">
+                Protocolo: <strong id="successProtocol">EDM-2026-XXXX</strong><br>
+                Docente: <strong id="successTeacher">Docente</strong>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Imprimir Comprovante
+                </button>
+                <a href="index.html" class="btn btn-primary" style="text-decoration: none;">
+                    <i class="fas fa-home"></i> Voltar à Lista
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts do Firebase e Lógica da Avaliação -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwWtrJSuwx_wwXRIie2KVq-5USYTQBM2g",
+            authDomain: "edmprofessor-1542b.firebaseapp.com",
+            projectId: "edmprofessor-1542b",
+            storageBucket: "edmprofessor-1542b.firebasestorage.app",
+            messagingSenderId: "225511245642",
+            appId: "1:225511245642:web:c021e0760fde3d51f6e3b3",
+            measurementId: "G-MT07NMRYXJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Preenchimento de Data padrão (Hoje)
+        const dateInput = document.getElementById('eval-data');
+        if (dateInput && !dateInput.value) {
+            dateInput.value = new Date().toISOString().split('T')[0];
+        }
+
+        // Carregar lista de professores para auto-complete
+        async function loadProfessorsList() {
+            const datalist = document.getElementById('professoresDatalist');
+            if (!datalist) return;
+            try {
+                // Tenta carregar do backup local primeiro
+                const resp = await fetch('backup_professores_2026-05-18.json');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const profs = Array.from(new Set(data.professores.map(p => p.nome).filter(Boolean))).sort();
+                    datalist.innerHTML = profs.map(name => `<option value="${name}">`).join('');
+                }
+            } catch (e) {
+                console.warn("Datalist fallback error:", e);
+            }
+        }
+        loadProfessorsList();
+
+        // Estilização interativa das opções (checked visual)
+        document.querySelectorAll('.option-label input').forEach(input => {
+            input.addEventListener('change', () => {
+                if (input.type === 'radio') {
+                    document.querySelectorAll(`input[name="${input.name}"]`).forEach(r => {
+                        r.closest('.option-label')?.classList.toggle('checked', r.checked);
+                    });
+                } else {
+                    input.closest('.option-label')?.classList.toggle('checked', input.checked);
+                }
+                saveDraft();
+            });
+        });
+
+        // Controle da Pergunta 28 condicional
+        window.handleQ27Change = (val) => {
+            const box = document.getElementById('q28-container');
+            const textarea = document.getElementById('q28-textarea');
+            if (!box) return;
+            if (val.includes('Não') || val.includes('dúvida')) {
+                box.style.display = 'block';
+                box.style.borderColor = '#f59e0b';
+                box.style.backgroundColor = 'rgba(245, 158, 11, 0.12)';
+                textarea?.focus();
+            } else {
+                box.style.backgroundColor = 'rgba(245, 158, 11, 0.04)';
+            }
+        };
+
+        // Rascunho Automático (LocalStorage)
+        const DRAFT_KEY = 'edm_avaliacao_2026_draft';
+        const draftStatus = document.getElementById('draftStatus');
+
+        function saveDraft() {
+            const form = document.getElementById('evaluationForm');
+            if (!form) return;
+            const formData = new FormData(form);
+            const data = {};
+            for (let [k, v] of formData.entries()) {
+                if (data[k]) {
+                    if (Array.isArray(data[k])) data[k].push(v);
+                    else data[k] = [data[k], v];
+                } else {
+                    data[k] = v;
+                }
+            }
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+            if (draftStatus) {
+                draftStatus.innerHTML = '<i class="fas fa-check"></i> Rascunho salvo';
+                draftStatus.style.color = '#16a34a';
+            }
+        }
+
+        function restoreDraft() {
+            try {
+                const saved = localStorage.getItem(DRAFT_KEY);
+                if (!saved) return;
+                const data = JSON.parse(saved);
+                const form = document.getElementById('evaluationForm');
+                if (!form) return;
+
+                Object.keys(data).forEach(k => {
+                    const val = data[k];
+                    const elements = form.querySelectorAll(`[name="${k}"]`);
+                    elements.forEach(el => {
+                        if (el.type === 'radio') {
+                            if (el.value === val) {
+                                el.checked = true;
+                                el.closest('.option-label')?.classList.add('checked');
+                            }
+                        } else if (el.type === 'checkbox') {
+                            const isArr = Array.isArray(val);
+                            if ((isArr && val.includes(el.value)) || (!isArr && val === el.value)) {
+                                el.checked = true;
+                                el.closest('.option-label')?.classList.add('checked');
+                            }
+                        } else {
+                            el.value = val;
+                        }
+                    });
+                });
+
+                // IDs diretos
+                if (data['eval-escola']) document.getElementById('eval-escola').value = data['eval-escola'];
+                if (data['eval-professor']) document.getElementById('eval-professor').value = data['eval-professor'];
+                if (data['eval-turmas']) document.getElementById('eval-turmas').value = data['eval-turmas'];
+                if (data['eval-data']) document.getElementById('eval-data').value = data['eval-data'];
+                if (data['q27']) handleQ27Change(data['q27']);
+            } catch (e) {
+                console.warn("Erro ao restaurar rascunho:", e);
+            }
+        }
+
+        restoreDraft();
+
+        // Salvar ao digitar em textareas / inputs
+        document.querySelectorAll('#evaluationForm input, #evaluationForm textarea, #evaluationForm select').forEach(el => {
+            el.addEventListener('input', () => {
+                if (draftStatus) {
+                    draftStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                    draftStatus.style.color = 'var(--text-secondary)';
+                }
+                saveDraft();
+            });
+        });
+
+        // Envio do Formulário
+        const evalForm = document.getElementById('evaluationForm');
+        evalForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            // Coleta de dados
+            const formData = new FormData(evalForm);
+            const payload = {
+                escola: document.getElementById('eval-escola').value,
+                professor: document.getElementById('eval-professor').value,
+                turmas: document.getElementById('eval-turmas').value,
+                dataAvaliacao: document.getElementById('eval-data').value,
+                createdAt: new Date().toISOString(),
+                protocolo: 'EDM-2026-' + Math.floor(100000 + Math.random() * 900000),
+                respostas: {}
+            };
+
+            for (let [k, v] of formData.entries()) {
+                if (['eval-escola', 'eval-professor', 'eval-turmas', 'eval-data'].includes(k)) continue;
+                if (payload.respostas[k]) {
+                    if (Array.isArray(payload.respostas[k])) payload.respostas[k].push(v);
+                    else payload.respostas[k] = [payload.respostas[k], v];
+                } else {
+                    payload.respostas[k] = v;
+                }
+            }
+
+            try {
+                // Tenta salvar no Firestore
+                await addDoc(collection(db, "avaliacoes_2026"), payload);
+                console.log("Salvo no Firestore com sucesso!");
+            } catch (firestoreErr) {
+                console.warn("Firestore bloqueado ou offline, guardando backup local:", firestoreErr);
+                // Salva backup localmente
+                const savedAll = JSON.parse(localStorage.getItem('edm_avaliacoes_submetidas') || '[]');
+                savedAll.push(payload);
+                localStorage.setItem('edm_avaliacoes_submetidas', JSON.stringify(savedAll));
+            }
+
+            // Limpa rascunho
+            localStorage.removeItem(DRAFT_KEY);
+
+            // Exibe modal de confirmação
+            document.getElementById('successProtocol').textContent = payload.protocolo;
+            document.getElementById('successTeacher').textContent = payload.professor + ' (' + payload.escola + ')';
+            document.getElementById('successModal').style.display = 'block';
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check"></i> Enviado!';
+        });
+
+        // Alternador de tema
+        const themeBtn = document.getElementById('theme-toggle');
+        if (themeBtn) {
+            themeBtn.onclick = () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', nextTheme);
+                localStorage.setItem('theme', nextTheme);
+                const icon = themeBtn.querySelector('i');
+                if (icon) icon.className = nextTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            };
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                const icon = themeBtn.querySelector('i');
+                if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        // Exportação de PDF da Avaliação
+        window.exportEvaluationPDF = () => {
+            window.print();
+        };
+    </script>
+</body>
+</html>
