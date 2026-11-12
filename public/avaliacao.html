@@ -142,22 +142,161 @@
             margin-bottom: 0;
         }
 
-        /* Seção de Identificação */
-        .ident-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 34px;
+        /* Seção de Identificação Moderna */
+        .ident-card {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
             border: 1px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 14px;
+            padding: 22px 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            transition: box-shadow 0.2s;
         }
 
-        @media (max-width: 600px) {
-            .ident-grid {
-                grid-template-columns: 1fr;
-            }
+        .ident-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 14px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .ident-card-title {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ident-presence-pill {
+            font-size: 0.74rem;
+            font-weight: 700;
+            background: rgba(16, 185, 129, 0.12);
+            color: #059669;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ident-fields-layout {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px 18px;
+        }
+
+        .col-prof { grid-column: span 7; }
+        .col-email { grid-column: span 5; }
+        .col-escola { grid-column: span 5; }
+        .col-turmas { grid-column: span 4; }
+        .col-data { grid-column: span 3; }
+
+        @media (max-width: 960px) {
+            .col-prof { grid-column: span 12; }
+            .col-email { grid-column: span 12; }
+            .col-escola { grid-column: span 6; }
+            .col-turmas { grid-column: span 6; }
+            .col-data { grid-column: span 12; }
+        }
+
+        @media (max-width: 640px) {
+            .col-escola { grid-column: span 12; }
+            .col-turmas { grid-column: span 12; }
+        }
+
+        .ident-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ident-field label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+            min-height: 20px;
+            margin: 0;
+        }
+
+        .ident-field label span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .required-star {
+            color: #e11d48;
+            font-weight: 800;
+        }
+
+        .badge-auto-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: normal;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+            padding: 2px 7px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-auto-tag.green {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .ident-field input,
+        .ident-field select {
+            height: 42px;
+            padding: 8px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 9px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.90rem;
+            font-family: inherit;
+            outline: none;
+            box-sizing: border-box;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .ident-field input:focus,
+        .ident-field select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background: var(--card-bg);
+        }
+
+        .ident-field input.input-readonly {
+            background: var(--zebra-bg);
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            font-weight: 500;
+        }
+
+        .ident-field input.input-date-lock {
+            pointer-events: none;
+            user-select: none;
+            letter-spacing: 0.03em;
+            font-weight: 600;
         }
 
         /* Banner de Chamada Aberta & Presença */
@@ -494,40 +633,6 @@
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-5px); }
             40%, 80% { transform: translateX(5px); }
-        }
-
-        .ident-field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .ident-field label {
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            letter-spacing: 0.03em;
-        }
-
-        .ident-field input,
-        .ident-field select {
-            height: 38px;
-            padding: 6px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            font-size: 0.88rem;
-            font-family: inherit;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .ident-field input:focus,
-        .ident-field select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
         }
 
         /* Blocos de Perguntas */
@@ -893,40 +998,70 @@
         <!-- Formulário Principal -->
         <form id="evaluationForm">
             <!-- Identificação -->
-            <div class="ident-grid">
-                <div class="ident-field">
-                    <label for="eval-professor">Professor(a) <span style="color:#e11d48">*</span></label>
-                    <input type="text" id="eval-professor" placeholder="Nome completo do(a) docente" required list="professoresDatalist">
-                    <datalist id="professoresDatalist"></datalist>
-                </div>
-                <div class="ident-field">
-                    <label for="eval-email">E-mail (Google / Institucional) <span style="color:#e11d48">*</span></label>
-                    <input type="email" id="eval-email" placeholder="seuemail@gmail.com" required readonly style="background-color: var(--zebra-bg); cursor: not-allowed;" title="Identificado automaticamente pela sua conta">
-                </div>
-                <div class="ident-field">
-                    <label for="eval-escola">Escola <span style="color:#e11d48">*</span></label>
-                    <select id="eval-escola" required>
-                        <option value="">Selecione a Escola...</option>
-                        <option value="ALZIRA">ALZIRA</option>
-                        <option value="ANNA">ANNA</option>
-                        <option value="BRAGA">BRAGA</option>
-                        <option value="CAIC">CAIC</option>
-                        <option value="CÉLIA">CÉLIA</option>
-                        <option value="ESTHER">ESTHER</option>
-                        <option value="PADRE">PADRE</option>
-                        <option value="OUTRA">OUTRA</option>
-                    </select>
-                </div>
-                <div class="ident-field">
-                    <label for="eval-turmas">Ano(s) / Turma(s) em que atuou <span style="color:#e11d48">*</span></label>
-                    <input type="text" id="eval-turmas" placeholder="Ex: 1º A, 2º B, 3º ano..." required>
-                </div>
-                <div class="ident-field">
-                    <label for="eval-data">Data (Automática do Sistema) <i class="fas fa-lock" style="font-size: 0.72rem; color: var(--text-secondary);" title="Data gerada automaticamente pelo sistema"></i></label>
-                    <input type="date" id="eval-data" required readonly tabindex="-1" style="background-color: var(--zebra-bg); cursor: not-allowed; pointer-events: none;" title="Data gerada automaticamente pelo sistema para comprovação de presença">
-                    <span style="font-size: 0.72rem; color: #10b981; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                        <i class="fas fa-circle-check"></i> Registro oficial de presença
+            <div class="ident-card">
+                <div class="ident-card-header">
+                    <div class="ident-card-title">
+                        <i class="fas fa-id-card text-primary"></i>
+                        <span>Identificação do(a) Professor(a)</span>
+                    </div>
+                    <span class="ident-presence-pill">
+                        <i class="fas fa-circle-check"></i> Chamada Oficial do Encontro
                     </span>
+                </div>
+
+                <div class="ident-fields-layout">
+                    <!-- Professor -->
+                    <div class="ident-field col-prof">
+                        <label for="eval-professor">
+                            <span><i class="fas fa-user text-primary"></i> Professor(a) <span class="required-star">*</span></span>
+                        </label>
+                        <input type="text" id="eval-professor" placeholder="Nome completo do(a) docente" required list="professoresDatalist">
+                        <datalist id="professoresDatalist"></datalist>
+                    </div>
+
+                    <!-- E-mail -->
+                    <div class="ident-field col-email">
+                        <label for="eval-email">
+                            <span><i class="fas fa-envelope text-primary"></i> E-mail Institucional <span class="required-star">*</span></span>
+                            <span class="badge-auto-tag"><i class="fas fa-lock"></i> Google</span>
+                        </label>
+                        <input type="email" id="eval-email" placeholder="seuemail@gmail.com" required readonly class="input-readonly" title="Identificado automaticamente pela sua conta autenticada">
+                    </div>
+
+                    <!-- Escola -->
+                    <div class="ident-field col-escola">
+                        <label for="eval-escola">
+                            <span><i class="fas fa-school text-primary"></i> Escola de Atuação <span class="required-star">*</span></span>
+                        </label>
+                        <select id="eval-escola" required>
+                            <option value="">Selecione a Escola...</option>
+                            <option value="ALZIRA">ALZIRA</option>
+                            <option value="ANNA">ANNA</option>
+                            <option value="BRAGA">BRAGA</option>
+                            <option value="CAIC">CAIC</option>
+                            <option value="CÉLIA">CÉLIA</option>
+                            <option value="ESTHER">ESTHER</option>
+                            <option value="PADRE">PADRE</option>
+                            <option value="OUTRA">OUTRA</option>
+                        </select>
+                    </div>
+
+                    <!-- Turmas -->
+                    <div class="ident-field col-turmas">
+                        <label for="eval-turmas">
+                            <span><i class="fas fa-chalkboard-user text-primary"></i> Ano(s) / Turma(s) <span class="required-star">*</span></span>
+                        </label>
+                        <input type="text" id="eval-turmas" placeholder="Ex: 1º A, 2º B, 3º ano..." required>
+                    </div>
+
+                    <!-- Data Presença -->
+                    <div class="ident-field col-data">
+                        <label for="eval-data">
+                            <span><i class="fas fa-calendar-check text-primary"></i> Data da Presença</span>
+                            <span class="badge-auto-tag green"><i class="fas fa-lock"></i> Sistema</span>
+                        </label>
+                        <input type="date" id="eval-data" required readonly tabindex="-1" class="input-readonly input-date-lock" title="Data gerada automaticamente pelo sistema para comprovação da sua presença">
+                    </div>
                 </div>
             </div>
 
