@@ -636,19 +636,19 @@
 
             <!-- Seletor de Abas Administrativas -->
             <div class="admin-tabs-nav">
-                <button type="button" class="admin-tab-btn active" onclick="switchAdminTab('graficos')" id="tabBtn-graficos">
+                <button type="button" class="admin-tab-btn active" onclick="switchAdminTab('tabela')" id="tabBtn-tabela">
+                    <i class="fas fa-table-list"></i> Tabela Geral & Espelhos
+                </button>
+                <button type="button" class="admin-tab-btn" onclick="switchAdminTab('graficos')" id="tabBtn-graficos">
                     <i class="fas fa-chart-pie"></i> Relatório Gráfico Executivo
                 </button>
                 <button type="button" class="admin-tab-btn" onclick="switchAdminTab('qualitativo')" id="tabBtn-qualitativo">
                     <i class="fas fa-comments"></i> Destaques Dissertativos
                 </button>
-                <button type="button" class="admin-tab-btn" onclick="switchAdminTab('tabela')" id="tabBtn-tabela">
-                    <i class="fas fa-table-list"></i> Tabela Geral & Espelhos
-                </button>
             </div>
 
             <!-- ABA 1: RELATÓRIO GRÁFICO EXECUTIVO -->
-            <div id="pane-graficos" class="admin-tab-pane active">
+            <div id="pane-graficos" class="admin-tab-pane">
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">
                         <i class="fas fa-print"></i> Imprimir Relatório Executivo
@@ -743,7 +743,7 @@
             </div>
 
             <!-- ABA 3: TABELA GERAL & ESPELHOS -->
-            <div id="pane-tabela" class="admin-tab-pane">
+            <div id="pane-tabela" class="admin-tab-pane active">
                 <!-- Filtros -->
                 <div class="filters-bar">
                     <div class="search-box">
