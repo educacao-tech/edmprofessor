@@ -1859,6 +1859,60 @@
         </div>
     </div>
 
+    <!-- Script Imediato: Abre o Modal de Identificação e Carrega Perfis Recentes no Carregamento -->
+    <script>
+        (function() {
+            try {
+                const activeSession = sessionStorage.getItem('edm_docente_session');
+                const modal = document.getElementById('authGateModal');
+                if (!activeSession && modal) {
+                    modal.style.display = 'block';
+                    const wrap = document.getElementById('quickRecentProfilesWrap');
+                    const list = document.getElementById('quickRecentProfilesList');
+                    if (wrap && list) {
+                        let recents = JSON.parse(localStorage.getItem('edm_recent_profiles') || '[]');
+                        const oldSession = localStorage.getItem('edm_docente_session');
+                        if (oldSession) {
+                            try {
+                                const parsed = JSON.parse(oldSession);
+                                if (parsed && parsed.email && !recents.some(r => (r.email || '').toLowerCase() === parsed.email.toLowerCase())) {
+                                    recents.unshift({ nome: parsed.nome, email: parsed.email, escola: parsed.escola || '' });
+                                }
+                            } catch(e) {}
+                        }
+                        if (recents && recents.length > 0) {
+                            wrap.style.display = 'block';
+                            list.innerHTML = '';
+                            recents.forEach(r => {
+                                const btn = document.createElement('button');
+                                btn.type = 'button';
+                                btn.className = 'quick-profile-chip';
+                                btn.onclick = function() {
+                                    if (window.selectQuickProfile) {
+                                        window.selectQuickProfile(r.nome, r.email, r.escola || '');
+                                    } else {
+                                        window._pendingQuickProfile = { nome: r.nome, email: r.email, escola: r.escola || '' };
+                                    }
+                                };
+                                const safeNome = String(r.nome || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+                                const safeEmail = String(r.email || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+                                const safeEscola = r.escola ? ' • ' + String(r.escola).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]) : '';
+                                btn.innerHTML = `
+                                    <div class="quick-chip-info">
+                                        <span class="quick-chip-name">${safeNome}</span>
+                                        <span class="quick-chip-email">${safeEmail}${safeEscola}</span>
+                                    </div>
+                                    <span class="quick-chip-action"><i class="fas fa-arrow-right"></i> Usar</span>
+                                `;
+                                list.appendChild(btn);
+                            });
+                        }
+                    }
+                }
+            } catch (err) {}
+        })();
+    </script>
+
     <!-- Scripts do Firebase e Lógica da Avaliação -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
@@ -1961,7 +2015,7 @@
             }
 
             currentDocente = profile;
-            localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(profile));
+            sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(profile));
 
             // Salva na lista de perfis recentes do aparelho
             try {
@@ -2047,7 +2101,21 @@
             if (!wrap || !list) return;
 
             try {
-                const recents = JSON.parse(localStorage.getItem(RECENT_PROFILES_KEY) || '[]');
+                let recents = JSON.parse(localStorage.getItem(RECENT_PROFILES_KEY) || '[]');
+                const saved = localStorage.getItem(AUTH_SESSION_KEY);
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        if (parsed && parsed.email && !recents.some(r => (r.email || '').toLowerCase() === parsed.email.toLowerCase())) {
+                            recents.unshift({
+                                nome: parsed.nome,
+                                email: parsed.email,
+                                escola: parsed.escola || ''
+                            });
+                        }
+                    } catch (e) {}
+                }
+
                 if (recents && recents.length > 0) {
                     wrap.style.display = 'block';
                     list.innerHTML = recents.map(r => `
@@ -2185,6 +2253,7 @@
             }
 
             currentDocente = null;
+            sessionStorage.removeItem(AUTH_SESSION_KEY);
             localStorage.removeItem(AUTH_SESSION_KEY);
 
             const chamadaBanner = document.getElementById('chamadaBanner');
@@ -2227,6 +2296,25 @@
             console.warn("Aviso getRedirectResult:", e);
         }
 
+        // Se o usuário já clicou em perfil recente antes da conclusão do carregamento do módulo
+        if (window._pendingQuickProfile) {
+            const p = window._pendingQuickProfile;
+            window._pendingQuickProfile = null;
+            window.selectQuickProfile(p.nome, p.email, p.escola);
+        } else {
+            const activeSession = sessionStorage.getItem(AUTH_SESSION_KEY);
+            if (activeSession) {
+                try {
+                    const parsed = JSON.parse(activeSession);
+                    if (parsed && parsed.email) {
+                        setAuthenticatedTeacher(parsed);
+                    }
+                } catch (e) {}
+            } else {
+                window.openAuthGateModal();
+            }
+        }
+
         // Monitorar estado de autenticação do Firebase
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -2240,11 +2328,11 @@
                     isGoogle: true
                 });
             } else {
-                // Se não há usuário do Firebase Auth, verifica se há sessão local recente
-                const savedSession = localStorage.getItem(AUTH_SESSION_KEY);
-                if (savedSession) {
+                // Se não há usuário do Firebase Auth, verifica se há sessão ativa nesta aba
+                const activeSession = sessionStorage.getItem(AUTH_SESSION_KEY);
+                if (activeSession) {
                     try {
-                        const parsed = JSON.parse(savedSession);
+                        const parsed = JSON.parse(activeSession);
                         if (parsed && parsed.email) {
                             setAuthenticatedTeacher(parsed);
                             return;
@@ -2252,7 +2340,7 @@
                     } catch (e) {}
                 }
 
-                // Se não estiver logado, abre o modal de identificação
+                // Se não estiver logado nesta sessão, abre o modal de identificação
                 window.openAuthGateModal();
             }
         });
@@ -2704,20 +2792,18 @@
                     });
                 });
 
-                // IDs diretos
-                if (data['eval-escola']) document.getElementById('eval-escola').value = data['eval-escola'];
-                if (data['eval-professor']) document.getElementById('eval-professor').value = data['eval-professor'];
-                if (data['eval-email']) document.getElementById('eval-email').value = data['eval-email'];
+                // IDs diretos (apenas restaura professor/email/escola se o docente já estiver confirmado nesta sessão)
+                if (currentDocente) {
+                    if (data['eval-escola']) document.getElementById('eval-escola').value = data['eval-escola'];
+                    if (data['eval-professor']) document.getElementById('eval-professor').value = data['eval-professor'];
+                    if (data['eval-email']) document.getElementById('eval-email').value = data['eval-email'];
+                }
                 if (data['eval-ano']) document.getElementById('eval-ano').value = data['eval-ano'];
                 if (data['eval-turma']) document.getElementById('eval-turma').value = data['eval-turma'];
                 if (data['eval-periodo']) document.getElementById('eval-periodo').value = data['eval-periodo'];
                 // Data é SEMPRE a data atual oficial do sistema para presença (não recupera data antiga de rascunho)
                 setSystemDate();
                 if (data['q27']) handleQ27Change(data['q27']);
-
-                if (data['_docente'] && !currentDocente) {
-                    setAuthenticatedTeacher(data['_docente']);
-                }
 
                 if (data._currentStep !== undefined && typeof data._currentStep === 'number') {
                     goToStep(data._currentStep, true);
@@ -2859,9 +2945,6 @@
                 authCode: protocoloCode,
                 origem: 'avaliacao_anual_edm',
                 tipo: 'avaliacao_e_presenca',
-                isGoogleAuth: !!currentDocente.isGoogle,
-                createdAt: now.toISOString()
-            };
                 isGoogleAuth: !!currentDocente.isGoogle,
                 createdAt: now.toISOString()
             };
