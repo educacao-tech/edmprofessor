@@ -922,8 +922,11 @@
                     <input type="text" id="eval-turmas" placeholder="Ex: 1º A, 2º B, 3º ano..." required>
                 </div>
                 <div class="ident-field">
-                    <label for="eval-data">Data</label>
-                    <input type="date" id="eval-data" required>
+                    <label for="eval-data">Data (Automática do Sistema) <i class="fas fa-lock" style="font-size: 0.72rem; color: var(--text-secondary);" title="Data gerada automaticamente pelo sistema"></i></label>
+                    <input type="date" id="eval-data" required readonly tabindex="-1" style="background-color: var(--zebra-bg); cursor: not-allowed; pointer-events: none;" title="Data gerada automaticamente pelo sistema para comprovação de presença">
+                    <span style="font-size: 0.72rem; color: #10b981; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                        <i class="fas fa-circle-check"></i> Registro oficial de presença
+                    </span>
                 </div>
             </div>
 
@@ -1405,11 +1408,23 @@
         const AUTH_SESSION_KEY = 'edm_docente_session';
         const DRAFT_KEY = 'edm_avaliacao_2026_draft';
 
-        // Preenchimento de Data padrão (Hoje)
-        const dateInput = document.getElementById('eval-data');
-        if (dateInput && !dateInput.value) {
-            dateInput.value = new Date().toISOString().split('T')[0];
+        // Preenchimento e Bloqueio da Data Oficial do Sistema (Hoje)
+        function getSystemDateISO() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
+
+        function setSystemDate() {
+            const dateInput = document.getElementById('eval-data');
+            if (dateInput) {
+                dateInput.value = getSystemDateISO();
+                dateInput.readOnly = true;
+            }
+        }
+        setSystemDate();
 
         // Helper para normalizar strings
         function normalizeStr(str) {
@@ -1940,6 +1955,7 @@
                     data[k] = v;
                 }
             }
+            data['eval-data'] = getSystemDateISO();
             if (currentDocente) data['_docente'] = currentDocente;
 
             localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
@@ -1984,7 +2000,8 @@
                 if (data['eval-professor']) document.getElementById('eval-professor').value = data['eval-professor'];
                 if (data['eval-email']) document.getElementById('eval-email').value = data['eval-email'];
                 if (data['eval-turmas']) document.getElementById('eval-turmas').value = data['eval-turmas'];
-                if (data['eval-data']) document.getElementById('eval-data').value = data['eval-data'];
+                // Data é SEMPRE a data atual oficial do sistema para presença (não recupera data antiga de rascunho)
+                setSystemDate();
                 if (data['q27']) handleQ27Change(data['q27']);
 
                 if (data['_docente'] && !currentDocente) {
@@ -2055,7 +2072,8 @@
             const professorVal = (document.getElementById('eval-professor').value || currentDocente.nome || '').toUpperCase().trim();
             const emailVal = (document.getElementById('eval-email').value || currentDocente.email || '').toLowerCase().trim();
             const turmasVal = document.getElementById('eval-turmas').value;
-            const dataAvaliacaoVal = document.getElementById('eval-data').value;
+            setSystemDate();
+            const dataAvaliacaoVal = getSystemDateISO();
 
             const payloadAvaliacao = {
                 escola: escolaVal,
