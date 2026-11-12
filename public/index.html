@@ -28,7 +28,7 @@
                 <span class="header-subtitle-inline">Gestão e Frequência Acadêmica</span>
             </div>
             <div class="header-actions">
-                <a href="avaliacao.html?v=20261112c" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm"
+                <a href="avaliacao.html?v=20261112d" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm"
                     title="Preencher Avaliação Anual EDM 2026 (Abre em nova guia)" style="text-decoration:none;"><i
                         class="fas fa-clipboard-check"></i> Avaliação 2026</a>
                 <a href="respostas_avaliacao.html" target="_blank" rel="noopener noreferrer"
@@ -42,6 +42,8 @@
                 <button type="button" class="btn btn-secondary btn-sm admin-only" id="btn-sync-emails"
                     onclick="syncEmailsFromPresenca()" title="Buscar e-mails da lista de presença oficial"><i
                         class="fas fa-envelope-circle-check"></i> Sincronizar</button>
+                <button type="button" class="btn btn-secondary btn-sm admin-only" onclick="openEncontrosModal()"
+                    title="Gestão de Encontros e Datas de Presença"><i class="fas fa-calendar-check"></i> Encontros</button>
                 <button type="button" class="btn btn-secondary btn-sm admin-only" onclick="openMetadataModal('escolas')"
                     title="Cadastro e Gestão de Escolas"><i class="fas fa-school"></i> Escolas</button>
                 <button type="button" class="btn btn-secondary btn-sm admin-only" onclick="openMetadataModal('disciplinas')"
@@ -111,6 +113,17 @@
                     </select>
                 </div>
             </div>
+            <div class="filter-item admin-only" id="filter-item-encontro">
+                <label for="select-encontro-ativo">Encontro Formativo</label>
+                <div class="input-with-action">
+                    <select id="select-encontro-ativo" onchange="handleEncontroChange(this.value)">
+                        <option value="">Carregando...</option>
+                    </select>
+                    <button type="button" class="btn-clear" onclick="openEncontrosModal()" title="Adicionar / Gerenciar Encontros">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
             <div class="filter-item filter-action">
                 <button type="button" class="btn-clear" id="btn-clear-filters" title="Limpar todos os filtros"><i
                         class="fas fa-filter-circle-xmark"></i></button>
@@ -163,9 +176,9 @@
                 <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>11/11/2026 às
                         17:24</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>cbaf1f1</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>3c783ef</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>feat: Adiciona modulo completo de cadastro e gestao de escolas e disciplinas</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>chore: Atualiza rodape para versao cbaf1f1</em></span>
             </div>
         </footer>
     </div>
@@ -469,6 +482,67 @@
 
             <div class="form-actions" style="margin-top: 18px; justify-content: flex-end;">
                 <button type="button" class="btn btn-secondary" onclick="closeMetadataModal()">Concluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gestor de Encontros Formativos -->
+    <div id="encontrosModal" class="modal">
+        <div class="modal-content metadata-modal-content">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <h2>Encontros Formativos</h2>
+                        <p class="modal-subtitle">Adicione datas de formação e controle a frequência oficial</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeEncontrosModal()" title="Fechar" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Formulário Novo Encontro -->
+            <form id="novoEncontroForm" onsubmit="handleNovoEncontroSubmit(event)" style="background: var(--zebra-bg); padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 18px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-calendar-plus" style="color: var(--primary-color);"></i>
+                    <span>Cadastrar Novo Encontro Formativo</span>
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1.3fr auto; gap: 10px; align-items: flex-end;">
+                    <div class="form-group" style="margin: 0;">
+                        <label for="encontroDataInput" style="font-size: 0.74rem; font-weight: 700; text-transform: uppercase;">Data do Encontro <span class="req-star">*</span></label>
+                        <input type="date" id="encontroDataInput" required style="height: 38px; padding: 6px 10px; font-size: 0.88rem;">
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label for="encontroNomeInput" style="font-size: 0.74rem; font-weight: 700; text-transform: uppercase;">Descrição / Tema</label>
+                        <input type="text" id="encontroNomeInput" placeholder="Ex: 2º Encontro EDM" style="height: 38px; padding: 6px 10px; font-size: 0.88rem;">
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary" id="btnSalvarEncontro" style="height: 38px; padding: 0 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                            <i class="fas fa-plus"></i> Criar Encontro
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Lista de Encontros Cadastrados -->
+            <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">
+                    <i class="fas fa-list-check"></i> Encontros Cadastrados (<span id="totalEncontrosCount">0</span>)
+                </span>
+                <span style="font-size: 0.72rem; color: var(--text-secondary);">Defina o encontro ativo na tabela</span>
+            </div>
+
+            <div class="metadata-list-container" style="max-height: 270px;">
+                <div id="encontrosList" class="metadata-items-list">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 18px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeEncontrosModal()">Concluir</button>
             </div>
         </div>
     </div>

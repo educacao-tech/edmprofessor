@@ -525,24 +525,260 @@ window.toggleActions = (id, event) => {
 
 window.addEventListener('click', () => window.closeAllDropdowns());
 
-let jsonData = { professores: [], escolas: [], disciplinas: [] };
+let jsonData = { professores: [], escolas: [], disciplinas: [], anos: [], encontros: [] };
 let presencaKey = '';
 let presencaDateFormatted = '';
+let activeEncontroKey = 'all';
+window._isEncontrosModalOpen = false;
+
+function extractEncontrosFromProfessores(professores) {
+    if (!professores || professores.length === 0) return [];
+    const keysFound = new Set();
+    professores.forEach(prof => {
+        Object.keys(prof).forEach(k => {
+            if (k.startsWith('presenca_')) keysFound.add(k);
+        });
+    });
+    const list = Array.from(keysFound).map(k => {
+        const datePart = k.replace('presenca_', '');
+        const parts = datePart.split('_');
+        let dataFormatada = datePart;
+        let dataIso = '';
+        if (parts.length === 3) {
+            const [y, m, d] = parts;
+            dataFormatada = `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+            dataIso = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+        }
+        return {
+            id: datePart,
+            key: k,
+            data: dataIso,
+            dataFormatada: dataFormatada,
+            nome: `Encontro ${dataFormatada}`
+        };
+    });
+    list.sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+    return list;
+}
+
+function syncEncontrosState() {
+    let meetings = Array.isArray(jsonData.encontros) ? [...jsonData.encontros] : [];
+    if (meetings.length === 0 && jsonData.professores && jsonData.professores.length > 0) {
+        meetings = extractEncontrosFromProfessores(jsonData.professores);
+    }
+    meetings = meetings.map(m => {
+        const key = m.key || `presenca_${(m.data || m.id).replace(/-/g, '_')}`;
+        let df = m.dataFormatada;
+        if (!df && m.data) {
+            const [y, mm, dd] = m.data.split('-');
+            df = `${dd}/${mm}/${y}`;
+        }
+        return {
+            id: m.id || m.data || key.replace('presenca_', ''),
+            key: key,
+            data: m.data || '',
+            dataFormatada: df || m.id,
+            nome: m.nome || `Encontro ${df || m.id}`
+        };
+    });
+    jsonData.encontros = meetings;
+
+    if (meetings.length > 0) {
+        const primary = meetings[meetings.length - 1];
+        presencaKey = primary.key;
+        presencaDateFormatted = primary.dataFormatada;
+    }
+    updateEncontrosSelectUI();
+}
+
+function getActiveEncontrosList() {
+    if (!jsonData.encontros || jsonData.encontros.length === 0) {
+        return [{
+            id: 'default',
+            key: presencaKey || 'presenca_2026_05_06',
+            dataFormatada: presencaDateFormatted || '06/05/2026',
+            nome: 'Encontro Oficial'
+        }];
+    }
+    if (activeEncontroKey && activeEncontroKey !== 'all') {
+        const found = jsonData.encontros.find(e => e.key === activeEncontroKey || e.id === activeEncontroKey);
+        return found ? [found] : jsonData.encontros;
+    }
+    return jsonData.encontros;
+}
+
+function updateEncontrosSelectUI() {
+    const sel = document.getElementById('select-encontro-ativo');
+    if (!sel) return;
+    const currentVal = sel.value || activeEncontroKey || 'all';
+    let html = '<option value="all">📅 Todos os Encontros (Lado a Lado)</option>';
+    (jsonData.encontros || []).forEach(enc => {
+        html += `<option value="${escapeHTML(enc.key)}">📅 ${escapeHTML(enc.dataFormatada)} - ${escapeHTML(enc.nome)}</option>`;
+    });
+    sel.innerHTML = html;
+    if (jsonData.encontros.some(e => e.key === currentVal) || currentVal === 'all') {
+        sel.value = currentVal;
+    } else {
+        sel.value = 'all';
+    }
+    activeEncontroKey = sel.value;
+}
+
+window.handleEncontroChange = (val) => {
+    activeEncontroKey = val;
+    renderTable();
+};
+
+window.openEncontrosModal = () => {
+    window._isEncontrosModalOpen = true;
+    const modal = document.getElementById('encontrosModal');
+    if (modal) {
+        modal.classList.add('show');
+        modal.style.display = 'flex';
+        renderEncontrosList();
+    }
+};
+
+window.closeEncontrosModal = () => {
+    window._isEncontrosModalOpen = false;
+    const modal = document.getElementById('encontrosModal');
+    if (modal) {
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+    }
+};
+
+function renderEncontrosList() {
+    const listEl = document.getElementById('encontrosList');
+    if (!listEl) return;
+    const encontros = jsonData.encontros || [];
+    if (encontros.length === 0) {
+        listEl.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 18px 0;">Nenhum encontro cadastrado ainda. Adicione uma data acima.</div>';
+        return;
+    }
+
+    const totalProfs = (jsonData.professores || []).length;
+    let html = '';
+    encontros.forEach(enc => {
+        const presCount = (jsonData.professores || []).filter(p => Boolean(p[enc.key])).length;
+        const pct = totalProfs > 0 ? Math.round((presCount / totalProfs) * 100) : 0;
+        const isActive = activeEncontroKey === enc.key;
+        
+        html += `
+        <div class="metadata-item-row ${isActive ? 'is-active-encontro' : ''}" style="display:flex; justify-content:space-between; align-items:center; padding: 10px 14px; border-bottom: 1px solid var(--border-color); gap: 10px;">
+            <div style="flex:1; min-width: 0;">
+                <div style="font-weight: 700; color: var(--text-color); display:flex; align-items:center; gap: 8px;">
+                    <i class="fas fa-calendar-day" style="color: #2563eb;"></i> ${escapeHTML(enc.dataFormatada)}
+                    ${isActive ? '<span class="metadata-badge-active"><i class="fas fa-check-circle"></i> Selecionado</span>' : ''}
+                </div>
+                <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 2px;">
+                    ${escapeHTML(enc.nome)} • <strong style="color: #059669;">${presCount}/${totalProfs} presentes (${pct}%)</strong>
+                </div>
+            </div>
+            <div style="display:flex; gap: 6px; align-items:center;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="setEncontroAtivo('${escapeHTML(enc.key)}')" title="Filtrar tabela por este encontro" style="font-size:0.75rem; padding: 4px 8px;">
+                    <i class="fas fa-filter"></i> ${isActive ? 'Ativo' : 'Filtrar'}
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteEncontro('${escapeHTML(enc.id)}')" title="Remover este encontro" style="font-size:0.75rem; padding: 4px 8px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>`;
+    });
+    listEl.innerHTML = html;
+}
+
+window.setEncontroAtivo = (key) => {
+    activeEncontroKey = key;
+    updateEncontrosSelectUI();
+    renderTable();
+    renderEncontrosList();
+};
+
+window.handleNovoEncontroSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!auth.currentUser) {
+        window.showNotification("Apenas administradores autenticados podem adicionar encontros.", "danger");
+        return;
+    }
+    const dataInput = document.getElementById('encontroDataInput');
+    const nomeInput = document.getElementById('encontroNomeInput');
+    const rawData = dataInput ? dataInput.value.trim() : '';
+    if (!rawData) {
+        window.showNotification("Por favor, informe a data do encontro formativo.", "warning");
+        return;
+    }
+    const [y, m, d] = rawData.split('-');
+    const dataFormatada = `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+    const id = rawData.replace(/-/g, '_');
+    const key = `presenca_${id}`;
+    const nome = (nomeInput && nomeInput.value.trim()) ? nomeInput.value.trim() : `Encontro Formativo ${dataFormatada}`;
+
+    const existing = (jsonData.encontros || []).find(e => e.id === id || e.key === key);
+    if (existing) {
+        window.showNotification("Já existe um encontro cadastrado para esta data.", "warning");
+        return;
+    }
+
+    const updated = [...(jsonData.encontros || []), {
+        id: id,
+        key: key,
+        data: rawData,
+        dataFormatada: dataFormatada,
+        nome: nome
+    }];
+
+    try {
+        await setDoc(doc(db, "configuracoes", "geral"), {
+            encontros: updated
+        }, { merge: true });
+        
+        jsonData.encontros = updated;
+        activeEncontroKey = key;
+        syncEncontrosState();
+        renderTable();
+        renderEncontrosList();
+        if (dataInput) dataInput.value = '';
+        if (nomeInput) nomeInput.value = '';
+        window.showNotification(`Encontro ${dataFormatada} adicionado com sucesso!`, "success");
+    } catch (err) {
+        console.error("Erro ao salvar encontro:", err);
+        window.showNotification(`Erro ao cadastrar encontro: ${err.message}`, "danger");
+    }
+};
+
+window.deleteEncontro = async (meetingId) => {
+    if (!auth.currentUser) {
+        window.showNotification("Apenas administradores autenticados podem remover encontros.", "danger");
+        return;
+    }
+    const target = (jsonData.encontros || []).find(e => e.id === meetingId);
+    if (!target) return;
+    
+    if (!confirm(`Tem certeza de que deseja remover o encontro de ${target.dataFormatada}? (Os registros de presença dos professores permanecerão no histórico)`)) {
+        return;
+    }
+
+    const updated = (jsonData.encontros || []).filter(e => e.id !== meetingId);
+    try {
+        await setDoc(doc(db, "configuracoes", "geral"), {
+            encontros: updated
+        }, { merge: true });
+        
+        jsonData.encontros = updated;
+        if (activeEncontroKey === target.key) activeEncontroKey = 'all';
+        syncEncontrosState();
+        renderTable();
+        renderEncontrosList();
+        window.showNotification(`Encontro ${target.dataFormatada} removido.`, "info");
+    } catch (err) {
+        console.error("Erro ao remover encontro:", err);
+        window.showNotification(`Erro ao remover: ${err.message}`, "danger");
+    }
+};
 
 function extractPresenceInfo(professores) {
-    if (!professores || professores.length === 0) return;
-    
-    const foundKey = professores.reduce((acc, prof) => {
-        if (acc) return acc;
-        return Object.keys(prof).find(k => k.startsWith('presenca_'));
-    }, null);
-
-    if (foundKey) {
-        presencaKey = foundKey;
-        const datePart = foundKey.replace('presenca_', ''); 
-        const [year, month, day] = datePart.split('_');
-        presencaDateFormatted = `${day}/${month}/${year}`;
-    }
+    syncEncontrosState();
 }
 
 function renderSkeleton() {
@@ -585,6 +821,8 @@ function loadData() {
             jsonData.escolas = configData.escolas || [];
             jsonData.disciplinas = configData.disciplinas || [];
             jsonData.anos = configData.anos || [];
+            jsonData.encontros = configData.encontros || [];
+            syncEncontrosState();
 
             // Se escolas ou disciplinas ainda não foram preenchidas no documento, carrega a partir dos professores
             if (jsonData.escolas.length === 0 && jsonData.professores && jsonData.professores.length > 0) {
@@ -598,6 +836,9 @@ function loadData() {
             renderTable();
             if (window._isMetadataModalOpen && typeof window.renderMetadataList === 'function') {
                 window.renderMetadataList();
+            }
+            if (window._isEncontrosModalOpen && typeof renderEncontrosList === 'function') {
+                renderEncontrosList();
             }
         } else {
             const defaultEscolas = ["ALZIRA", "ANNA", "BRAGA", "CAIC", "CÉLIA", "ESTHER", "PADRE", "OUTRA"];
@@ -790,18 +1031,19 @@ window.deleteProfessor = async (id, nome) => {
     }
 };
 
-window.togglePresenca = async (id, currentStatus) => {
+window.togglePresenca = async (id, currentStatus, targetKey = null) => {
     if (!auth.currentUser) {
         window.showNotification("Acesso negado. Faça login para alterar a presença.", 'danger');
         return;
     }
 
     try {
+        const keyToUse = targetKey || presencaKey || 'presenca_2026_05_06';
         const docRef = doc(db, "professores", id);
         const newStatus = !currentStatus;
         
         await updateDoc(docRef, {
-            [presencaKey]: newStatus,
+            [keyToUse]: newStatus,
             ultima_alteracao: new Date().toISOString()
         });
     } catch (error) {
@@ -859,15 +1101,20 @@ window.exportToPDF = () => {
     doc.text(`Data da Chamada: ${presencaDateFormatted || 'N/A'}`, 38, 24);
     doc.text(`Gerado em: ${new Date().toLocaleDateString()}`, 38, 29);
 
+    const activeEncontros = getActiveEncontrosList();
     const pdfHead = ['Nome', 'Escola', 'Disciplina', 'Ano', 'Turma', 'Turno', 'Telefone', 'E-mail'];
-    if (auth.currentUser && presencaKey) {
-        pdfHead.push('Presença');
+    if (auth.currentUser && activeEncontros.length > 0) {
+        activeEncontros.forEach(enc => {
+            pdfHead.push(`Presença (${enc.dataFormatada})`);
+        });
     }
 
     const tableData = filtered.map(p => {
         const row = [p.nome, p.escola, p.disciplina, p.ano, p.turma, p.turno, p.telefone || '-', p.email || '-'];
-        if (auth.currentUser && presencaKey) {
-            row.push(p[presencaKey] ? 'PRESENTE' : 'AUSENTE');
+        if (auth.currentUser && activeEncontros.length > 0) {
+            activeEncontros.forEach(enc => {
+                row.push(p[enc.key] ? 'PRESENTE' : 'AUSENTE');
+            });
         }
         return row;
     });
@@ -1516,12 +1763,15 @@ function renderTable() {
                         : 'N/A';
 
                     let presencaBadgeHTML = '';
-                    if (auth.currentUser && presencaKey && professor[presencaKey] !== undefined) {
-                        const isPresent = professor[presencaKey];
-                        const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
-                        const presencaText = isPresent ? 'Presente' : 'Ausente';
-                        const dotClass = isPresent ? 'dot-presente' : 'dot-ausente';
-                        presencaBadgeHTML = `<span class="badge ${presencaClass}" onclick="togglePresenca('${professor.id}', ${isPresent})" title="Clique para alternar presença"><span class="status-dot ${dotClass}"></span> ${escapeHTML(presencaText)}</span>`;
+                    const activeEncontros = getActiveEncontrosList();
+                    if (auth.currentUser && activeEncontros.length > 0) {
+                        presencaBadgeHTML = activeEncontros.map(enc => {
+                            const isPresent = Boolean(professor[enc.key]);
+                            const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
+                            const presencaText = isPresent ? 'Presente' : 'Ausente';
+                            const dotClass = isPresent ? 'dot-presente' : 'dot-ausente';
+                            return `<span class="badge ${presencaClass}" style="margin: 2px;" onclick="togglePresenca('${professor.id}', ${isPresent}, '${enc.key}')" title="${escapeHTML(enc.nome)}: Clique para alternar"><span class="status-dot ${dotClass}"></span> ${escapeHTML(enc.dataFormatada)}: ${escapeHTML(presencaText)}</span>`;
+                        }).join(' ');
                     }
 
                     let avalBadgeHTML = '';
@@ -1590,8 +1840,11 @@ function renderTable() {
                     { label: 'Telefone', key: 'telefone' },
                     { label: 'E-mail', key: 'email' }
                 ];
-                if (auth.currentUser && presencaKey && presencaDateFormatted) {
-                    headers.push({ label: `Presença (${presencaDateFormatted})`, key: presencaKey });
+                const activeEncontrosList = getActiveEncontrosList();
+                if (auth.currentUser && activeEncontrosList.length > 0) {
+                    activeEncontrosList.forEach(enc => {
+                        headers.push({ label: `Presença (${enc.dataFormatada})`, key: enc.key });
+                    });
                 }
                 if (auth.currentUser) {
                     headers.push({ label: 'Avaliação 2026', key: 'avaliacao_status' });
@@ -1638,16 +1891,16 @@ function renderTable() {
                     tableHTML += `<td class="col-telefone">${telDisplay}</td>`;
                     tableHTML += `<td class="col-email">${emailCell}</td>`;
 
-                    if (auth.currentUser && presencaKey && professor[presencaKey] !== undefined) {
-                        const isPresent = professor[presencaKey];
-                        const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
-                        const presencaText = isPresent ? 'Presente' : 'Ausente';
-                        const dotClass = isPresent ? 'dot-presente' : 'dot-ausente';
-                        
-                        const clickHandler = `onclick="togglePresenca('${professor.id}', ${isPresent})"`;
-                        const tooltip = 'title="Clique para alternar presença"';
-                        
-                        tableHTML += `<td class="col-presenca text-center"><span class="badge ${presencaClass}" ${clickHandler} ${tooltip}><span class="status-dot ${dotClass}"></span> ${escapeHTML(presencaText)}</span></td>`;
+                    if (auth.currentUser && activeEncontrosList.length > 0) {
+                        activeEncontrosList.forEach(enc => {
+                            const isPresent = Boolean(professor[enc.key]);
+                            const presencaClass = isPresent ? 'badge-presente' : 'badge-ausente';
+                            const presencaText = isPresent ? 'Presente' : 'Ausente';
+                            const dotClass = isPresent ? 'dot-presente' : 'dot-ausente';
+                            const clickHandler = `onclick="togglePresenca('${professor.id}', ${isPresent}, '${enc.key}')"`;
+                            const tooltip = `title="Clique para alternar presença de ${escapeHTML(enc.dataFormatada)}"`;
+                            tableHTML += `<td class="col-presenca text-center"><span class="badge ${presencaClass}" ${clickHandler} ${tooltip}><span class="status-dot ${dotClass}"></span> ${escapeHTML(presencaText)}</span></td>`;
+                        });
                     }
 
                     if (auth.currentUser) {

@@ -3157,3 +3157,21 @@ html[data-theme="dark"] .filters {
     color: #ef4444;
     background: rgba(239, 68, 68, 0.08);
 }
+
+.metadata-badge-active {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.metadata-item-row.is-active-encontro {
+    background: rgba(16, 185, 129, 0.05);
+    border-left: 3px solid #10b981;
+}
