@@ -2038,6 +2038,32 @@
         }
         loadProfessorsList();
 
+        // Carrega lista oficial de escolas atualizadas de configuracoes/geral
+        async function loadSchoolsConfig() {
+            try {
+                const snap = await getDoc(doc(db, "configuracoes", "geral"));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    const escolas = data.escolas || [];
+                    if (escolas.length > 0) {
+                        ['eval-escola', 'quickEscola'].forEach(id => {
+                            const selectEl = document.getElementById(id);
+                            if (selectEl) {
+                                const currentVal = selectEl.value;
+                                selectEl.innerHTML = '<option value="">Selecione a Escola...</option>' + 
+                                    escolas.map(e => `<option value="${e}">${e}</option>`).join('') +
+                                    (!escolas.includes('OUTRA') ? '<option value="OUTRA">OUTRA</option>' : '');
+                                if (currentVal) selectEl.value = currentVal;
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                console.warn("Aviso ao carregar escolas de configuracoes/geral:", e);
+            }
+        }
+        loadSchoolsConfig();
+
         // Localiza professor na base de dados por e-mail ou nome
         function findTeacherInCache(email, nome) {
             const cleanEmail = (email || '').toLowerCase().trim();

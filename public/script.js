@@ -579,20 +579,46 @@ function loadData() {
         }
     });
 
-    onSnapshot(doc(db, "configuracoes", "geral"), (configSnap) => {
+    onSnapshot(doc(db, "configuracoes", "geral"), async (configSnap) => {
         if (configSnap.exists()) {
             const configData = configSnap.data();
             jsonData.escolas = configData.escolas || [];
             jsonData.disciplinas = configData.disciplinas || [];
             jsonData.anos = configData.anos || [];
+
+            // Se escolas ou disciplinas ainda não foram preenchidas no documento, carrega a partir dos professores
+            if (jsonData.escolas.length === 0 && jsonData.professores && jsonData.professores.length > 0) {
+                jsonData.escolas = [...new Set(jsonData.professores.map(p => p.escola).filter(Boolean))].sort();
+            }
+            if (jsonData.disciplinas.length === 0 && jsonData.professores && jsonData.professores.length > 0) {
+                jsonData.disciplinas = [...new Set(jsonData.professores.map(p => p.disciplina).filter(Boolean))].sort();
+            }
+
             initFilters();
             renderTable();
+            if (window._isMetadataModalOpen && typeof window.renderMetadataList === 'function') {
+                window.renderMetadataList();
+            }
         } else {
-            jsonData.escolas = [];
-            jsonData.disciplinas = [];
-            jsonData.anos = [];
+            const defaultEscolas = ["ALZIRA", "ANNA", "BRAGA", "CAIC", "CÉLIA", "ESTHER", "PADRE", "OUTRA"];
+            const defaultDisciplinas = ["EDM"];
+            const defaultAnos = ["1º", "2º", "3º", "4º", "5º", "6º", "7º", "8º", "9º"];
+
+            jsonData.escolas = defaultEscolas;
+            jsonData.disciplinas = defaultDisciplinas;
+            jsonData.anos = defaultAnos;
             initFilters();
             renderTable();
+
+            if (auth.currentUser) {
+                try {
+                    await setDoc(doc(db, "configuracoes", "geral"), {
+                        escolas: defaultEscolas,
+                        disciplinas: defaultDisciplinas,
+                        anos: defaultAnos
+                    }, { merge: true });
+                } catch(e) {}
+            }
         }
     }, (error) => {
         console.error("Erro no Real-time de Configurações:", error);
@@ -889,35 +915,261 @@ window.exportToPDF = () => {
     window.showNotification("PDF gerado com sucesso!");
 };
 
-window.manageMetadata = async (type) => {
-    let label = 'Disciplina';
-    if (type === 'escolas') label = 'Escola';
-    if (type === 'anos') label = 'Ano';
+// --- Gestão Completa de Cadastro de Escolas e Disciplinas ---
+let currentMetadataTab = 'escolas';
+window._isMetadataModalOpen = false;
 
-    let newValue = prompt(`Digite o nome do(a) novo(a) ${label}:`);
+window.openMetadataModal = (tab = 'escolas') => {
+    if (!auth.currentUser) {
+        window.showNotification("Acesso restrito para administradores.", "warning");
+        return;
+    }
+    const modal = document.getElementById('metadataModal');
+    if (!modal) return;
     
-    if (!newValue || newValue.trim() === "") return;
-    newValue = newValue.trim().toUpperCase();
+    window._isMetadataModalOpen = true;
+    modal.style.display = 'block';
+    window.switchMetadataTab(tab);
+};
 
-    const currentList = jsonData[type] || [];
-    if (currentList.includes(newValue)) {
-        window.showNotification(`${label} já existe na lista.`, 'danger');
+window.closeMetadataModal = () => {
+    const modal = document.getElementById('metadataModal');
+    if (modal) modal.style.display = 'none';
+    window._isMetadataModalOpen = false;
+};
+
+window.switchMetadataTab = (tab = 'escolas') => {
+    currentMetadataTab = tab;
+    const isEscola = tab === 'escolas';
+
+    const tabBtnEscolas = document.getElementById('tab-btn-escolas');
+    const tabBtnDisciplinas = document.getElementById('tab-btn-disciplinas');
+    const titleEl = document.getElementById('metadataModalTitle');
+    const subtitleEl = document.getElementById('metadataModalSubtitle');
+    const iconBadge = document.getElementById('metadataIconBadge');
+    const inputEl = document.getElementById('metadataNewInput');
+
+    if (tabBtnEscolas) tabBtnEscolas.classList.toggle('active', isEscola);
+    if (tabBtnDisciplinas) tabBtnDisciplinas.classList.toggle('active', !isEscola);
+
+    if (titleEl) titleEl.textContent = isEscola ? 'Gestão de Escolas' : 'Gestão de Disciplinas';
+    if (subtitleEl) subtitleEl.textContent = isEscola 
+        ? 'Cadastre, renomeie e organize as escolas da rede municipal' 
+        : 'Cadastre, renomeie e organize os componentes curriculares';
+
+    if (iconBadge) {
+        iconBadge.innerHTML = isEscola ? '<i class="fas fa-school"></i>' : '<i class="fas fa-book-open"></i>';
+    }
+
+    if (inputEl) {
+        inputEl.placeholder = isEscola ? 'NOME DA NOVA ESCOLA (EX: CAIC)' : 'NOME DA DISCIPLINA (EX: ROBÓTICA)';
+        inputEl.value = '';
+        inputEl.focus();
+    }
+
+    window.renderMetadataList();
+};
+
+window.renderMetadataList = () => {
+    const listEl = document.getElementById('metadataList');
+    const badgeEscolas = document.getElementById('count-badge-escolas');
+    const badgeDisciplinas = document.getElementById('count-badge-disciplinas');
+
+    const escolas = jsonData.escolas || [];
+    const disciplinas = jsonData.disciplinas || [];
+
+    if (badgeEscolas) badgeEscolas.textContent = escolas.length;
+    if (badgeDisciplinas) badgeDisciplinas.textContent = disciplinas.length;
+
+    if (!listEl) return;
+
+    const isEscola = currentMetadataTab === 'escolas';
+    const items = isEscola ? escolas : disciplinas;
+    const fieldKey = isEscola ? 'escola' : 'disciplina';
+
+    if (items.length === 0) {
+        listEl.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--text-secondary); font-size: 0.88rem;">
+                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 8px; opacity: 0.5;"></i>
+                <p style="margin: 0;">Nenhum item cadastrado nesta categoria.</p>
+            </div>
+        `;
         return;
     }
 
-    const updatedList = [...currentList, newValue].sort();
-    const updateObj = {};
-    updateObj[type] = updatedList;
+    listEl.innerHTML = items.map(item => {
+        const linkedCount = (jsonData.professores || []).filter(p => {
+            const val = (p[fieldKey] || '').toUpperCase().trim();
+            return val === item.toUpperCase().trim() || val.includes(item.toUpperCase().trim());
+        }).length;
+
+        const countBadge = linkedCount > 0
+            ? `<span class="metadata-badge-count"><i class="fas fa-chalkboard-user"></i> ${linkedCount} docente${linkedCount > 1 ? 's' : ''} vinculado${linkedCount > 1 ? 's' : ''}</span>`
+            : `<span class="metadata-badge-count zero"><i class="fas fa-user-slash"></i> 0 vinculados</span>`;
+
+        const safeItem = String(item).replace(/'/g, "\\'");
+        const safeDisplay = String(item).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+
+        return `
+            <div class="metadata-item-row">
+                <div class="metadata-item-info">
+                    <span class="metadata-item-name">
+                        <i class="fas ${isEscola ? 'fa-school' : 'fa-book-bookmark'}" style="color: var(--primary-color); opacity: 0.85;"></i>
+                        ${safeDisplay}
+                    </span>
+                    <span class="metadata-item-meta">
+                        ${countBadge}
+                    </span>
+                </div>
+                <div class="metadata-item-actions">
+                    <button type="button" class="btn-metadata-action" onclick="editMetadataItem('${safeItem}')" title="Renomear / Editar">
+                        <i class="fas fa-pen-to-square"></i>
+                    </button>
+                    <button type="button" class="btn-metadata-action danger" onclick="deleteMetadataItem('${safeItem}')" title="Excluir">
+                        <i class="fas fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+window.handleMetadataAdd = async (e) => {
+    e.preventDefault();
+    if (!auth.currentUser) {
+        window.showNotification("Acesso restrito para administradores.", "warning");
+        return;
+    }
+
+    const input = document.getElementById('metadataNewInput');
+    if (!input) return;
+    const val = input.value.trim().toUpperCase();
+    if (!val) return;
+
+    const type = currentMetadataTab; // 'escolas' ou 'disciplinas'
+    const label = type === 'escolas' ? 'Escola' : 'Disciplina';
+    const currentList = jsonData[type] || [];
+
+    if (currentList.some(item => item.toUpperCase() === val)) {
+        window.showNotification(`${label} '${val}' já está cadastrada.`, 'danger');
+        input.focus();
+        return;
+    }
+
+    const updatedList = [...currentList, val].sort();
 
     try {
-        await updateDoc(doc(db, "configuracoes", "geral"), updateObj);
+        const updateObj = {};
+        updateObj[type] = updatedList;
+        await setDoc(doc(db, "configuracoes", "geral"), updateObj, { merge: true });
         jsonData[type] = updatedList;
         initFilters();
-        window.showNotification(`${label} adicionado(a) com sucesso!`);
-    } catch (error) {
-        window.showNotification("Erro ao atualizar lista: " + error.message, 'danger');
+        window.renderMetadataList();
+        input.value = '';
+        input.focus();
+        window.showNotification(`${label} '${val}' cadastrada com sucesso!`);
+    } catch (err) {
+        console.error("Erro ao adicionar:", err);
+        window.showNotification("Erro ao cadastrar: " + err.message, "danger");
     }
 };
+
+window.editMetadataItem = async (oldName) => {
+    if (!auth.currentUser) {
+        window.showNotification("Acesso restrito para administradores.", "warning");
+        return;
+    }
+
+    const type = currentMetadataTab;
+    const label = type === 'escolas' ? 'Escola' : 'Disciplina';
+    const fieldKey = type === 'escolas' ? 'escola' : 'disciplina';
+
+    const newName = prompt(`Digite o novo nome para ${label.toLowerCase()} '${oldName}':`, oldName);
+    if (!newName) return;
+    const trimmed = newName.trim().toUpperCase();
+    if (!trimmed || trimmed === oldName.toUpperCase()) return;
+
+    const currentList = jsonData[type] || [];
+    if (currentList.some(item => item.toUpperCase() === trimmed && item.toUpperCase() !== oldName.toUpperCase())) {
+        window.showNotification(`Já existe outra ${label.toLowerCase()} cadastrada com o nome '${trimmed}'.`, 'danger');
+        return;
+    }
+
+    const linkedProfs = (jsonData.professores || []).filter(p => (p[fieldKey] || '').toUpperCase().trim() === oldName.toUpperCase().trim());
+
+    try {
+        const updatedList = currentList.map(item => item.toUpperCase() === oldName.toUpperCase() ? trimmed : item).sort();
+        const updateObj = {};
+        updateObj[type] = updatedList;
+
+        await setDoc(doc(db, "configuracoes", "geral"), updateObj, { merge: true });
+        jsonData[type] = updatedList;
+
+        if (linkedProfs.length > 0) {
+            let updatedCount = 0;
+            for (let prof of linkedProfs) {
+                if (prof.id) {
+                    const profUpdate = {};
+                    profUpdate[fieldKey] = trimmed;
+                    await updateDoc(doc(db, "professores", prof.id), profUpdate);
+                    prof[fieldKey] = trimmed;
+                    updatedCount++;
+                }
+            }
+            window.showNotification(`${label} renomeada para '${trimmed}' e atualizada em ${updatedCount} professor(es)!`);
+        } else {
+            window.showNotification(`${label} renomeada com sucesso para '${trimmed}'!`);
+        }
+
+        initFilters();
+        renderTable();
+        window.renderMetadataList();
+    } catch (err) {
+        console.error("Erro ao renomear:", err);
+        window.showNotification("Erro ao renomear: " + err.message, "danger");
+    }
+};
+
+window.deleteMetadataItem = async (name) => {
+    if (!auth.currentUser) {
+        window.showNotification("Acesso restrito para administradores.", "warning");
+        return;
+    }
+
+    const type = currentMetadataTab;
+    const label = type === 'escolas' ? 'Escola' : 'Disciplina';
+    const fieldKey = type === 'escolas' ? 'escola' : 'disciplina';
+
+    const linkedCount = (jsonData.professores || []).filter(p => (p[fieldKey] || '').toUpperCase().trim() === name.toUpperCase().trim()).length;
+
+    let confirmMsg = `Deseja realmente remover a ${label.toLowerCase()} '${name}'?`;
+    if (linkedCount > 0) {
+        confirmMsg = `Atenção: Existem ${linkedCount} professor(es) vinculados à ${label.toLowerCase()} '${name}'.\n\nSe você excluir, os docentes existentes manterão este valor, mas '${name}' não aparecerá mais para novas seleções.\n\nDeseja continuar?`;
+    }
+
+    if (!confirm(confirmMsg)) return;
+
+    try {
+        const currentList = jsonData[type] || [];
+        const updatedList = currentList.filter(item => item.toUpperCase() !== name.toUpperCase());
+        const updateObj = {};
+        updateObj[type] = updatedList;
+
+        await setDoc(doc(db, "configuracoes", "geral"), updateObj, { merge: true });
+        jsonData[type] = updatedList;
+
+        initFilters();
+        renderTable();
+        window.renderMetadataList();
+        window.showNotification(`${label} '${name}' excluída com sucesso!`);
+    } catch (err) {
+        console.error("Erro ao excluir:", err);
+        window.showNotification("Erro ao excluir: " + err.message, "danger");
+    }
+};
+
+// Mantém compatibilidade com chamadas antigas de manageMetadata
+window.manageMetadata = (type) => window.openMetadataModal(type);
 
 const professoresListDiv = document.getElementById('professores-list');
 const searchInput = document.getElementById('search-input');

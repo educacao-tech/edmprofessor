@@ -1681,6 +1681,463 @@ html[data-theme="dark"] .app-footer {
     }
 }
 
+/* ==========================================================================
+   ESTILOS DA ABA DE CRUZAMENTO & AUDITORIA DE FALTAS
+   ========================================================================== */
+
+/* Barra de Navegação Principal (Abas) */
+.main-nav-tabs {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="dark"] .main-nav-tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.nav-tab-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 8px 16px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.nav-tab-btn:hover {
+    color: var(--primary-color);
+    background: rgba(0, 123, 255, 0.05);
+}
+
+.nav-tab-btn.active {
+    color: var(--primary-color);
+    background: var(--card-bg);
+    border-bottom: 3px solid var(--primary-color);
+    margin-bottom: -2px;
+}
+
+html[data-theme="dark"] .nav-tab-btn.active {
+    background: var(--card-bg);
+}
+
+.tab-badge-alert {
+    background: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 12px;
+    line-height: 1;
+    display: inline-block;
+}
+
+.main-tab-pane {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.tab-sub-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 6px;
+}
+
+/* Painel de Controle Direto da URL da Planilha */
+.sheet-url-control-panel {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.sheet-url-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.sheet-url-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.sheet-url-status {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sheet-url-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sheet-input-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.sheet-input-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+.sheet-input-wrapper input[type="url"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px 6px 30px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    outline: none;
+    font-size: 0.8rem;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sheet-input-wrapper input[type="url"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+    background-color: var(--card-bg);
+}
+
+/* Barra de Status do Cruzamento */
+.cruzamento-status-bar {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(99, 102, 241, 0.06));
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 10px;
+}
+
+html[data-theme="dark"] .cruzamento-status-bar {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(99, 102, 241, 0.12));
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.cruzamento-status-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-pulse-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #10b981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulseGlow 2s infinite;
+}
+
+.status-pulse-dot.warning {
+    background-color: #f59e0b;
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+}
+
+.status-pulse-dot.danger {
+    background-color: #ef4444;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+}
+
+@keyframes pulseGlow {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.cruzamento-status-info strong {
+    font-size: 0.85rem;
+    color: var(--text-color);
+}
+
+.cruzamento-status-sub {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.cruzamento-actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.btn-sm {
+    padding: 4px 10px !important;
+    font-size: 0.78rem !important;
+    height: 30px !important;
+}
+
+/* Grid de KPIs */
+.cruzamento-kpis-grid {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.cruzamento-kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cruzamento-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+}
+
+.kpi-icon-wrapper {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.kpi-total .kpi-icon-wrapper { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
+.kpi-presentes .kpi-icon-wrapper { background: rgba(16, 185, 129, 0.12); color: #059669; }
+.kpi-faltas .kpi-icon-wrapper { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+.kpi-extras .kpi-icon-wrapper { background: rgba(168, 85, 247, 0.12); color: #9333ea; }
+
+html[data-theme="dark"] .kpi-total .kpi-icon-wrapper { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+html[data-theme="dark"] .kpi-presentes .kpi-icon-wrapper { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+html[data-theme="dark"] .kpi-faltas .kpi-icon-wrapper { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+html[data-theme="dark"] .kpi-extras .kpi-icon-wrapper { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+
+.kpi-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.kpi-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.03em;
+}
+
+.kpi-number {
+    margin: 1px 0 0 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-color);
+    line-height: 1.2;
+}
+
+.kpi-foot {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Pílulas de Escolas */
+.cruzamento-schools-bar {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    scrollbar-width: thin;
+}
+
+.cruzamento-schools-bar::-webkit-scrollbar {
+    height: 4px;
+}
+
+.cruz-school-pill {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.cruz-school-pill:hover {
+    border-color: var(--primary-color);
+    background: rgba(0, 123, 255, 0.06);
+}
+
+.cruz-school-pill.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.cruz-school-pill.active .pill-falta-badge {
+    background: white;
+    color: #dc2626;
+}
+
+.pill-falta-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 10px;
+}
+
+.pill-ok-badge {
+    background: #10b981;
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 10px;
+}
+
+/* Badges de Status do Cruzamento */
+.badge-falta {
+    background-color: rgba(239, 68, 68, 0.14);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    font-weight: 700;
+}
+
+html[data-theme="dark"] .badge-falta {
+    background-color: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.badge-presente-live {
+    background-color: rgba(16, 185, 129, 0.14);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    font-weight: 700;
+}
+
+html[data-theme="dark"] .badge-presente-live {
+    background-color: rgba(16, 185, 129, 0.25);
+    color: #6ee7b7;
+    border-color: rgba(16, 185, 129, 0.5);
+}
+
+.badge-extra {
+    background-color: rgba(168, 85, 247, 0.14);
+    color: #7e22ce;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    font-weight: 700;
+}
+
+html[data-theme="dark"] .badge-extra {
+    background-color: rgba(168, 85, 247, 0.25);
+    color: #d8b4fe;
+    border-color: rgba(168, 85, 247, 0.5);
+}
+
+.form-sheet-tag {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.form-timestamp {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.form-email {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+
+/* Responsividade da Aba de Cruzamento */
+@media (max-width: 992px) {
+    .cruzamento-kpis-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .main-nav-tabs {
+        overflow-x: auto;
+    }
+    .cruzamento-status-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .cruzamento-actions-bar {
+        justify-content: flex-start;
+    }
+    .cruzamento-kpis-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 
 
 /* Alerta dinâmico de login / Firebase */
@@ -2537,4 +2994,166 @@ html[data-theme="dark"] .filters {
     justify-content: center;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+/* Modal de Gestão de Escolas e Disciplinas */
+.metadata-modal-content {
+    max-width: 560px;
+    width: 92%;
+    padding: 24px 26px;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--border-color);
+}
+
+.metadata-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 4px;
+}
+
+.metadata-tab-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.metadata-tab-btn:hover {
+    color: var(--text-color);
+    background: var(--zebra-bg);
+}
+
+.metadata-tab-btn.active {
+    color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.metadata-add-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    align-items: center;
+}
+
+.metadata-add-bar .input-with-icon {
+    flex: 1;
+}
+
+.metadata-list-container {
+    max-height: 340px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--zebra-bg);
+    scrollbar-width: thin;
+}
+
+.metadata-items-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.metadata-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.15s ease;
+    gap: 10px;
+}
+
+.metadata-item-row:last-child {
+    border-bottom: none;
+}
+
+.metadata-item-row:hover {
+    background: var(--hover-bg);
+}
+
+.metadata-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.metadata-item-name {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    word-break: break-word;
+}
+
+.metadata-item-meta {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.metadata-badge-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--primary-color);
+}
+
+.metadata-badge-count.zero {
+    background: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.metadata-item-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.btn-metadata-action {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-metadata-action:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.06);
+}
+
+.btn-metadata-action.danger:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
 }

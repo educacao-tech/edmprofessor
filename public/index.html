@@ -42,6 +42,10 @@
                 <button type="button" class="btn btn-secondary btn-sm admin-only" id="btn-sync-emails"
                     onclick="syncEmailsFromPresenca()" title="Buscar e-mails da lista de presença oficial"><i
                         class="fas fa-envelope-circle-check"></i> Sincronizar</button>
+                <button type="button" class="btn btn-secondary btn-sm admin-only" onclick="openMetadataModal('escolas')"
+                    title="Cadastro e Gestão de Escolas"><i class="fas fa-school"></i> Escolas</button>
+                <button type="button" class="btn btn-secondary btn-sm admin-only" onclick="openMetadataModal('disciplinas')"
+                    title="Cadastro e Gestão de Disciplinas"><i class="fas fa-book-open"></i> Disciplinas</button>
                 <button type="button" class="btn btn-primary btn-sm admin-only" onclick="openProfessorModal()"><i
                         class="fas fa-plus"></i> Novo</button>
                 <div class="header-auth-group">
@@ -68,8 +72,8 @@
                     <select id="school-filter">
                         <option value="">Todas as Escolas</option>
                     </select>
-                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('escolas')"
-                        title="Adicionar Escola"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn-clear admin-only" onclick="openMetadataModal('escolas')"
+                        title="Cadastrar / Gerenciar Escolas"><i class="fas fa-sliders"></i></button>
                 </div>
             </div>
             <div class="filter-item">
@@ -78,8 +82,8 @@
                     <select id="discipline-filter">
                         <option value="">Todas as Disciplinas</option>
                     </select>
-                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('disciplinas')"
-                        title="Adicionar Disciplina"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn-clear admin-only" onclick="openMetadataModal('disciplinas')"
+                        title="Cadastrar / Gerenciar Disciplinas"><i class="fas fa-sliders"></i></button>
                 </div>
             </div>
             <div class="filter-item filter-year">
@@ -159,9 +163,9 @@
                 <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>11/11/2026 às
                         17:24</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>edee9fb</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>efb7142</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>feat: Limita para exatamente uma resposta por professor na avaliacao</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>chore: Atualiza rodape para versao edee9fb</em></span>
             </div>
         </footer>
     </div>
@@ -413,6 +417,58 @@
             <div class="form-actions" style="justify-content: center; gap: 15px;">
                 <button type="button" class="btn btn-secondary" id="confirmCancelBtn">Cancelar</button>
                 <button type="button" class="btn btn-danger" id="confirmOkBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Gestão de Escolas e Disciplinas -->
+    <div id="metadataModal" class="modal">
+        <div class="modal-content metadata-modal-content">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge" id="metadataIconBadge">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <div>
+                        <h2 id="metadataModalTitle">Gestão de Escolas</h2>
+                        <p class="modal-subtitle" id="metadataModalSubtitle">Cadastre, edite e organize as escolas da rede municipal</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeMetadataModal()" title="Fechar" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Abas: Escolas / Disciplinas -->
+            <div class="metadata-tabs">
+                <button type="button" class="metadata-tab-btn active" id="tab-btn-escolas" onclick="switchMetadataTab('escolas')">
+                    <i class="fas fa-school"></i> Escolas (<span id="count-badge-escolas">0</span>)
+                </button>
+                <button type="button" class="metadata-tab-btn" id="tab-btn-disciplinas" onclick="switchMetadataTab('disciplinas')">
+                    <i class="fas fa-book-open"></i> Disciplinas (<span id="count-badge-disciplinas">0</span>)
+                </button>
+            </div>
+
+            <!-- Formulário para Adicionar Novo Item -->
+            <form id="metadataAddForm" onsubmit="handleMetadataAdd(event)" class="metadata-add-bar">
+                <div class="input-with-icon" style="flex: 1;">
+                    <i class="fas fa-plus input-icon"></i>
+                    <input type="text" id="metadataNewInput" placeholder="NOME DA NOVA ESCOLA" required style="text-transform: uppercase;">
+                </div>
+                <button type="submit" class="btn btn-primary" id="metadataAddBtn" style="white-space: nowrap;">
+                    <i class="fas fa-plus"></i> Adicionar
+                </button>
+            </form>
+
+            <!-- Lista de Itens Cadastrados -->
+            <div class="metadata-list-container">
+                <div id="metadataList" class="metadata-items-list">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 18px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeMetadataModal()">Concluir</button>
             </div>
         </div>
     </div>
