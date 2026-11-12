@@ -1211,6 +1211,56 @@
             </div>
         </div>
 
+        <!-- Card de Avaliação Já Realizada (Exibido quando o professor já enviou sua avaliação) -->
+        <div id="alreadySubmittedCard" class="eval-block" style="display: none; text-align: center; border: 2px solid #10b981; background: var(--card-bg); padding: 36px 24px; border-radius: 16px; margin-top: 20px; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);">
+            <div style="width: 76px; height: 76px; border-radius: 50%; background: rgba(16, 185, 129, 0.12); color: #10b981; display: inline-flex; align-items: center; justify-content: center; font-size: 2.4rem; margin-bottom: 16px;">
+                <i class="fas fa-circle-check"></i>
+            </div>
+            <h2 style="font-size: 1.55rem; font-weight: 800; margin: 0 0 8px 0; color: var(--text-color);">Avaliação 2026 Já Enviada!</h2>
+            <p style="font-size: 0.95rem; color: var(--text-secondary); max-width: 580px; margin: 0 auto 20px auto; line-height: 1.5;">
+                Identificamos que você já realizou e enviou sua avaliação anual de Educação Digital e Midiática.
+                <strong>O sistema aceita apenas uma resposta de cada professor(a)</strong> para consolidar os indicadores da rede. Sua presença oficial no encontro formativo já está registrada!
+            </p>
+
+            <div style="max-width: 540px; margin: 0 auto 26px auto; background: var(--zebra-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px 22px; text-align: left; font-size: 0.88rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                    <span style="color: var(--text-secondary); font-weight: 600;">Protocolo de Envio:</span>
+                    <strong id="alreadyProtocol" style="font-family: monospace; font-size: 1.05rem; color: var(--primary-color);">EDM-2026-XXXX</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                    <span style="color: var(--text-secondary); font-weight: 600;">Professor(a):</span>
+                    <strong id="alreadyTeacher">-</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                    <span style="color: var(--text-secondary); font-weight: 600;">E-mail:</span>
+                    <span id="alreadyEmail" style="font-family: monospace;">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                    <span style="color: var(--text-secondary); font-weight: 600;">Escola:</span>
+                    <strong id="alreadyEscola">-</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+                    <span style="color: var(--text-secondary); font-weight: 600;">Data e Hora do Envio:</span>
+                    <span id="alreadyData">-</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; color: #10b981; font-weight: 700; padding-top: 8px; border-top: 1px dashed var(--border-color);">
+                    <i class="fas fa-check-double"></i> Presença Oficial Registrada no Encontro de EDM
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary" onclick="window.downloadComprovantePDF(window._lastFoundExisting)">
+                    <i class="fas fa-file-pdf"></i> Baixar Comprovante PDF
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="window.printComprovante(window._lastFoundExisting)">
+                    <i class="fas fa-print"></i> Imprimir Comprovante
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="window.handleLogout()">
+                    <i class="fas fa-arrow-right-from-bracket"></i> Trocar Docente
+                </button>
+            </div>
+        </div>
+
         <!-- Formulário Principal -->
         <form id="evaluationForm">
             <!-- ETAPA 1: IDENTIFICAÇÃO -->
@@ -1916,7 +1966,7 @@
     <!-- Scripts do Firebase e Lógica da Avaliação -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -2006,6 +2056,111 @@
             return null;
         }
 
+        // Verifica se o(a) professor(a) já realizou e enviou a avaliação (limite de 1 resposta)
+        async function checkExistingSubmission(email, nome) {
+            if (!email && !nome) return null;
+            const cleanEmail = (email || '').toLowerCase().trim();
+            const cleanNome = normalizeStr(nome);
+            const docId = cleanEmail ? cleanEmail.replace(/[^a-z0-9]/g, '_') : null;
+
+            try {
+                // 1. Verificação direta pelo docId do e-mail no Firestore (O(1))
+                if (docId) {
+                    const snap = await getDoc(doc(db, "avaliacoes_2026", docId));
+                    if (snap.exists()) {
+                        return { id: snap.id, ...snap.data() };
+                    }
+                }
+
+                // 2. Verificação por query de e-mail (caso tenha sido salvo anteriormente com addDoc)
+                if (cleanEmail) {
+                    const qEmail = query(collection(db, "avaliacoes_2026"), where("email", "==", cleanEmail));
+                    const snapEmail = await getDocs(qEmail);
+                    if (!snapEmail.empty) {
+                        const first = snapEmail.docs[0];
+                        return { id: first.id, ...first.data() };
+                    }
+                }
+
+                // 3. Verificação por query de nome do professor
+                if (cleanNome) {
+                    const qNome = query(collection(db, "avaliacoes_2026"), where("professor", "==", cleanNome));
+                    const snapNome = await getDocs(qNome);
+                    if (!snapNome.empty) {
+                        const first = snapNome.docs[0];
+                        return { id: first.id, ...first.data() };
+                    }
+                }
+            } catch (e) {
+                console.warn("Aviso ao verificar avaliação existente no Firestore:", e);
+            }
+
+            // 4. Verificação em cache local do dispositivo
+            try {
+                if (docId) {
+                    const localCached = localStorage.getItem('edm_avaliacao_enviada_' + docId);
+                    if (localCached) return JSON.parse(localCached);
+                }
+                const localSaved = JSON.parse(localStorage.getItem('edm_avaliacoes_submetidas') || '[]');
+                const found = localSaved.find(a => 
+                    (cleanEmail && (a.email || '').toLowerCase().trim() === cleanEmail) ||
+                    (cleanNome && normalizeStr(a.professor) === cleanNome)
+                );
+                if (found) return found;
+            } catch (e) {}
+
+            return null;
+        }
+
+        // Exibe o painel de "Avaliação Já Enviada" bloqueando novo preenchimento
+        function showAlreadySubmittedCard(existing) {
+            window._lastFoundExisting = existing;
+            const card = document.getElementById('alreadySubmittedCard');
+            const form = document.getElementById('evaluationForm');
+            const progressBox = document.getElementById('evalProgressBox');
+            const stepper = document.getElementById('evalStepperContainer');
+
+            if (card) {
+                const protoEl = document.getElementById('alreadyProtocol');
+                const teacherEl = document.getElementById('alreadyTeacher');
+                const emailEl = document.getElementById('alreadyEmail');
+                const escolaEl = document.getElementById('alreadyEscola');
+                const dataEl = document.getElementById('alreadyData');
+
+                if (protoEl) protoEl.textContent = existing.protocolo || existing.authCode || 'EDM-2026';
+                if (teacherEl) teacherEl.textContent = existing.professor || currentDocente?.nome || '-';
+                if (emailEl) emailEl.textContent = existing.email || currentDocente?.email || '-';
+                if (escolaEl) escolaEl.textContent = existing.escola || currentDocente?.escola || '-';
+                if (dataEl) dataEl.textContent = existing.timestamp || (existing.createdAt ? new Date(existing.createdAt).toLocaleString('pt-BR') : '-') || '-';
+                card.style.display = 'block';
+            }
+
+            if (form) form.style.display = 'none';
+            if (progressBox) progressBox.style.display = 'none';
+            if (stepper) stepper.style.display = 'none';
+
+            // Atualiza status do Card de Presença no topo
+            const presenceBadge = document.getElementById('presenceStatusBadge');
+            if (presenceBadge) {
+                presenceBadge.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+                presenceBadge.style.color = '#059669';
+                presenceBadge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                presenceBadge.innerHTML = '<i class="fas fa-check-double"></i> Presença no Encontro: CONFIRMADA (Avaliação já enviada)';
+            }
+        }
+
+        function hideAlreadySubmittedCard() {
+            const card = document.getElementById('alreadySubmittedCard');
+            const form = document.getElementById('evaluationForm');
+            const progressBox = document.getElementById('evalProgressBox');
+            const stepper = document.getElementById('evalStepperContainer');
+
+            if (card) card.style.display = 'none';
+            if (form) form.style.display = 'block';
+            if (progressBox) progressBox.style.display = 'block';
+            if (stepper) stepper.style.display = 'block';
+        }
+
         // Atualiza a interface com o Docente Autenticado
         function setAuthenticatedTeacher(profile) {
             if (!profile || !profile.email) return;
@@ -2090,8 +2245,22 @@
 
             // Fecha modal de identificação
             window.closeAuthGateModal();
-            saveDraft();
-            checkCloudDraft(profile.email);
+
+            // Verifica se o docente já enviou a avaliação anteriormente (limite de 1 resposta por professor)
+            checkExistingSubmission(profile.email, profile.nome).then(existing => {
+                if (existing) {
+                    showAlreadySubmittedCard(existing);
+                } else {
+                    hideAlreadySubmittedCard();
+                    saveDraft();
+                    checkCloudDraft(profile.email);
+                }
+            }).catch(err => {
+                console.warn("Aviso ao checar envio anterior:", err);
+                hideAlreadySubmittedCard();
+                saveDraft();
+                checkCloudDraft(profile.email);
+            });
         }
 
         // Renderiza perfis recentes no modal de identificação rápida
@@ -2273,6 +2442,9 @@
             if (selectAno) selectAno.value = '';
             if (selectTurma) selectTurma.value = '';
             if (selectPeriodo) selectPeriodo.value = '';
+
+            hideAlreadySubmittedCard();
+            window._lastFoundExisting = null;
 
             window.openAuthGateModal();
         };
@@ -2885,7 +3057,7 @@
 
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando e Registrando Presença...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando e Enviando...';
 
             const now = new Date();
             const dateStrBR = now.toLocaleDateString('pt-BR');
@@ -2904,6 +3076,17 @@
             const turmasCompostasVal = [anoVal, turmaVal ? `Turma ${turmaVal}` : '', periodoVal ? `(${periodoVal})` : ''].filter(Boolean).join(' ');
             setSystemDate();
             const dataAvaliacaoVal = getSystemDateISO();
+
+            // Verificação estrita: Apenas 1 resposta por professor(a)
+            const existing = await checkExistingSubmission(emailVal, professorVal);
+            if (existing) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Avaliação 2026';
+                alert(`Atenção: Já consta no sistema uma avaliação enviada para o(a) docente ${professorVal} (${emailVal}) com o protocolo ${existing.protocolo || existing.authCode || 'registrado'}.\n\nÉ permitida apenas uma resposta de cada professor(a). Sua presença já está confirmada!`);
+                showAlreadySubmittedCard(existing);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
 
             const payloadAvaliacao = {
                 escola: escolaVal,
@@ -2949,14 +3132,16 @@
                 createdAt: now.toISOString()
             };
 
+            const docId = emailVal.toLowerCase().replace(/[^a-z0-9]/g, '_');
             try {
-                // 1. Salva Avaliação Anual em avaliacoes_2026
-                await addDoc(collection(db, "avaliacoes_2026"), payloadAvaliacao);
+                // 1. Salva Avaliação Anual em avaliacoes_2026 usando docId exclusivo do professor
+                await setDoc(doc(db, "avaliacoes_2026", docId), payloadAvaliacao);
                 console.log("Avaliação salva com sucesso!");
 
                 // 2. Registra Presença Oficial na coleção presencas (compatível com lista_presenca)
                 try {
-                    await addDoc(collection(db, "presencas"), payloadPresenca);
+                    const presencaDocId = 'presenca_' + docId;
+                    await setDoc(doc(db, "presencas", presencaDocId), payloadPresenca);
                     console.log("Presença oficial no Encontro computada com sucesso!");
                 } catch (presencaErr) {
                     console.warn("Aviso ao registrar presença oficial:", presencaErr);
@@ -2967,6 +3152,11 @@
                 savedAll.push(payloadAvaliacao);
                 localStorage.setItem('edm_avaliacoes_submetidas', JSON.stringify(savedAll));
             }
+
+            // Salva registro local da avaliação enviada por este e-mail
+            try {
+                localStorage.setItem('edm_avaliacao_enviada_' + docId, JSON.stringify(payloadAvaliacao));
+            } catch (e) {}
 
             // Atualiza status do Card de Presença para Confirmado
             const presenceBadge = document.getElementById('presenceStatusBadge');
@@ -3035,18 +3225,20 @@
         };
 
         // Gerar Comprovante Oficial de Presença em PDF
-        window.downloadComprovantePDF = () => {
-            const protocolo = document.getElementById('successProtocol')?.textContent || 'EDM-2026';
-            const professor = document.getElementById('successTeacher')?.textContent || 'Docente';
-            const escola = document.getElementById('eval-escola')?.value || currentDocente?.escola || '-';
-            const email = document.getElementById('eval-email')?.value || currentDocente?.email || '-';
+        window.downloadComprovantePDF = (customData) => {
+            const dataObj = customData || window._lastFoundExisting || null;
+            const protocolo = dataObj?.protocolo || dataObj?.authCode || document.getElementById('successProtocol')?.textContent || 'EDM-2026';
+            const rawProf = dataObj?.professor || document.getElementById('successTeacher')?.textContent || currentDocente?.nome || 'Docente';
+            const professor = rawProf.includes('(') ? rawProf : `${rawProf}${dataObj?.escola ? ' (' + dataObj.escola + ')' : ''}`;
+            const escola = dataObj?.escola || document.getElementById('eval-escola')?.value || currentDocente?.escola || '-';
+            const email = dataObj?.email || document.getElementById('eval-email')?.value || currentDocente?.email || '-';
             const ano = document.getElementById('eval-ano')?.value || '';
             const turma = document.getElementById('eval-turma')?.value || '';
             const periodo = document.getElementById('eval-periodo')?.value || '';
-            const turmas = [ano, turma ? `Turma ${turma}` : '', periodo ? `(${periodo})` : ''].filter(Boolean).join(' ') || '-';
+            const turmas = dataObj?.turmas || [ano, turma ? `Turma ${turma}` : '', periodo ? `(${periodo})` : ''].filter(Boolean).join(' ') || '-';
             const now = new Date();
-            const dateStr = now.toLocaleDateString('pt-BR');
-            const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = dataObj?.data || (dataObj?.createdAt ? new Date(dataObj.createdAt).toLocaleDateString('pt-BR') : now.toLocaleDateString('pt-BR'));
+            const timeStr = dataObj?.timestamp || now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
             const printWin = window.open('', '_blank');
             if (!printWin) {
@@ -3230,6 +3422,10 @@
                     console.warn("Aviso ao disparar impressão:", e);
                 }
             }, 450);
+        };
+
+        window.printComprovante = (customData) => {
+            window.downloadComprovantePDF(customData);
         };
 
         // Alternador de tema
