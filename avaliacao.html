@@ -3130,17 +3130,20 @@
             Salvar como PDF / Imprimir Comprovante
         </button>
     </div>
-    <script>
-        window.onload = function() {
-            setTimeout(function() { window.print(); }, 400);
-        };
-    <\/script>
 </body>
 </html>`;
 
             printWin.document.open();
             printWin.document.write(html);
             printWin.document.close();
+            setTimeout(() => {
+                try {
+                    printWin.focus();
+                    printWin.print();
+                } catch (e) {
+                    console.warn("Aviso ao disparar impressão:", e);
+                }
+            }, 450);
         };
 
         // Alternador de tema
