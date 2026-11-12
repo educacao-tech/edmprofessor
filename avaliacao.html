@@ -284,6 +284,13 @@
             transition: all 0.2s ease;
         }
 
+        #eval-professor,
+        #quickNome {
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-weight: 600;
+        }
+
         .ident-field input:focus,
         .ident-field select:focus {
             border-color: var(--primary-color);
@@ -1222,7 +1229,7 @@
                         <label for="eval-professor">
                             <span><i class="fas fa-user text-primary"></i> Professor(a) <span class="required-star">*</span></span>
                         </label>
-                        <input type="text" id="eval-professor" placeholder="Nome completo do(a) docente" required list="professoresDatalist">
+                        <input type="text" id="eval-professor" placeholder="NOME COMPLETO DO(A) DOCENTE" required list="professoresDatalist" style="text-transform: uppercase;" autocomplete="name">
                         <datalist id="professoresDatalist"></datalist>
                     </div>
 
@@ -1822,7 +1829,7 @@
                     <label for="quickNome" style="display: block; font-size: 0.80rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">
                         <i class="fas fa-user-graduate"></i> Nome Completo Oficial <span style="color:#e11d48">*</span>
                     </label>
-                    <input type="text" id="quickNome" placeholder="Selecione ou digite seu nome" required list="professoresDatalist" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-size: 0.90rem; font-family: inherit;">
+                    <input type="text" id="quickNome" placeholder="DIGITE OU SELECIONE SEU NOME" required list="professoresDatalist" style="text-transform: uppercase; width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-size: 0.90rem; font-family: inherit;" autocomplete="name">
                 </div>
 
                 <div style="margin-bottom: 20px; text-align: left;">
@@ -1945,6 +1952,10 @@
         // Atualiza a interface com o Docente Autenticado
         function setAuthenticatedTeacher(profile) {
             if (!profile || !profile.email) return;
+
+            if (profile.nome) {
+                profile.nome = profile.nome.replace(/[^a-zA-ZÀ-ÿ\s']/g, '').toUpperCase();
+            }
 
             currentDocente = profile;
             localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(profile));
@@ -2718,6 +2729,20 @@
         }
 
         restoreDraft();
+
+        // Força e aceita apenas letras maiúsculas no nome do(a) professor(a)
+        ['eval-professor', 'quickNome'].forEach(id => {
+            const inputEl = document.getElementById(id);
+            if (!inputEl) return;
+            inputEl.addEventListener('input', () => {
+                const start = inputEl.selectionStart;
+                const end = inputEl.selectionEnd;
+                inputEl.value = inputEl.value.replace(/[^a-zA-ZÀ-ÿ\s']/g, '').toUpperCase();
+                if (start !== null && end !== null) {
+                    inputEl.setSelectionRange(start, end);
+                }
+            });
+        });
 
         // Salvar e atualizar progresso ao digitar em textareas / inputs
         document.querySelectorAll('#evaluationForm input, #evaluationForm textarea, #evaluationForm select').forEach(el => {

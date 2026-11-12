@@ -1463,13 +1463,25 @@ const resetAndRender = () => {
 
 if (searchInput) searchInput.addEventListener('input', debouncedRenderTable);
 
-const uppercaseFields = ['search-input', 'prof-nome', 'prof-ano', 'prof-turma'];
+const uppercaseFields = ['search-input', 'prof-ano', 'prof-turma'];
 uppercaseFields.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
         el.addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase(); });
     }
 });
+
+const profNomeInput = document.getElementById('prof-nome');
+if (profNomeInput) {
+    profNomeInput.addEventListener('input', (e) => {
+        const start = e.target.selectionStart;
+        const end = e.target.selectionEnd;
+        e.target.value = e.target.value.replace(/[^a-zA-ZÀ-ÿ\s']/g, '').toUpperCase();
+        if (start !== null && end !== null) {
+            e.target.setSelectionRange(start, end);
+        }
+    });
+}
 
 if (schoolFilter) schoolFilter.addEventListener('change', debouncedRenderTable);
 if (disciplineFilter) disciplineFilter.addEventListener('change', debouncedRenderTable);
