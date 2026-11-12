@@ -805,6 +805,9 @@
                     <button type="button" class="btn btn-secondary btn-sm" onclick="printEvaluationModal()">
                         <i class="fas fa-print"></i> Imprimir
                     </button>
+                    <button type="button" class="btn btn-danger btn-sm" id="btnModalDelete" onclick="deleteCurrentEvaluationFromModal()" title="Excluir esta resposta permanentemente" style="background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <i class="fas fa-trash"></i> Excluir
+                    </button>
                     <button type="button" class="modal-close-btn" onclick="closeDetailsModal()">&times;</button>
                 </div>
             </div>
@@ -841,7 +844,7 @@
     <!-- Scripts do Firebase e Lógica de Visualização -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -976,10 +979,15 @@
                                 <i class="fas fa-check-circle"></i> Presença Registrada
                             </span>
                         </td>
-                        <td style="text-align: center;">
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="openDetails('${item.id || index}')" title="Visualizar respostas completas">
-                                <i class="fas fa-eye"></i> Ver Respostas
-                            </button>
+                        <td style="text-align: center; white-space: nowrap;">
+                            <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: center;">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="openDetails('${item.id || index}')" title="Visualizar respostas completas">
+                                    <i class="fas fa-eye"></i> Ver Respostas
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="deleteAvaliacao('${item.id || index}')" title="Excluir esta avaliação" style="background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 9px;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -1008,6 +1016,8 @@
         window.openDetails = (docId) => {
             const item = allAvaliacoes.find((a, idx) => (a.id === docId || String(idx) === String(docId)));
             if (!item) return;
+
+            window._currentOpenDocId = item.id || docId;
 
             document.getElementById('detailProtocolBadge').textContent = item.protocolo || 'EDM-2026';
             document.getElementById('detailProfNome').textContent = item.professor || '-';
@@ -1054,10 +1064,70 @@
 
         window.closeDetailsModal = () => {
             document.getElementById('modalDetails').style.display = 'none';
+            window._currentOpenDocId = null;
         };
 
         window.printEvaluationModal = () => {
             window.print();
+        };
+
+        // Excluir Avaliação (Firestore e Local)
+        window.deleteAvaliacao = async (docId) => {
+            const item = allAvaliacoes.find((a, idx) => (a.id === docId || String(idx) === String(docId)));
+            if (!item) return;
+
+            const prof = item.professor || 'Docente Não Informado';
+            const protocolo = item.protocolo || docId;
+            const escola = item.escola || '-';
+
+            const confirmMsg = `Tem certeza que deseja EXCLUIR permanentemente esta avaliação?\n\n` +
+                               `• Professor(a): ${prof}\n` +
+                               `• Protocolo: ${protocolo}\n` +
+                               `• Escola: ${escola}\n\n` +
+                               `Esta ação removerá a resposta do banco de dados e permitirá que o professor preencha novamente caso necessário.`;
+
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                if (item.id) {
+                    await deleteDoc(doc(db, "avaliacoes_2026", item.id));
+                    try {
+                        await deleteDoc(doc(db, "presencas", 'presenca_' + item.id));
+                    } catch(e) {}
+                }
+
+                // Remove do backup local no localStorage caso exista
+                try {
+                    const local = JSON.parse(localStorage.getItem('edm_avaliacoes_submetidas') || '[]');
+                    const filteredLocal = local.filter(l => l.id !== item.id && l.protocolo !== item.protocolo);
+                    localStorage.setItem('edm_avaliacoes_submetidas', JSON.stringify(filteredLocal));
+                } catch(e) {}
+
+                // Remove da lista em memória
+                allAvaliacoes = allAvaliacoes.filter(a => a.id !== item.id && a !== item);
+
+                // Fecha modal se estiver aberto com esta resposta
+                const modal = document.getElementById('modalDetails');
+                if (modal && modal.style.display === 'block') {
+                    window.closeDetailsModal();
+                }
+
+                updateKPIs();
+                filterTable();
+                renderExecutiveCharts();
+                renderQualitativeAnswers();
+
+                alert(`Avaliação de ${prof} excluída com sucesso!`);
+            } catch (err) {
+                console.error("Erro ao excluir avaliação:", err);
+                alert(`Erro ao excluir avaliação: ${err.message || err.code}`);
+            }
+        };
+
+        window.deleteCurrentEvaluationFromModal = () => {
+            if (window._currentOpenDocId) {
+                window.deleteAvaliacao(window._currentOpenDocId);
+            }
         };
 
         // Exportar Todas as Respostas para Planilha (CSV com UTF-8 BOM para Excel)
