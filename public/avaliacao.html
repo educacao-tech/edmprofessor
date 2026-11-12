@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Avaliação Anual 2026 – Educação Digital e Midiática (EDM)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2969,12 +2972,12 @@
                 return;
             }
 
-            const html = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Comprovante de Presença - ${protocolo}</title>
-    <style>
+            const html = `\x3C!DOCTYPE html>
+\x3Chtml lang="pt-BR">
+\x3Chead>
+    \x3Cmeta charset="UTF-8">
+    \x3Ctitle>Comprovante de Presença - ${protocolo}\x3C/title>
+    \x3Cstyle>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             margin: 0;
@@ -3069,69 +3072,69 @@
             body { padding: 0; }
             .no-print { display: none; }
         }
-    </style>
-</head>
-<body>
-    <div class="cert-card">
-        <div class="cert-header">
-            <div class="cert-title">Secretaria Municipal de Educação de Batatais</div>
-            <div class="cert-subtitle">Educação Digital e Midiática (EDM) • Ano Letivo de 2026</div>
-        </div>
+    \x3C/style>
+\x3C/head>
+\x3Cbody>
+    \x3Cdiv class="cert-card">
+        \x3Cdiv class="cert-header">
+            \x3Cdiv class="cert-title">Secretaria Municipal de Educação de Batatais\x3C/div>
+            \x3Cdiv class="cert-subtitle">Educação Digital e Midiática (EDM) • Ano Letivo de 2026\x3C/div>
+        \x3C/div>
         
-        <div class="cert-badge-row">
-            <div class="presence-pill">✓ COMPROVANTE OFICIAL DE PRESENÇA E AVALIAÇÃO</div>
-        </div>
+        \x3Cdiv class="cert-badge-row">
+            \x3Cdiv class="presence-pill">✓ COMPROVANTE OFICIAL DE PRESENÇA E AVALIAÇÃO\x3C/div>
+        \x3C/div>
 
-        <div class="cert-body">
-            Certificamos que o(a) docente abaixo identificado(a) participou ativamente e concluiu integralmente a <strong>Avaliação Anual de Educação Digital e Midiática 2026</strong>, tendo sua presença oficial e frequência acadêmica devidamente registradas e homologadas no Encontro Formativo de EDM.
-        </div>
+        \x3Cdiv class="cert-body">
+            Certificamos que o(a) docente abaixo identificado(a) participou ativamente e concluiu integralmente a \x3Cstrong>Avaliação Anual de Educação Digital e Midiática 2026\x3C/strong>, tendo sua presença oficial e frequência acadêmica devidamente registradas e homologadas no Encontro Formativo de EDM.
+        \x3C/div>
 
-        <div class="data-grid">
-            <div>
-                <strong>Professor(a)</strong>
+        \x3Cdiv class="data-grid">
+            \x3Cdiv>
+                \x3Cstrong>Professor(a)\x3C/strong>
                 ${escapeHtml(professor)}
-            </div>
-            <div>
-                <strong>E-mail Institucional</strong>
+            \x3C/div>
+            \x3Cdiv>
+                \x3Cstrong>E-mail Institucional\x3C/strong>
                 ${escapeHtml(email)}
-            </div>
-            <div>
-                <strong>Escola de Atuação</strong>
+            \x3C/div>
+            \x3Cdiv>
+                \x3Cstrong>Escola de Atuação\x3C/strong>
                 ${escapeHtml(escola)}
-            </div>
-            <div>
-                <strong>Ano / Turma / Período</strong>
+            \x3C/div>
+            \x3Cdiv>
+                \x3Cstrong>Ano / Turma / Período\x3C/strong>
                 ${escapeHtml(turmas)}
-            </div>
-            <div>
-                <strong>Data da Frequência</strong>
+            \x3C/div>
+            \x3Cdiv>
+                \x3Cstrong>Data da Frequência\x3C/strong>
                 ${dateStr} às ${timeStr}
-            </div>
-            <div>
-                <strong>Código de Autenticidade</strong>
-                <span class="cert-auth">${escapeHtml(protocolo)}</span>
-            </div>
-        </div>
+            \x3C/div>
+            \x3Cdiv>
+                \x3Cstrong>Código de Autenticidade\x3C/strong>
+                \x3Cspan class="cert-auth">${escapeHtml(protocolo)}\x3C/span>
+            \x3C/div>
+        \x3C/div>
 
-        <div class="cert-footer">
-            <div>
-                Sistema Oficial de Educação Digital e Midiática<br>
+        \x3Cdiv class="cert-footer">
+            \x3Cdiv>
+                Sistema Oficial de Educação Digital e Midiática\x3Cbr>
                 Prefeitura Municipal da Estância Turística de Batatais
-            </div>
-            <div style="text-align: right;">
-                Documento gerado eletronicamente em:<br>
-                <strong>${dateStr} às ${timeStr}</strong>
-            </div>
-        </div>
-    </div>
+            \x3C/div>
+            \x3Cdiv style="text-align: right;">
+                Documento gerado eletronicamente em:\x3Cbr>
+                \x3Cstrong>${dateStr} às ${timeStr}\x3C/strong>
+            \x3C/div>
+        \x3C/div>
+    \x3C/div>
 
-    <div class="no-print" style="text-align: center; margin-top: 24px;">
-        <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 11px 26px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+    \x3Cdiv class="no-print" style="text-align: center; margin-top: 24px;">
+        \x3Cbutton onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 11px 26px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
             Salvar como PDF / Imprimir Comprovante
-        </button>
-    </div>
-</body>
-</html>`;
+        \x3C/button>
+    \x3C/div>
+\x3C/body>
+\x3C/html>`;
 
             printWin.document.open();
             printWin.document.write(html);
