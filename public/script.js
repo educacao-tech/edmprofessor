@@ -18,10 +18,22 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Lista de Administradores Autorizados
+export const ADMIN_EMAILS = [
+    'madscold@gmail.com'
+];
+
+export function isUserAdmin(user) {
+    if (!user || !user.email) return false;
+    return ADMIN_EMAILS.includes(user.email.toLowerCase().trim());
+}
+
 // Helper para mensagens amigáveis de autenticação
 function formatAuthErrorMessage(error) {
     if (!error || !error.code) return "Falha na autenticação.";
     switch (error.code) {
+        case 'auth/unauthorized':
+            return "Acesso restrito. Este e-mail não possui permissões administrativas.";
         case 'auth/operation-not-allowed':
             return "O provedor Google não está ativado no Firebase Console. Ative o Google em Authentication > Sign-in method.";
         case 'auth/unauthorized-domain':
@@ -84,6 +96,11 @@ window.handleCreateAccount = async () => {
         window.showLoginAlert("Por favor, preencha o e-mail e a senha para cadastrar.");
         return;
     }
+    if (!ADMIN_EMAILS.includes(email.toLowerCase().trim())) {
+        window.showLoginAlert(`Cadastro não autorizado: O e-mail <strong>${escapeHTML(email)}</strong> não possui privilégios de administrador.`, 'auth/unauthorized');
+        window.showNotification("Apenas administradores autorizados podem criar contas.", "danger");
+        return;
+    }
     if (pass.length < 6) {
         window.showLoginAlert("O Firebase exige que a senha tenha no mínimo 6 caracteres (letras ou números).");
         return;
@@ -101,8 +118,15 @@ window.handleCreateAccount = async () => {
 
 // Tratar retorno de login por redirecionamento
 try {
-    getRedirectResult(auth).then((result) => {
+    getRedirectResult(auth).then(async (result) => {
         if (result && result.user) {
+            if (!isUserAdmin(result.user)) {
+                const unauthorizedEmail = result.user.email;
+                await signOut(auth);
+                window.showNotification(`Acesso negado: O e-mail (${unauthorizedEmail}) não possui permissão de administrador.`, 'danger');
+                window.showLoginAlert(`Acesso restrito. O e-mail <strong>${escapeHTML(unauthorizedEmail)}</strong> não está autorizado como administrador.`, 'auth/unauthorized');
+                return;
+            }
             window.closeLoginModal();
             window.showNotification(`Bem-vindo, ${result.user.displayName || result.user.email || 'Administrador'}!`);
         }
@@ -359,7 +383,14 @@ if (loginForm) {
         const pass = document.getElementById('login-password').value;
         
         try {
-            await signInWithEmailAndPassword(auth, email, pass);
+            const cred = await signInWithEmailAndPassword(auth, email, pass);
+            if (!isUserAdmin(cred.user)) {
+                const unauthorizedEmail = cred.user.email;
+                await signOut(auth);
+                window.showLoginAlert(`Acesso restrito. O e-mail <strong>${escapeHTML(unauthorizedEmail)}</strong> não possui privilégios de administrador.`, 'auth/unauthorized');
+                window.showNotification(`Acesso negado para ${unauthorizedEmail}`, 'danger');
+                return;
+            }
             window.closeLoginModal();
             window.showNotification("Bem-vindo! Acesso administrativo liberado.");
         } catch (error) {
@@ -419,6 +450,15 @@ window.loginSocial = async (providerName) => {
                 return;
             }
             throw popupErr;
+        }
+
+        if (!isUserAdmin(result.user)) {
+            const unauthorizedEmail = result.user.email;
+            await signOut(auth);
+            const msg = `Acesso restrito: O e-mail <strong>${escapeHTML(unauthorizedEmail)}</strong> não possui privilégios de administrador.`;
+            window.showLoginAlert(msg, 'auth/unauthorized');
+            window.showNotification(`Acesso negado para ${unauthorizedEmail}`, 'danger');
+            return;
         }
 
         window.closeLoginModal();
@@ -497,9 +537,20 @@ function updateAvaliacoesCounterUI() {
     pill.innerHTML = `<i class="fas fa-clipboard-check" style="color: #10b981;"></i> Avaliações: <strong>${completed} de ${total}</strong> (${pct}%)`;
 }
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     const authBtn = document.getElementById('auth-toggle');
     if (user) {
+        if (!isUserAdmin(user)) {
+            console.warn(`Tentativa de acesso administrativo não autorizado: ${user.email}`);
+            const unauthorizedEmail = user.email;
+            await signOut(auth);
+            document.body.classList.remove('is-admin');
+            if (authBtn) authBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            window.showNotification(`Acesso negado: O e-mail (${unauthorizedEmail}) não possui privilégios de administrador.`, 'danger');
+            window.showLoginAlert(`Acesso restrito. O e-mail <strong>${escapeHTML(unauthorizedEmail)}</strong> não possui privilégios de administrador.`, 'auth/unauthorized');
+            return;
+        }
+
         document.body.classList.add('is-admin');
         if (authBtn) authBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Sair';
     } else {

@@ -1470,14 +1470,32 @@
             }
         };
 
+        // Lista de Administradores Autorizados
+        const ADMIN_EMAILS = [
+            'madscold@gmail.com'
+        ];
+
+        function isUserAdmin(user) {
+            if (!user || !user.email) return false;
+            return ADMIN_EMAILS.includes(user.email.toLowerCase().trim());
+        }
+
         // Observador do Estado de Autenticação
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             const gate = document.getElementById('adminAuthGate');
             const panel = document.getElementById('adminPanelContent');
             const userSection = document.getElementById('adminUserSection');
             const userEmailSpan = document.getElementById('adminUserEmail');
 
             if (user) {
+                if (!isUserAdmin(user)) {
+                    console.warn("Tentativa de acesso não autorizada:", user.email);
+                    const emailTentativa = user.email;
+                    await signOut(auth);
+                    alert(`Acesso Negado: O e-mail (${emailTentativa}) não possui permissão de administrador.`);
+                    return;
+                }
+
                 if (gate) gate.style.display = 'none';
                 if (panel) panel.style.display = 'block';
                 if (userSection) userSection.style.display = 'flex';
