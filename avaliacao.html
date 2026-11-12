@@ -642,6 +642,160 @@
             40%, 80% { transform: translateX(5px); }
         }
 
+        /* Barra de Navegação de Etapas / Stepper */
+        .eval-stepper-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 10px 14px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .eval-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: thin;
+        }
+
+        .eval-stepper::-webkit-scrollbar {
+            height: 5px;
+        }
+        .eval-stepper::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+
+        .stepper-step {
+            flex: 1;
+            min-width: 105px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            font-size: 0.81rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.22s ease-in-out;
+            white-space: nowrap;
+        }
+
+        .stepper-step:hover {
+            border-color: var(--primary-color);
+            color: var(--text-color);
+            background: var(--hover-bg);
+            transform: translateY(-1px);
+        }
+
+        .stepper-step.active {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border-color: #1d4ed8;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+        }
+
+        .stepper-step.completed {
+            border-color: #10b981;
+            color: #059669;
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .stepper-step.active.completed {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border-color: #1d4ed8;
+        }
+
+        .stepper-step .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.08);
+            font-size: 0.74rem;
+            font-weight: 800;
+            transition: all 0.2s ease;
+        }
+
+        .stepper-step.active .step-badge {
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+        }
+
+        .stepper-step.completed .step-badge {
+            background: #10b981;
+            color: #ffffff;
+        }
+
+        /* Painéis de Cada Etapa (Paginação) */
+        .eval-step-pane {
+            display: none;
+            animation: fadeInStep 0.28s ease-in-out;
+        }
+
+        .eval-step-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeInStep {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Rodapé de Navegação em cada Etapa */
+        .step-nav-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 24px;
+            padding: 16px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+            flex-wrap: wrap;
+        }
+
+        .step-counter-text {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .step-counter-text strong {
+            color: var(--primary-color);
+            font-weight: 800;
+        }
+
+        @media (max-width: 640px) {
+            .step-nav-footer {
+                flex-direction: column-reverse;
+                gap: 10px;
+            }
+            .step-nav-footer button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
         /* Blocos de Perguntas */
         .eval-block {
             margin-bottom: 36px;
@@ -897,8 +1051,14 @@
             }
             .eval-top-nav,
             .eval-footer-actions,
+            .eval-stepper-container,
+            .step-nav-footer,
+            .eval-progress-container,
             #theme-toggle {
                 display: none !important;
+            }
+            .eval-step-pane {
+                display: block !important;
             }
             .eval-block {
                 border: 1px solid #ccc !important;
@@ -1007,10 +1167,45 @@
             </div>
         </div>
 
+        <!-- Barra de Etapas / Stepper dos Blocos -->
+        <div class="eval-stepper-container" id="evalStepperContainer">
+            <div class="eval-stepper" id="evalStepper">
+                <button type="button" class="stepper-step active" id="step-btn-0" onclick="goToStep(0)" title="Identificação do Docente e da Escola">
+                    <span class="step-badge" id="step-badge-0">1</span>
+                    <span class="step-label">Identificação</span>
+                </button>
+                <button type="button" class="stepper-step" id="step-btn-1" onclick="goToStep(1)" title="Bloco 1 – Planejamento e Organização das Aulas">
+                    <span class="step-badge" id="step-badge-1">2</span>
+                    <span class="step-label">Bloco 1</span>
+                </button>
+                <button type="button" class="stepper-step" id="step-btn-2" onclick="goToStep(2)" title="Bloco 2 – Práticas Pedagógicas e Metodologias">
+                    <span class="step-badge" id="step-badge-2">3</span>
+                    <span class="step-label">Bloco 2</span>
+                </button>
+                <button type="button" class="stepper-step" id="step-btn-3" onclick="goToStep(3)" title="Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos">
+                    <span class="step-badge" id="step-badge-3">4</span>
+                    <span class="step-label">Bloco 3</span>
+                </button>
+                <button type="button" class="stepper-step" id="step-btn-4" onclick="goToStep(4)" title="Bloco 4 – Desafios e Necessidades">
+                    <span class="step-badge" id="step-badge-4">5</span>
+                    <span class="step-label">Bloco 4</span>
+                </button>
+                <button type="button" class="stepper-step" id="step-btn-5" onclick="goToStep(5)" title="Bloco 5 – Autoavaliação Docente">
+                    <span class="step-badge" id="step-badge-5">6</span>
+                    <span class="step-label">Bloco 5</span>
+                </button>
+                <button type="button" class="stepper-step" id="step-btn-6" onclick="goToStep(6)" title="Bloco 6 – Perspectivas para 2027 e Envio">
+                    <span class="step-badge" id="step-badge-6">7</span>
+                    <span class="step-label">Bloco 6 & Envio</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Formulário Principal -->
         <form id="evaluationForm">
-            <!-- Identificação -->
-            <div class="ident-card">
+            <!-- ETAPA 1: IDENTIFICAÇÃO -->
+            <div class="eval-step-pane active" id="step-pane-0">
+                <div class="ident-card">
                 <div class="ident-card-header">
                     <div class="ident-card-title">
                         <i class="fas fa-id-card text-primary"></i>
@@ -1118,15 +1313,27 @@
                         </label>
                         <input type="date" id="eval-data" required readonly tabindex="-1" class="input-readonly input-date-lock" title="Data gerada automaticamente pelo sistema para comprovação da sua presença">
                     </div>
-                </div>
-            </div>
+                </div> <!-- /ident-fields-layout -->
+            </div> <!-- /ident-card -->
 
-            <!-- BLOCO 1 – PLANEJAMENTO E ORGANIZAÇÃO DAS AULAS -->
-            <div class="eval-block">
-                <div class="eval-block-header">
-                    <span class="eval-block-badge">Bloco 1</span>
-                    <h2 class="eval-block-title">Planejamento e Organização das Aulas</h2>
+            <div class="step-nav-footer">
+                <div style="font-size: 0.84rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-id-badge text-primary"></i> Chamada oficial do encontro
                 </div>
+                <span class="step-counter-text">Etapa <strong>1</strong> de 7</span>
+                <button type="button" class="btn btn-primary" onclick="nextStep()" style="font-weight: 700;">
+                    Avançar para o Bloco 1 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div> <!-- /step-pane-0 -->
+
+            <!-- ETAPA 2: BLOCO 1 – PLANEJAMENTO E ORGANIZAÇÃO DAS AULAS -->
+            <div class="eval-step-pane" id="step-pane-1">
+                <div class="eval-block">
+                    <div class="eval-block-header">
+                        <span class="eval-block-badge">Bloco 1</span>
+                        <h2 class="eval-block-title">Planejamento e Organização das Aulas</h2>
+                    </div>
 
                 <!-- Q1 -->
                 <div class="question-item">
@@ -1167,7 +1374,19 @@
                 </div>
             </div>
 
-            <!-- BLOCO 2 – DESENVOLVIMENTO DAS AULAS E PRÁTICAS PEDAGÓGICAS -->
+            <div class="step-nav-footer">
+                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                    <i class="fas fa-arrow-left"></i> Identificação
+                </button>
+                <span class="step-counter-text">Etapa <strong>2</strong> de 7</span>
+                <button type="button" class="btn btn-primary" onclick="nextStep()" style="font-weight: 700;">
+                    Avançar para o Bloco 2 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ETAPA 3: BLOCO 2 – DESENVOLVIMENTO DAS AULAS E PRÁTICAS PEDAGÓGICAS -->
+        <div class="eval-step-pane" id="step-pane-2">
             <div class="eval-block">
                 <div class="eval-block-header">
                     <span class="eval-block-badge">Bloco 2</span>
@@ -1219,7 +1438,19 @@
                 </div>
             </div>
 
-            <!-- BLOCO 3 – APRENDIZAGEM E DESENVOLVIMENTO DOS ALUNOS -->
+            <div class="step-nav-footer">
+                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                    <i class="fas fa-arrow-left"></i> Bloco 1
+                </button>
+                <span class="step-counter-text">Etapa <strong>3</strong> de 7</span>
+                <button type="button" class="btn btn-primary" onclick="nextStep()" style="font-weight: 700;">
+                    Avançar para o Bloco 3 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ETAPA 4: BLOCO 3 – APRENDIZAGEM E DESENVOLVIMENTO DOS ALUNOS -->
+        <div class="eval-step-pane" id="step-pane-3">
             <div class="eval-block">
                 <div class="eval-block-header">
                     <span class="eval-block-badge">Bloco 3</span>
@@ -1284,7 +1515,19 @@
                 </div>
             </div>
 
-            <!-- BLOCO 4 – DESAFIOS E NECESSIDADES -->
+            <div class="step-nav-footer">
+                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                    <i class="fas fa-arrow-left"></i> Bloco 2
+                </button>
+                <span class="step-counter-text">Etapa <strong>4</strong> de 7</span>
+                <button type="button" class="btn btn-primary" onclick="nextStep()" style="font-weight: 700;">
+                    Avançar para o Bloco 4 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ETAPA 5: BLOCO 4 – DESAFIOS E NECESSIDADES -->
+        <div class="eval-step-pane" id="step-pane-4">
             <div class="eval-block">
                 <div class="eval-block-header">
                     <span class="eval-block-badge">Bloco 4</span>
@@ -1325,7 +1568,19 @@
                 </div>
             </div>
 
-            <!-- BLOCO 5 – AUTOAVALIAÇÃO DOCENTE -->
+            <div class="step-nav-footer">
+                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                    <i class="fas fa-arrow-left"></i> Bloco 3
+                </button>
+                <span class="step-counter-text">Etapa <strong>5</strong> de 7</span>
+                <button type="button" class="btn btn-primary" onclick="nextStep()" style="font-weight: 700;">
+                    Avançar para o Bloco 5 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ETAPA 6: BLOCO 5 – AUTOAVALIAÇÃO DOCENTE -->
+        <div class="eval-step-pane" id="step-pane-5">
             <div class="eval-block">
                 <div class="eval-block-header">
                     <span class="eval-block-badge">Bloco 5</span>
@@ -1402,7 +1657,19 @@
                 </div>
             </div>
 
-            <!-- BLOCO 6 – PERSPECTIVAS E PROPOSTAS PARA 2027 -->
+            <div class="step-nav-footer">
+                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                    <i class="fas fa-arrow-left"></i> Bloco 4
+                </button>
+                <span class="step-counter-text">Etapa <strong>6</strong> de 7</span>
+                <button type="button" class="btn btn-primary" onclick="nextStep()" style="font-weight: 700;">
+                    Avançar para o Bloco 6 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ETAPA 7: BLOCO 6 – PERSPECTIVAS E PROPOSTAS PARA 2027 & ENVIO -->
+        <div class="eval-step-pane" id="step-pane-6">
             <div class="eval-block">
                 <div class="eval-block-header">
                     <span class="eval-block-badge">Bloco 6</span>
@@ -1446,19 +1713,26 @@
             </div>
 
             <!-- Agradecimento & Ações de Envio -->
-            <div class="eval-presentation-card" style="border-left-color: #10b981; background: rgba(16, 185, 129, 0.08);">
+            <div class="eval-presentation-card" style="border-left-color: #10b981; background: rgba(16, 185, 129, 0.08); margin-bottom: 20px;">
                 <h3 style="color: #059669;"><i class="fas fa-check-circle"></i> Agradecemos sua participação e contribuição!</h3>
                 <p>Sua reflexão é fundamental para que possamos construir práticas pedagógicas cada vez mais significativas, inclusivas e alinhadas às necessidades dos nossos alunos.</p>
             </div>
 
-            <div class="eval-footer-actions">
-                <button type="button" class="btn btn-secondary" onclick="exportEvaluationPDF()">
-                    <i class="fas fa-file-pdf"></i> Baixar / Gerar PDF
+            <div class="step-nav-footer" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.3);">
+                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                    <i class="fas fa-arrow-left"></i> Bloco 5
                 </button>
-                <button type="submit" class="btn-submit-eval" id="btnSubmit">
-                    <i class="fas fa-paper-plane"></i> Enviar Avaliação 2026
-                </button>
+                <span class="step-counter-text">Etapa <strong>7</strong> de 7 (Conclusão)</span>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary" onclick="exportEvaluationPDF()">
+                        <i class="fas fa-file-pdf"></i> Baixar / Gerar PDF
+                    </button>
+                    <button type="submit" class="btn-submit-eval" id="btnSubmit">
+                        <i class="fas fa-paper-plane"></i> Enviar Avaliação 2026
+                    </button>
+                </div>
             </div>
+        </div> <!-- /step-pane-6 -->
         </form>
     </div>
 
@@ -2056,28 +2330,95 @@
                     badge.innerHTML = '<i class="fas fa-hourglass-half"></i> Presença só é confirmada com 100% preenchido';
                 }
             }
+
+            updateStepperUI();
         }
 
-        // Validação Estrita de Preenchimento Completo
-        function validateCompleteEvaluation() {
-            // 1. Identificação
-            const prof = document.getElementById('eval-professor')?.value.trim();
-            const email = document.getElementById('eval-email')?.value.trim();
-            const escola = document.getElementById('eval-escola')?.value;
-            const ano = document.getElementById('eval-ano')?.value;
-            const turma = document.getElementById('eval-turma')?.value;
-            const periodo = document.getElementById('eval-periodo')?.value;
+        // ==========================================================================
+        // CONTROLE DA PAGINAÇÃO POR BLOCOS (WIZARD / MULTI-STEP FORM)
+        // ==========================================================================
+        let currentStep = 0;
+        const TOTAL_STEPS = 7;
 
-            if (!prof || !email || !escola || !ano || !turma || !periodo) {
-                return {
-                    valid: false,
-                    message: "Por favor, complete todos os campos de identificação (Professor, E-mail, Escola, Ano, Turma e Período).",
-                    element: document.querySelector('.ident-grid')
-                };
+        const STEP_DEFINITIONS = [
+            { index: 0, title: "Identificação", label: "Identificação", questions: [] },
+            { index: 1, title: "Bloco 1", label: "Bloco 1", questions: ['q1', 'q2', 'q3', 'q4'] },
+            { index: 2, title: "Bloco 2", label: "Bloco 2", questions: ['q5', 'q6', 'q7', 'q8'] },
+            { index: 3, title: "Bloco 3", label: "Bloco 3", questions: ['q9', 'q10', 'q11', 'q12', 'q13'] },
+            { index: 4, title: "Bloco 4", label: "Bloco 4", questions: ['q14', 'q15', 'q16'] },
+            { index: 5, title: "Bloco 5", label: "Bloco 5", questions: ['q17', 'q18', 'q19', 'q20', 'q21', 'q22', 'q23'] },
+            { index: 6, title: "Bloco 6 & Envio", label: "Bloco 6 & Envio", questions: ['q24', 'q25', 'q26', 'q27', 'q28'] }
+        ];
+
+        function isQuestionAnswered(qKey) {
+            const q = ALL_QUESTION_KEYS.find(item => item.key === qKey);
+            if (!q) return true;
+
+            if (q.key === 'q28') {
+                const q27Val = document.querySelector('input[name="q27"]:checked')?.value || '';
+                if (q27Val.includes('Não') || q27Val.includes('dúvida')) {
+                    const text = document.querySelector('[name="q28"]')?.value.trim();
+                    return !!text;
+                }
+                return true;
             }
 
-            // 2. Validação questão por questão
-            for (let q of ALL_QUESTION_KEYS) {
+            if (q.type === 'radio') {
+                return !!document.querySelector(`input[name="${q.key}"]:checked`);
+            } else if (q.type === 'checkbox') {
+                const checkedBoxes = document.querySelectorAll(`input[name="${q.key}"]:checked`);
+                const outrosCheck = document.getElementById(`${q.key}-outros-check`);
+                const outrosText = document.getElementById(`${q.key}-outros-text`);
+                return checkedBoxes.length > 0 || !!(outrosCheck && outrosCheck.checked && outrosText && outrosText.value.trim());
+            } else if (q.type === 'text') {
+                const val = document.querySelector(`[name="${q.key}"]`)?.value.trim();
+                return !!(val && val.length > 0);
+            }
+            return true;
+        }
+
+        function isStepComplete(stepIdx) {
+            if (stepIdx === 0) {
+                const prof = document.getElementById('eval-professor')?.value.trim();
+                const email = document.getElementById('eval-email')?.value.trim();
+                const escola = document.getElementById('eval-escola')?.value;
+                const ano = document.getElementById('eval-ano')?.value;
+                const turma = document.getElementById('eval-turma')?.value;
+                const periodo = document.getElementById('eval-periodo')?.value;
+                return !!(prof && email && escola && ano && turma && periodo);
+            }
+
+            const stepDef = STEP_DEFINITIONS[stepIdx];
+            if (!stepDef) return true;
+            return stepDef.questions.every(k => isQuestionAnswered(k));
+        }
+
+        function validateStep(stepIdx) {
+            if (stepIdx === 0) {
+                const prof = document.getElementById('eval-professor');
+                const email = document.getElementById('eval-email');
+                const escola = document.getElementById('eval-escola');
+                const ano = document.getElementById('eval-ano');
+                const turma = document.getElementById('eval-turma');
+                const periodo = document.getElementById('eval-periodo');
+
+                if (!prof?.value.trim()) return { valid: false, message: "Por favor, informe seu nome completo na identificação.", element: prof };
+                if (!email?.value.trim()) return { valid: false, message: "Por favor, realize a identificação obrigatória com a Conta Google.", element: email };
+                if (!escola?.value) return { valid: false, message: "Por favor, selecione a Escola de atuação.", element: escola };
+                if (!ano?.value) return { valid: false, message: "Por favor, selecione o Ano de atuação.", element: ano };
+                if (!turma?.value) return { valid: false, message: "Por favor, selecione a Turma de atuação.", element: turma };
+                if (!periodo?.value) return { valid: false, message: "Por favor, selecione o Período / Turno.", element: periodo };
+
+                return { valid: true };
+            }
+
+            const stepDef = STEP_DEFINITIONS[stepIdx];
+            if (!stepDef) return { valid: true };
+
+            for (let qKey of stepDef.questions) {
+                const q = ALL_QUESTION_KEYS.find(item => item.key === qKey);
+                if (!q) continue;
+
                 if (q.key === 'q28') {
                     const q27Val = document.querySelector('input[name="q27"]:checked')?.value || '';
                     if (q27Val.includes('Não') || q27Val.includes('dúvida')) {
@@ -2085,7 +2426,7 @@
                         if (!q28El || !q28El.value.trim()) {
                             return {
                                 valid: false,
-                                message: `Por favor, responda à ${q.label} antes de enviar.`,
+                                message: `Por favor, responda à ${q.label} antes de avançar.`,
                                 element: q28El?.closest('.question-item') || q28El
                             };
                         }
@@ -2099,7 +2440,7 @@
                         const container = document.querySelector(`input[name="${q.key}"]`)?.closest('.question-item');
                         return {
                             valid: false,
-                            message: `Por favor, selecione uma opção na ${q.label}.`,
+                            message: `Por favor, responda à ${q.label} antes de avançar.`,
                             element: container
                         };
                     }
@@ -2112,7 +2453,7 @@
                         const container = document.querySelector(`input[name="${q.key}"]`)?.closest('.question-item');
                         return {
                             valid: false,
-                            message: `Por favor, selecione ao menos uma opção na ${q.label}.`,
+                            message: `Por favor, selecione ao menos uma opção na ${q.label} antes de avançar.`,
                             element: container
                         };
                     }
@@ -2121,10 +2462,89 @@
                     if (!textEl || !textEl.value.trim()) {
                         return {
                             valid: false,
-                            message: `Por favor, responda à reflexão da ${q.label}.`,
+                            message: `Por favor, responda à reflexão da ${q.label} antes de avançar.`,
                             element: textEl?.closest('.question-item') || textEl
                         };
                     }
+                }
+            }
+
+            return { valid: true };
+        }
+
+        function updateStepperUI() {
+            for (let i = 0; i < TOTAL_STEPS; i++) {
+                const btn = document.getElementById(`step-btn-${i}`);
+                const badge = document.getElementById(`step-badge-${i}`);
+                if (!btn || !badge) continue;
+
+                const completed = isStepComplete(i);
+
+                btn.classList.toggle('active', i === currentStep);
+                btn.classList.toggle('completed', completed);
+
+                if (completed && i !== currentStep) {
+                    badge.innerHTML = '<i class="fas fa-check"></i>';
+                } else {
+                    badge.textContent = (i + 1);
+                }
+            }
+        }
+
+        window.goToStep = (targetStep, skipValidation = false) => {
+            if (targetStep < 0 || targetStep >= TOTAL_STEPS) return;
+
+            // Se estiver tentando avançar além da etapa atual, valida a etapa atual
+            if (!skipValidation && targetStep > currentStep) {
+                const validation = validateStep(currentStep);
+                if (!validation.valid) {
+                    alert(validation.message);
+                    document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
+                    if (validation.element) {
+                        validation.element.classList.add('unanswered-highlight');
+                        validation.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        const focusable = validation.element.querySelector('input, textarea, select');
+                        if (focusable) focusable.focus();
+                    }
+                    return;
+                }
+            }
+
+            // Oculta todas as panes e ativa a selecionada
+            document.querySelectorAll('.eval-step-pane').forEach((pane, idx) => {
+                pane.classList.toggle('active', idx === targetStep);
+            });
+
+            currentStep = targetStep;
+            updateStepperUI();
+            saveDraft();
+
+            // Rola suavemente até o topo da área do formulário
+            const stepperBox = document.getElementById('evalStepperContainer');
+            if (stepperBox) {
+                stepperBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+
+        window.nextStep = () => {
+            goToStep(currentStep + 1);
+        };
+
+        window.prevStep = () => {
+            goToStep(Math.max(0, currentStep - 1), true);
+        };
+
+        // Validação Estrita de Preenchimento Completo (confere todas as etapas)
+        function validateCompleteEvaluation() {
+            for (let stepIdx = 0; stepIdx < TOTAL_STEPS; stepIdx++) {
+                const validationStep = validateStep(stepIdx);
+                if (!validationStep.valid) {
+                    return {
+                        valid: false,
+                        message: validationStep.message,
+                        element: validationStep.element,
+                        stepIndex: stepIdx
+                    };
                 }
             }
 
@@ -2228,6 +2648,7 @@
                 }
             }
             data['eval-data'] = getSystemDateISO();
+            data._currentStep = currentStep;
             data._savedAt = new Date().toISOString();
             if (currentDocente) data['_docente'] = currentDocente;
 
@@ -2284,6 +2705,12 @@
                     setAuthenticatedTeacher(data['_docente']);
                 }
 
+                if (data._currentStep !== undefined && typeof data._currentStep === 'number') {
+                    goToStep(data._currentStep, true);
+                } else {
+                    updateStepperUI();
+                }
+
                 updateProgressUI();
             } catch (e) {
                 console.warn("Erro ao restaurar rascunho:", e);
@@ -2322,6 +2749,16 @@
             if (!validation.valid) {
                 alert("Preenchimento Incompleto:\n\nPara que sua presença no Encontro Formativo de EDM seja confirmada, você deve responder a todas as questões da avaliação anual.\n\n" + validation.message);
                 
+                if (validation.stepIndex !== undefined) {
+                    goToStep(validation.stepIndex, true);
+                } else if (validation.element) {
+                    const targetPane = validation.element.closest('.eval-step-pane');
+                    if (targetPane) {
+                        const stepIdx = parseInt(targetPane.id.replace('step-pane-', ''), 10);
+                        if (!isNaN(stepIdx)) goToStep(stepIdx, true);
+                    }
+                }
+
                 document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
                 if (validation.element) {
                     validation.element.classList.add('unanswered-highlight');
@@ -2459,47 +2896,28 @@
 
         // Navegador Rápido de Questões Pendentes
         window.goToNextUnanswered = () => {
-            const profInput = document.getElementById('eval-professor');
-            const escolaSelect = document.getElementById('eval-escola');
-            const anoSelect = document.getElementById('eval-ano');
-            const turmaSelect = document.getElementById('eval-turma');
-            const periodoSelect = document.getElementById('eval-periodo');
+            const validation = validateCompleteEvaluation();
+            if (!validation.valid) {
+                if (validation.stepIndex !== undefined) {
+                    goToStep(validation.stepIndex, true);
+                } else if (validation.element) {
+                    const targetPane = validation.element.closest('.eval-step-pane');
+                    if (targetPane) {
+                        const stepIdx = parseInt(targetPane.id.replace('step-pane-', ''), 10);
+                        if (!isNaN(stepIdx)) goToStep(stepIdx, true);
+                    }
+                }
 
-            if (!profInput?.value.trim()) {
-                profInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                profInput?.focus();
-                return;
-            }
-            if (!escolaSelect?.value) {
-                escolaSelect?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                escolaSelect?.focus();
-                return;
-            }
-            if (!anoSelect?.value) {
-                anoSelect?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                anoSelect?.focus();
-                return;
-            }
-            if (!turmaSelect?.value) {
-                turmaSelect?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                turmaSelect?.focus();
-                return;
-            }
-            if (!periodoSelect?.value) {
-                periodoSelect?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                periodoSelect?.focus();
-                return;
-            }
-
-            const validation = validateAllQuestions();
-            if (!validation.valid && validation.element) {
                 document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
-                validation.element.classList.add('unanswered-highlight');
-                validation.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                const focusable = validation.element.querySelector('input, textarea, select');
-                if (focusable) focusable.focus();
+                if (validation.element) {
+                    validation.element.classList.add('unanswered-highlight');
+                    validation.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const focusable = validation.element.querySelector('input, textarea, select');
+                    if (focusable) focusable.focus();
+                }
             } else {
                 alert("Parabéns! Todas as questões foram preenchidas. Você já pode enviar sua avaliação.");
+                goToStep(6, true);
                 const btnSubmit = document.getElementById('btnSubmit');
                 if (btnSubmit) btnSubmit.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
