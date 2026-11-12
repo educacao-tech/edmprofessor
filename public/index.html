@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Professores</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
+
 <body>
     <div id="notification-area"></div>
     <div class="container">
@@ -25,15 +28,27 @@
                 <span class="header-subtitle-inline">Gestão e Frequência Acadêmica</span>
             </div>
             <div class="header-actions">
-                <a href="avaliacao.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" title="Preencher Avaliação Anual EDM 2026 (Abre em nova guia)" style="text-decoration:none;"><i class="fas fa-clipboard-check"></i> Avaliação 2026</a>
-                <a href="respostas_avaliacao.html" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm admin-only" title="Ver Respostas da Avaliação 2026 (Exclusivo Administrador)" style="text-decoration:none;"><i class="fas fa-clipboard-list"></i> Respostas</a>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="exportToPDF()" title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="copyShareLink()" title="Copiar link desta visualização"><i class="fas fa-share-nodes"></i> Compartilhar</button>
-                <button type="button" class="btn btn-secondary btn-sm admin-only" id="btn-sync-emails" onclick="syncEmailsFromPresenca()" title="Buscar e-mails da lista de presença oficial"><i class="fas fa-envelope-circle-check"></i> Sincronizar</button>
-                <button type="button" class="btn btn-primary btn-sm admin-only" onclick="openProfessorModal()"><i class="fas fa-plus"></i> Novo</button>
+                <a href="avaliacao.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm"
+                    title="Preencher Avaliação Anual EDM 2026 (Abre em nova guia)" style="text-decoration:none;"><i
+                        class="fas fa-clipboard-check"></i> Avaliação 2026</a>
+                <a href="respostas_avaliacao.html" target="_blank" rel="noopener noreferrer"
+                    class="btn btn-secondary btn-sm admin-only"
+                    title="Ver Respostas da Avaliação 2026 (Exclusivo Administrador)" style="text-decoration:none;"><i
+                        class="fas fa-clipboard-list"></i> Respostas</a>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="exportToPDF()"
+                    title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyShareLink()"
+                    title="Copiar link desta visualização"><i class="fas fa-share-nodes"></i> Compartilhar</button>
+                <button type="button" class="btn btn-secondary btn-sm admin-only" id="btn-sync-emails"
+                    onclick="syncEmailsFromPresenca()" title="Buscar e-mails da lista de presença oficial"><i
+                        class="fas fa-envelope-circle-check"></i> Sincronizar</button>
+                <button type="button" class="btn btn-primary btn-sm admin-only" onclick="openProfessorModal()"><i
+                        class="fas fa-plus"></i> Novo</button>
                 <div class="header-auth-group">
-                    <button type="button" id="auth-toggle" class="btn-icon" onclick="handleAuthClick()" title="Login Administrativo"><i class="fas fa-sign-in-alt"></i></button>
-                    <button type="button" id="theme-toggle" class="btn-icon" title="Alternar Modo Escuro/Claro" aria-label="Alternar Tema"><i class="fas fa-moon"></i></button>
+                    <button type="button" id="auth-toggle" class="btn-icon" onclick="handleAuthClick()"
+                        title="Login Administrativo"><i class="fas fa-sign-in-alt"></i></button>
+                    <button type="button" id="theme-toggle" class="btn-icon" title="Alternar Modo Escuro/Claro"
+                        aria-label="Alternar Tema"><i class="fas fa-moon"></i></button>
                 </div>
             </div>
         </header>
@@ -53,7 +68,8 @@
                     <select id="school-filter">
                         <option value="">Todas as Escolas</option>
                     </select>
-                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('escolas')" title="Adicionar Escola"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('escolas')"
+                        title="Adicionar Escola"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
             <div class="filter-item">
@@ -62,24 +78,28 @@
                     <select id="discipline-filter">
                         <option value="">Todas as Disciplinas</option>
                     </select>
-                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('disciplinas')" title="Adicionar Disciplina"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('disciplinas')"
+                        title="Adicionar Disciplina"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
             <div class="filter-item filter-year">
                 <label for="year-filter-btn">Ano(s)</label>
                 <div class="input-with-action">
                     <div class="custom-multiselect" id="year-multiselect">
-                        <button type="button" class="multiselect-btn" id="year-filter-btn" onclick="toggleYearDropdown(event)">
+                        <button type="button" class="multiselect-btn" id="year-filter-btn"
+                            onclick="toggleYearDropdown(event)">
                             <span id="year-filter-label">Todos os Anos</span>
                             <i class="fas fa-chevron-down multiselect-arrow"></i>
                         </button>
                         <div class="multiselect-dropdown" id="year-dropdown-menu"></div>
                     </div>
-                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('anos')" title="Adicionar Ano"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn-clear admin-only" onclick="manageMetadata('anos')"
+                        title="Adicionar Ano"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
             <div class="filter-item filter-action">
-                <button type="button" class="btn-clear" id="btn-clear-filters" title="Limpar todos os filtros"><i class="fas fa-filter-circle-xmark"></i></button>
+                <button type="button" class="btn-clear" id="btn-clear-filters" title="Limpar todos os filtros"><i
+                        class="fas fa-filter-circle-xmark"></i></button>
             </div>
         </div>
 
@@ -90,21 +110,26 @@
             </div>
             <div class="controls-toolbar">
                 <div class="density-toggle" title="Densidade das Linhas">
-                    <button type="button" id="btn-density-compact" class="btn-toggle active" onclick="setDensity('compact')" title="Modo Compacto (cabe mais professores)">
+                    <button type="button" id="btn-density-compact" class="btn-toggle active"
+                        onclick="setDensity('compact')" title="Modo Compacto (cabe mais professores)">
                         <i class="fas fa-bars"></i> Compacto
                     </button>
-                    <button type="button" id="btn-density-comfort" class="btn-toggle" onclick="setDensity('comfort')" title="Modo Confortável (mais espaçado)">
+                    <button type="button" id="btn-density-comfort" class="btn-toggle" onclick="setDensity('comfort')"
+                        title="Modo Confortável (mais espaçado)">
                         <i class="fas fa-grip-lines"></i> Confortável
                     </button>
                 </div>
-                <button type="button" id="btn-toggle-expand" class="btn-toggle" onclick="toggleExpandMode()" title="Recolher/Exibir filtros para modo tela cheia">
+                <button type="button" id="btn-toggle-expand" class="btn-toggle" onclick="toggleExpandMode()"
+                    title="Recolher/Exibir filtros para modo tela cheia">
                     <i class="fas fa-expand"></i> Expandir
                 </button>
                 <div class="view-mode-toggle">
-                    <button type="button" id="btn-view-table" class="btn-toggle active" onclick="setViewMode('table')" title="Visualização em Tabela">
+                    <button type="button" id="btn-view-table" class="btn-toggle active" onclick="setViewMode('table')"
+                        title="Visualização em Tabela">
                         <i class="fas fa-table-list"></i> Tabela
                     </button>
-                    <button type="button" id="btn-view-cards" class="btn-toggle" onclick="setViewMode('cards')" title="Visualização em Cartões">
+                    <button type="button" id="btn-view-cards" class="btn-toggle" onclick="setViewMode('cards')"
+                        title="Visualização em Cartões">
                         <i class="fas fa-id-card"></i> Cartões
                     </button>
                 </div>
@@ -118,11 +143,12 @@
         <!-- Rodapé de Informações de Atualização (Git) -->
         <footer class="app-footer">
             <div class="footer-info">
-                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>11/11/2026 às 17:24</strong></span>
+                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>11/11/2026 às
+                        17:24</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>4ed84d5</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>b5a971b</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>feat: Abre Avaliacao 2026 e Respostas em nova guia (target _blank)</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>fix: Bloqueia e sincroniza campo de data com data oficial do sistema para presenca do docente</em></span>
             </div>
         </footer>
     </div>
@@ -145,11 +171,12 @@
                         <p class="modal-subtitle" id="modalSubtitle">Preencha os dados cadastrais do docente</p>
                     </div>
                 </div>
-                <button type="button" class="modal-close-btn" onclick="closeProfessorModal()" title="Fechar" aria-label="Fechar">
+                <button type="button" class="modal-close-btn" onclick="closeProfessorModal()" title="Fechar"
+                    aria-label="Fechar">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-                        <form id="professorForm">
+            <form id="professorForm">
                 <input type="hidden" id="prof-id">
 
                 <!-- Seção 1: Identificação & Contato -->
@@ -162,7 +189,8 @@
                     <label for="prof-nome">Nome Completo <span class="req-star">*</span></label>
                     <div class="input-with-icon">
                         <i class="fas fa-user input-icon"></i>
-                        <input type="text" id="prof-nome" placeholder="Ex: Carlos Alberto da Silva" required autocomplete="name">
+                        <input type="text" id="prof-nome" placeholder="Ex: Carlos Alberto da Silva" required
+                            autocomplete="name">
                     </div>
                 </div>
 
@@ -171,14 +199,17 @@
                         <label for="prof-email">E-mail Institucional / Pessoal</label>
                         <div class="input-with-icon">
                             <i class="fas fa-envelope input-icon"></i>
-                            <input type="email" id="prof-email" class="no-uppercase" placeholder="professor@educacao.batatais.sp.gov.br" autocomplete="email" autocapitalize="none">
+                            <input type="email" id="prof-email" class="no-uppercase"
+                                placeholder="professor@educacao.batatais.sp.gov.br" autocomplete="email"
+                                autocapitalize="none">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="prof-telefone">Telefone / WhatsApp</label>
                         <div class="input-with-icon">
                             <i class="fab fa-whatsapp input-icon icon-whatsapp"></i>
-                            <input type="text" id="prof-telefone" class="no-uppercase" placeholder="(16) 90000-0000" autocomplete="tel">
+                            <input type="text" id="prof-telefone" class="no-uppercase" placeholder="(16) 90000-0000"
+                                autocomplete="tel">
                         </div>
                     </div>
                 </div>
@@ -270,7 +301,7 @@
         </div>
     </div>
 
-        <!-- Modal Login -->
+    <!-- Modal Login -->
     <div id="loginModal" class="modal">
         <div class="modal-content login-modal-content">
             <div class="modal-header">
@@ -283,7 +314,8 @@
                         <p class="modal-subtitle">Identifique-se para gerenciar o sistema</p>
                     </div>
                 </div>
-                <button type="button" class="modal-close-btn" onclick="closeLoginModal()" title="Fechar" aria-label="Fechar">
+                <button type="button" class="modal-close-btn" onclick="closeLoginModal()" title="Fechar"
+                    aria-label="Fechar">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -292,7 +324,8 @@
                 <div class="login-alert-body">
                     <strong id="login-error-title">Aviso do Firebase</strong>
                     <p id="login-error-msg" style="margin: 4px 0 0 0; font-size: 0.84rem; line-height: 1.4;"></p>
-                    <div id="login-error-action" style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                    <div id="login-error-action" style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    </div>
                 </div>
             </div>
             <form id="loginForm">
@@ -309,19 +342,26 @@
                     <label for="login-email">E-mail</label>
                     <div class="input-with-icon">
                         <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="login-email" class="no-uppercase" placeholder="admin@exemplo.com ou sua conta google" required autocomplete="email" autocapitalize="none">
+                        <input type="email" id="login-email" class="no-uppercase"
+                            placeholder="admin@exemplo.com ou sua conta google" required autocomplete="email"
+                            autocapitalize="none">
                     </div>
                     <div id="google-email-hint" class="google-detect-hint">
                         <i class="fab fa-google" style="color: #4285f4;"></i>
-                        <span>Conta Google detectada! Você pode clicar em <strong>Entrar com a Conta Google</strong> acima para acesso direto.</span>
+                        <span>Conta Google detectada! Você pode clicar em <strong>Entrar com a Conta Google</strong>
+                            acima para acesso direto.</span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="login-password">Senha</label>
                     <div class="input-with-icon">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="login-password" class="no-uppercase" placeholder="Digite sua senha" required autocomplete="current-password" autocorrect="off" autocapitalize="none" spellcheck="false">
-                        <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('login-password', this)" title="Mostrar ou ocultar senha" tabindex="-1">
+                        <input type="password" id="login-password" class="no-uppercase" placeholder="Digite sua senha"
+                            required autocomplete="current-password" autocorrect="off" autocapitalize="none"
+                            spellcheck="false">
+                        <button type="button" class="btn-toggle-password"
+                            onclick="togglePasswordVisibility('login-password', this)" title="Mostrar ou ocultar senha"
+                            tabindex="-1">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
@@ -331,7 +371,8 @@
                 </div>
                 <div class="form-actions login-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">Cancelar</button>
-                    <button type="button" class="btn btn-secondary btn-register" onclick="handleCreateAccount()" title="Cadastrar novo usuário no Firebase">
+                    <button type="button" class="btn btn-secondary btn-register" onclick="handleCreateAccount()"
+                        title="Cadastrar novo usuário no Firebase">
                         <i class="fas fa-user-plus"></i> Cadastrar
                     </button>
                     <button type="submit" class="btn btn-primary btn-submit-login">
@@ -366,4 +407,5 @@
     <!-- Lógica Principal -->
     <script type="module" src="script.js"></script>
 </body>
+
 </html>
