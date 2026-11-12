@@ -196,20 +196,27 @@
         .col-prof { grid-column: span 7; }
         .col-email { grid-column: span 5; }
         .col-escola { grid-column: span 5; }
-        .col-turmas { grid-column: span 4; }
-        .col-data { grid-column: span 3; }
+        .col-ano { grid-column: span 4; }
+        .col-turma { grid-column: span 3; }
+        .col-periodo { grid-column: span 6; }
+        .col-data { grid-column: span 6; }
 
         @media (max-width: 960px) {
             .col-prof { grid-column: span 12; }
             .col-email { grid-column: span 12; }
-            .col-escola { grid-column: span 6; }
-            .col-turmas { grid-column: span 6; }
-            .col-data { grid-column: span 12; }
+            .col-escola { grid-column: span 12; }
+            .col-ano { grid-column: span 6; }
+            .col-turma { grid-column: span 6; }
+            .col-periodo { grid-column: span 6; }
+            .col-data { grid-column: span 6; }
         }
 
         @media (max-width: 640px) {
             .col-escola { grid-column: span 12; }
-            .col-turmas { grid-column: span 12; }
+            .col-ano { grid-column: span 12; }
+            .col-turma { grid-column: span 12; }
+            .col-periodo { grid-column: span 12; }
+            .col-data { grid-column: span 12; }
         }
 
         .ident-field {
@@ -1051,12 +1058,56 @@
                         </select>
                     </div>
 
-                    <!-- Turmas -->
-                    <div class="ident-field col-turmas">
-                        <label for="eval-turmas">
-                            <span><i class="fas fa-chalkboard-user text-primary"></i> Ano(s) / Turma(s) <span class="required-star">*</span></span>
+                    <!-- Ano -->
+                    <div class="ident-field col-ano">
+                        <label for="eval-ano">
+                            <span><i class="fas fa-graduation-cap text-primary"></i> Ano(s) <span class="required-star">*</span></span>
                         </label>
-                        <input type="text" id="eval-turmas" placeholder="Ex: 1º A, 2º B, 3º ano..." required>
+                        <select id="eval-ano" name="eval-ano" required>
+                            <option value="">Selecione o Ano...</option>
+                            <option value="1º ANO">1º ANO</option>
+                            <option value="2º ANO">2º ANO</option>
+                            <option value="3º ANO">3º ANO</option>
+                            <option value="4º ANO">4º ANO</option>
+                            <option value="5º ANO">5º ANO</option>
+                            <option value="1º AO 5º ANO">1º AO 5º ANO (MÚLTIPLOS)</option>
+                            <option value="6º AO 9º ANO">6º AO 9º ANO</option>
+                            <option value="EDUCAÇÃO INFANTIL">EDUCAÇÃO INFANTIL</option>
+                            <option value="EJA">EJA</option>
+                            <option value="OUTRO">OUTRO</option>
+                        </select>
+                    </div>
+
+                    <!-- Turma -->
+                    <div class="ident-field col-turma">
+                        <label for="eval-turma">
+                            <span><i class="fas fa-layer-group text-primary"></i> Turma <span class="required-star">*</span></span>
+                        </label>
+                        <select id="eval-turma" name="eval-turma" required>
+                            <option value="">Selecione a Turma...</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                            <option value="E">E</option>
+                            <option value="TURMAS A e B">TURMAS A e B</option>
+                            <option value="MÚLTIPLAS TURMAS">MÚLTIPLAS TURMAS</option>
+                            <option value="TURMA ÚNICA">TURMA ÚNICA</option>
+                            <option value="OUTRA">OUTRA</option>
+                        </select>
+                    </div>
+
+                    <!-- Período / Turno -->
+                    <div class="ident-field col-periodo">
+                        <label for="eval-periodo">
+                            <span><i class="fas fa-clock text-primary"></i> Período / Turno <span class="required-star">*</span></span>
+                        </label>
+                        <select id="eval-periodo" name="eval-periodo" required>
+                            <option value="">Selecione o Período...</option>
+                            <option value="MANHÃ">MANHÃ</option>
+                            <option value="TARDE">TARDE</option>
+                            <option value="INTEGRAL">INTEGRAL</option>
+                        </select>
                     </div>
 
                     <!-- Data Presença -->
@@ -1668,18 +1719,31 @@
             const inputProf = document.getElementById('eval-professor');
             const inputEmail = document.getElementById('eval-email');
             const selectEscola = document.getElementById('eval-escola');
-            const inputTurmas = document.getElementById('eval-turmas');
+            const selectAno = document.getElementById('eval-ano');
+            const selectTurma = document.getElementById('eval-turma');
+            const selectPeriodo = document.getElementById('eval-periodo');
 
             if (inputProf) inputProf.value = profile.nome;
             if (inputEmail) inputEmail.value = profile.email;
             if (selectEscola && profile.escola) {
-                // Tenta selecionar a escola no select
                 const options = Array.from(selectEscola.options);
                 const matchingOpt = options.find(opt => profile.escola.toUpperCase().includes(opt.value.toUpperCase()));
                 if (matchingOpt) selectEscola.value = matchingOpt.value;
             }
-            if (inputTurmas && !inputTurmas.value && profile.turmas) {
-                inputTurmas.value = profile.turmas;
+            if (selectAno && profile.ano) {
+                const options = Array.from(selectAno.options);
+                const matchingOpt = options.find(opt => opt.value.toUpperCase().includes(profile.ano.toUpperCase()) || profile.ano.toUpperCase().includes(opt.value.toUpperCase()));
+                if (matchingOpt) selectAno.value = matchingOpt.value;
+            }
+            if (selectTurma && profile.turma) {
+                const options = Array.from(selectTurma.options);
+                const matchingOpt = options.find(opt => opt.value.toUpperCase() === profile.turma.toUpperCase());
+                if (matchingOpt) selectTurma.value = matchingOpt.value;
+            }
+            if (selectPeriodo && profile.turno) {
+                const options = Array.from(selectPeriodo.options);
+                const matchingOpt = options.find(opt => opt.value.toUpperCase() === profile.turno.toUpperCase());
+                if (matchingOpt) selectPeriodo.value = matchingOpt.value;
             }
 
             // Fecha modal de identificação
@@ -1739,6 +1803,9 @@
                 nome: (matched?.nome || nome).toUpperCase(),
                 email: (email || '').toLowerCase(),
                 escola: matched?.escola || escola || '',
+                ano: matched?.ano || '',
+                turma: matched?.turma || '',
+                turno: matched?.turno || '',
                 turmas: matched?.turma ? `${matched.ano || ''} ${matched.turma}` : '',
                 isGoogle: false
             });
@@ -1767,6 +1834,9 @@
                     nome: (matched?.nome || user.displayName || 'Professor(a)').toUpperCase(),
                     email: (user.email || '').toLowerCase(),
                     escola: matched?.escola || '',
+                    ano: matched?.ano || '',
+                    turma: matched?.turma || '',
+                    turno: matched?.turno || '',
                     turmas: matched?.turma ? `${matched.ano || ''} ${matched.turma}` : '',
                     photoURL: user.photoURL || null,
                     isGoogle: true
@@ -1808,6 +1878,9 @@
                 nome: (matched?.nome || nome).toUpperCase(),
                 email: email.toLowerCase(),
                 escola: matched?.escola || escola || '',
+                ano: matched?.ano || '',
+                turma: matched?.turma || '',
+                turno: matched?.turno || '',
                 turmas: matched?.turma ? `${matched.ano || ''} ${matched.turma}` : '',
                 isGoogle: false
             };
@@ -1834,9 +1907,15 @@
             const inputProf = document.getElementById('eval-professor');
             const inputEmail = document.getElementById('eval-email');
             const selectEscola = document.getElementById('eval-escola');
+            const selectAno = document.getElementById('eval-ano');
+            const selectTurma = document.getElementById('eval-turma');
+            const selectPeriodo = document.getElementById('eval-periodo');
             if (inputProf) inputProf.value = '';
             if (inputEmail) inputEmail.value = '';
             if (selectEscola) selectEscola.value = '';
+            if (selectAno) selectAno.value = '';
+            if (selectTurma) selectTurma.value = '';
+            if (selectPeriodo) selectPeriodo.value = '';
 
             window.openAuthGateModal();
         };
@@ -1985,12 +2064,14 @@
             const prof = document.getElementById('eval-professor')?.value.trim();
             const email = document.getElementById('eval-email')?.value.trim();
             const escola = document.getElementById('eval-escola')?.value;
-            const turmas = document.getElementById('eval-turmas')?.value.trim();
+            const ano = document.getElementById('eval-ano')?.value;
+            const turma = document.getElementById('eval-turma')?.value;
+            const periodo = document.getElementById('eval-periodo')?.value;
 
-            if (!prof || !email || !escola || !turmas) {
+            if (!prof || !email || !escola || !ano || !turma || !periodo) {
                 return {
                     valid: false,
-                    message: "Por favor, complete todos os campos de identificação (Professor, E-mail, Escola e Turmas em que atuou).",
+                    message: "Por favor, complete todos os campos de identificação (Professor, E-mail, Escola, Ano, Turma e Período).",
                     element: document.querySelector('.ident-grid')
                 };
             }
@@ -2192,7 +2273,9 @@
                 if (data['eval-escola']) document.getElementById('eval-escola').value = data['eval-escola'];
                 if (data['eval-professor']) document.getElementById('eval-professor').value = data['eval-professor'];
                 if (data['eval-email']) document.getElementById('eval-email').value = data['eval-email'];
-                if (data['eval-turmas']) document.getElementById('eval-turmas').value = data['eval-turmas'];
+                if (data['eval-ano']) document.getElementById('eval-ano').value = data['eval-ano'];
+                if (data['eval-turma']) document.getElementById('eval-turma').value = data['eval-turma'];
+                if (data['eval-periodo']) document.getElementById('eval-periodo').value = data['eval-periodo'];
                 // Data é SEMPRE a data atual oficial do sistema para presença (não recupera data antiga de rascunho)
                 setSystemDate();
                 if (data['q27']) handleQ27Change(data['q27']);
@@ -2264,7 +2347,10 @@
             const escolaVal = (document.getElementById('eval-escola').value || currentDocente.escola || '').toUpperCase().trim();
             const professorVal = (document.getElementById('eval-professor').value || currentDocente.nome || '').toUpperCase().trim();
             const emailVal = (document.getElementById('eval-email').value || currentDocente.email || '').toLowerCase().trim();
-            const turmasVal = document.getElementById('eval-turmas').value;
+            const anoVal = (document.getElementById('eval-ano').value || currentDocente.ano || '').toUpperCase().trim();
+            const turmaVal = (document.getElementById('eval-turma').value || currentDocente.turma || '').toUpperCase().trim();
+            const periodoVal = (document.getElementById('eval-periodo').value || currentDocente.turno || '').toUpperCase().trim();
+            const turmasCompostasVal = [anoVal, turmaVal ? `Turma ${turmaVal}` : '', periodoVal ? `(${periodoVal})` : ''].filter(Boolean).join(' ');
             setSystemDate();
             const dataAvaliacaoVal = getSystemDateISO();
 
@@ -2272,7 +2358,10 @@
                 escola: escolaVal,
                 professor: professorVal,
                 email: emailVal,
-                turmas: turmasVal,
+                ano: anoVal,
+                turma: turmaVal,
+                periodo: periodoVal,
+                turmas: turmasCompostasVal,
                 dataAvaliacao: dataAvaliacaoVal,
                 createdAt: now.toISOString(),
                 protocolo: protocoloCode,
@@ -2283,7 +2372,7 @@
             };
 
             for (let [k, v] of formData.entries()) {
-                if (['eval-escola', 'eval-professor', 'eval-email', 'eval-turmas', 'eval-data'].includes(k)) continue;
+                if (['eval-escola', 'eval-professor', 'eval-email', 'eval-ano', 'eval-turma', 'eval-periodo', 'eval-turmas', 'eval-data'].includes(k)) continue;
                 if (payloadAvaliacao.respostas[k]) {
                     if (Array.isArray(payloadAvaliacao.respostas[k])) payloadAvaliacao.respostas[k].push(v);
                     else payloadAvaliacao.respostas[k] = [payloadAvaliacao.respostas[k], v];
@@ -2297,11 +2386,17 @@
                 professor: professorVal,
                 email: emailVal,
                 escola: escolaVal,
+                ano: anoVal,
+                turma: turmaVal,
+                periodo: periodoVal,
                 data: dateStrBR,
                 timestamp: timestampFormatted,
                 authCode: protocoloCode,
                 origem: 'avaliacao_anual_edm',
                 tipo: 'avaliacao_e_presenca',
+                isGoogleAuth: !!currentDocente.isGoogle,
+                createdAt: now.toISOString()
+            };
                 isGoogleAuth: !!currentDocente.isGoogle,
                 createdAt: now.toISOString()
             };
@@ -2366,7 +2461,9 @@
         window.goToNextUnanswered = () => {
             const profInput = document.getElementById('eval-professor');
             const escolaSelect = document.getElementById('eval-escola');
-            const turmasInput = document.getElementById('eval-turmas');
+            const anoSelect = document.getElementById('eval-ano');
+            const turmaSelect = document.getElementById('eval-turma');
+            const periodoSelect = document.getElementById('eval-periodo');
 
             if (!profInput?.value.trim()) {
                 profInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2378,9 +2475,19 @@
                 escolaSelect?.focus();
                 return;
             }
-            if (!turmasInput?.value.trim()) {
-                turmasInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                turmasInput?.focus();
+            if (!anoSelect?.value) {
+                anoSelect?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                anoSelect?.focus();
+                return;
+            }
+            if (!turmaSelect?.value) {
+                turmaSelect?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                turmaSelect?.focus();
+                return;
+            }
+            if (!periodoSelect?.value) {
+                periodoSelect?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                periodoSelect?.focus();
                 return;
             }
 
@@ -2404,7 +2511,10 @@
             const professor = document.getElementById('successTeacher')?.textContent || 'Docente';
             const escola = document.getElementById('eval-escola')?.value || currentDocente?.escola || '-';
             const email = document.getElementById('eval-email')?.value || currentDocente?.email || '-';
-            const turmas = document.getElementById('eval-turmas')?.value || '-';
+            const ano = document.getElementById('eval-ano')?.value || '';
+            const turma = document.getElementById('eval-turma')?.value || '';
+            const periodo = document.getElementById('eval-periodo')?.value || '';
+            const turmas = [ano, turma ? `Turma ${turma}` : '', periodo ? `(${periodo})` : ''].filter(Boolean).join(' ') || '-';
             const now = new Date();
             const dateStr = now.toLocaleDateString('pt-BR');
             const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -2547,7 +2657,7 @@
                 ${escapeHtml(escola)}
             </div>
             <div>
-                <strong>Ano(s) / Turma(s)</strong>
+                <strong>Ano / Turma / Período</strong>
                 ${escapeHtml(turmas)}
             </div>
             <div>
