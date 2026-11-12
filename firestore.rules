@@ -17,6 +17,9 @@ service cloud.firestore {
       allow read, create: if true;
       allow update, delete: if request.auth != null;
     }
+    match /rascunhos_avaliacoes_2026/{rascunhoId} {
+      allow read, write: if true;
+    }
     match /{document=**} {
       allow read, write: if false;
     }

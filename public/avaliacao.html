@@ -986,9 +986,14 @@
                     <strong style="font-size: 0.88rem; color: var(--text-color);"><i class="fas fa-tasks"></i> Progresso do Preenchimento:</strong>
                     <span id="evalProgressText" style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 6px;">0 de 28 respondidas (0%)</span>
                 </div>
-                <span id="evalProgressStatusBadge" class="badge-status-progresso" style="font-size: 0.76rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; background-color: rgba(245, 158, 11, 0.15); color: #b45309;">
-                    <i class="fas fa-hourglass-half"></i> Presença só é confirmada com 100% preenchido
-                </span>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnNextUnanswered" onclick="goToNextUnanswered()" title="Rola diretamente para a próxima questão ainda não respondida" style="font-size: 0.76rem; padding: 4px 10px; border-radius: 6px;">
+                        <i class="fas fa-arrow-down"></i> Próxima Pendente
+                    </button>
+                    <span id="evalProgressStatusBadge" class="badge-status-progresso" style="font-size: 0.76rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; background-color: rgba(245, 158, 11, 0.15); color: #b45309;">
+                        <i class="fas fa-hourglass-half"></i> Presença requer 100%
+                    </span>
+                </div>
             </div>
             <div class="eval-progress-track">
                 <div class="eval-progress-bar" id="evalProgressBar" style="width: 0%;"></div>
@@ -1428,8 +1433,11 @@
                 </div>
             </div>
             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary" onclick="window.downloadComprovantePDF()">
+                    <i class="fas fa-file-pdf" style="color: #ef4444;"></i> Baixar Comprovante PDF
+                </button>
                 <button type="button" class="btn btn-secondary" onclick="window.print()">
-                    <i class="fas fa-print"></i> Imprimir Comprovante
+                    <i class="fas fa-print"></i> Imprimir
                 </button>
                 <button type="button" class="btn btn-primary" onclick="document.getElementById('successModal').style.display = 'none'; window.scrollTo({top: 0, behavior: 'smooth'});">
                     <i class="fas fa-check"></i> Concluir
@@ -1519,7 +1527,7 @@
     <!-- Scripts do Firebase e Lógica da Avaliação -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -1677,6 +1685,7 @@
             // Fecha modal de identificação
             window.closeAuthGateModal();
             saveDraft();
+            checkCloudDraft(profile.email);
         }
 
         // Renderiza perfis recentes no modal de identificação rápida
@@ -2074,8 +2083,55 @@
             updateProgressUI();
         };
 
-        // Rascunho Automático (LocalStorage)
+        // Rascunho Automático (LocalStorage + Nuvem Firestore)
         const draftStatus = document.getElementById('draftStatus');
+        let cloudDraftTimer = null;
+
+        function queueCloudDraftSync(data) {
+            clearTimeout(cloudDraftTimer);
+            cloudDraftTimer = setTimeout(async () => {
+                const email = currentDocente?.email || document.getElementById('eval-email')?.value.trim();
+                if (!email) return;
+                const docId = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                try {
+                    await setDoc(doc(db, "rascunhos_avaliacoes_2026", docId), {
+                        ...data,
+                        _savedAt: new Date().toISOString(),
+                        email: email,
+                        professor: currentDocente?.nome || document.getElementById('eval-professor')?.value.trim() || ''
+                    });
+                    if (draftStatus) {
+                        draftStatus.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> Salvo na nuvem';
+                        draftStatus.style.color = '#10b981';
+                    }
+                } catch (e) {
+                    console.warn("Rascunho salvo localmente:", e);
+                }
+            }, 1200);
+        }
+
+        async function checkCloudDraft(email) {
+            if (!email) return;
+            const docId = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            try {
+                const snap = await getDoc(doc(db, "rascunhos_avaliacoes_2026", docId));
+                if (snap.exists()) {
+                    const cloudData = snap.data();
+                    const localSaved = localStorage.getItem(DRAFT_KEY);
+                    const localData = localSaved ? JSON.parse(localSaved) : null;
+                    if (!localData || !localData._savedAt || (cloudData._savedAt && new Date(cloudData._savedAt) > new Date(localData._savedAt))) {
+                        localStorage.setItem(DRAFT_KEY, JSON.stringify(cloudData));
+                        restoreDraft();
+                        if (draftStatus) {
+                            draftStatus.innerHTML = '<i class="fas fa-cloud-arrow-down"></i> Rascunho sincronizado';
+                            draftStatus.style.color = '#3b82f6';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("Aviso ao buscar rascunho na nuvem:", e);
+            }
+        }
 
         function saveDraft() {
             const form = document.getElementById('evaluationForm');
@@ -2091,6 +2147,7 @@
                 }
             }
             data['eval-data'] = getSystemDateISO();
+            data._savedAt = new Date().toISOString();
             if (currentDocente) data['_docente'] = currentDocente;
 
             localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
@@ -2098,6 +2155,7 @@
                 draftStatus.innerHTML = '<i class="fas fa-check"></i> Rascunho salvo';
                 draftStatus.style.color = '#16a34a';
             }
+            queueCloudDraftSync(data);
         }
 
         function restoreDraft() {
@@ -2276,8 +2334,13 @@
                 presenceBadge.innerHTML = '<i class="fas fa-check-double"></i> Presença no Encontro CONFIRMADA';
             }
 
-            // Limpa rascunho
+            // Limpa rascunho local e na nuvem
             localStorage.removeItem(DRAFT_KEY);
+            const emailForDraft = emailVal || currentDocente?.email;
+            if (emailForDraft) {
+                const docId = emailForDraft.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                deleteDoc(doc(db, "rascunhos_avaliacoes_2026", docId)).catch(() => {});
+            }
 
             // Exibe modal de confirmação comemorativo
             document.getElementById('successProtocol').textContent = protocoloCode;
@@ -2298,6 +2361,234 @@
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-check-double"></i> Enviado & Presença Confirmada!';
         });
+
+        // Navegador Rápido de Questões Pendentes
+        window.goToNextUnanswered = () => {
+            const profInput = document.getElementById('eval-professor');
+            const escolaSelect = document.getElementById('eval-escola');
+            const turmasInput = document.getElementById('eval-turmas');
+
+            if (!profInput?.value.trim()) {
+                profInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                profInput?.focus();
+                return;
+            }
+            if (!escolaSelect?.value) {
+                escolaSelect?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                escolaSelect?.focus();
+                return;
+            }
+            if (!turmasInput?.value.trim()) {
+                turmasInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                turmasInput?.focus();
+                return;
+            }
+
+            const validation = validateAllQuestions();
+            if (!validation.valid && validation.element) {
+                document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
+                validation.element.classList.add('unanswered-highlight');
+                validation.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const focusable = validation.element.querySelector('input, textarea, select');
+                if (focusable) focusable.focus();
+            } else {
+                alert("Parabéns! Todas as questões foram preenchidas. Você já pode enviar sua avaliação.");
+                const btnSubmit = document.getElementById('btnSubmit');
+                if (btnSubmit) btnSubmit.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        };
+
+        // Gerar Comprovante Oficial de Presença em PDF
+        window.downloadComprovantePDF = () => {
+            const protocolo = document.getElementById('successProtocol')?.textContent || 'EDM-2026';
+            const professor = document.getElementById('successTeacher')?.textContent || 'Docente';
+            const escola = document.getElementById('eval-escola')?.value || currentDocente?.escola || '-';
+            const email = document.getElementById('eval-email')?.value || currentDocente?.email || '-';
+            const turmas = document.getElementById('eval-turmas')?.value || '-';
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('pt-BR');
+            const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            const printWin = window.open('', '_blank');
+            if (!printWin) {
+                alert("Por favor, permita pop-ups para gerar e imprimir o comprovante em PDF.");
+                window.print();
+                return;
+            }
+
+            const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Comprovante de Presença - ${protocolo}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            color: #1e293b;
+            background: #fff;
+        }
+        .cert-card {
+            border: 3px double #2563eb;
+            border-radius: 16px;
+            padding: 36px 40px;
+            max-width: 760px;
+            margin: 0 auto;
+            position: relative;
+            background: #fff;
+        }
+        .cert-header {
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+        .cert-title {
+            font-size: 1.40rem;
+            font-weight: 800;
+            color: #1e3a8a;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin: 8px 0 4px 0;
+        }
+        .cert-subtitle {
+            font-size: 0.95rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .cert-badge-row {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .presence-pill {
+            display: inline-block;
+            background: #ecfdf5;
+            color: #047857;
+            border: 1.5px solid #a7f3d0;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+        .cert-body {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #334155;
+            margin: 24px 0;
+            text-align: justify;
+        }
+        .data-grid {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 22px 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            font-size: 0.92rem;
+        }
+        .data-grid div strong {
+            display: block;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+        .cert-footer {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            margin-top: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.84rem;
+            color: #64748b;
+        }
+        .cert-auth {
+            font-family: monospace;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #2563eb;
+        }
+        @media print {
+            body { padding: 0; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cert-card">
+        <div class="cert-header">
+            <div class="cert-title">Secretaria Municipal de Educação de Batatais</div>
+            <div class="cert-subtitle">Educação Digital e Midiática (EDM) • Ano Letivo de 2026</div>
+        </div>
+        
+        <div class="cert-badge-row">
+            <div class="presence-pill">✓ COMPROVANTE OFICIAL DE PRESENÇA E AVALIAÇÃO</div>
+        </div>
+
+        <div class="cert-body">
+            Certificamos que o(a) docente abaixo identificado(a) participou ativamente e concluiu integralmente a <strong>Avaliação Anual de Educação Digital e Midiática 2026</strong>, tendo sua presença oficial e frequência acadêmica devidamente registradas e homologadas no Encontro Formativo de EDM.
+        </div>
+
+        <div class="data-grid">
+            <div>
+                <strong>Professor(a)</strong>
+                ${escapeHtml(professor)}
+            </div>
+            <div>
+                <strong>E-mail Institucional</strong>
+                ${escapeHtml(email)}
+            </div>
+            <div>
+                <strong>Escola de Atuação</strong>
+                ${escapeHtml(escola)}
+            </div>
+            <div>
+                <strong>Ano(s) / Turma(s)</strong>
+                ${escapeHtml(turmas)}
+            </div>
+            <div>
+                <strong>Data da Frequência</strong>
+                ${dateStr} às ${timeStr}
+            </div>
+            <div>
+                <strong>Código de Autenticidade</strong>
+                <span class="cert-auth">${escapeHtml(protocolo)}</span>
+            </div>
+        </div>
+
+        <div class="cert-footer">
+            <div>
+                Sistema Oficial de Educação Digital e Midiática<br>
+                Prefeitura Municipal da Estância Turística de Batatais
+            </div>
+            <div style="text-align: right;">
+                Documento gerado eletronicamente em:<br>
+                <strong>${dateStr} às ${timeStr}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="no-print" style="text-align: center; margin-top: 24px;">
+        <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 11px 26px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+            Salvar como PDF / Imprimir Comprovante
+        </button>
+    </div>
+    <script>
+        window.onload = function() {
+            setTimeout(function() { window.print(); }, 400);
+        };
+    <\/script>
+</body>
+</html>`;
+
+            printWin.document.open();
+            printWin.document.write(html);
+            printWin.document.close();
+        };
 
         // Alternador de tema
         const themeBtn = document.getElementById('theme-toggle');

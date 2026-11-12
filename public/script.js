@@ -439,6 +439,64 @@ window.loginSocial = async (providerName) => {
     }
 };
 
+let avaliacoesMap = new Map();
+let unsubscribeAvaliacoes = null;
+
+function subscribeAvaliacoes() {
+    if (unsubscribeAvaliacoes) {
+        unsubscribeAvaliacoes();
+        unsubscribeAvaliacoes = null;
+    }
+    if (!auth.currentUser) {
+        avaliacoesMap.clear();
+        updateAvaliacoesCounterUI();
+        renderTable();
+        return;
+    }
+
+    try {
+        unsubscribeAvaliacoes = onSnapshot(collection(db, "avaliacoes_2026"), (snapshot) => {
+            avaliacoesMap.clear();
+            snapshot.docs.forEach(d => {
+                const data = d.data();
+                const normName = normalizeString(data.professor || '');
+                const email = (data.email || '').toLowerCase().trim();
+                if (normName) avaliacoesMap.set(normName, { id: d.id, ...data });
+                if (email) avaliacoesMap.set(email, { id: d.id, ...data });
+            });
+            updateAvaliacoesCounterUI();
+            renderTable();
+        }, (err) => {
+            console.warn("Aviso ao carregar avaliações no painel:", err);
+        });
+    } catch (e) {
+        console.warn("Erro ao registrar snapshot de avaliações:", e);
+    }
+}
+
+function updateAvaliacoesCounterUI() {
+    const pill = document.getElementById('kpi-avaliacoes-pill');
+    if (!pill) return;
+    if (!auth.currentUser || !jsonData.professores || jsonData.professores.length === 0) {
+        pill.style.display = 'none';
+        return;
+    }
+
+    let completed = 0;
+    jsonData.professores.forEach(p => {
+        const pNorm = normalizeString(p.nome || '');
+        const pEmail = (p.email || '').toLowerCase().trim();
+        if (avaliacoesMap.has(pNorm) || (pEmail && avaliacoesMap.has(pEmail))) {
+            completed++;
+        }
+    });
+
+    const total = jsonData.professores.length;
+    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    pill.style.display = 'inline-flex';
+    pill.innerHTML = `<i class="fas fa-clipboard-check" style="color: #10b981;"></i> Avaliações: <strong>${completed} de ${total}</strong> (${pct}%)`;
+}
+
 onAuthStateChanged(auth, (user) => {
     const authBtn = document.getElementById('auth-toggle');
     if (user) {
@@ -448,6 +506,7 @@ onAuthStateChanged(auth, (user) => {
         document.body.classList.remove('is-admin');
         if (authBtn) authBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
     }
+    subscribeAvaliacoes();
     renderTable();
 });
 
@@ -1127,7 +1186,17 @@ function renderTable() {
         const matchesDiscipline = selectedDisciplina === '' || professor.disciplina === selectedDisciplina;
         const matchesYear = selectedYears.length === 0 || selectedYears.includes(professor.ano);
 
-        return matchesSearch && matchesSchool && matchesDiscipline && matchesYear;
+        let matchesAval = true;
+        const filterAval = document.getElementById('filter-avaliacao')?.value || '';
+        if (auth.currentUser && filterAval) {
+            const pNorm = normalizeString(professor.nome || '');
+            const pEmail = (professor.email || '').toLowerCase().trim();
+            const hasAval = avaliacoesMap.has(pNorm) || (pEmail && avaliacoesMap.has(pEmail));
+            if (filterAval === 'concluida' && !hasAval) matchesAval = false;
+            if (filterAval === 'pendente' && hasAval) matchesAval = false;
+        }
+
+        return matchesSearch && matchesSchool && matchesDiscipline && matchesYear && matchesAval;
     });
 
     // Cálculo do indicador de presença visual
@@ -1203,6 +1272,16 @@ function renderTable() {
                         presencaBadgeHTML = `<span class="badge ${presencaClass}" onclick="togglePresenca('${professor.id}', ${isPresent})" title="Clique para alternar presença"><span class="status-dot ${dotClass}"></span> ${escapeHTML(presencaText)}</span>`;
                     }
 
+                    let avalBadgeHTML = '';
+                    if (auth.currentUser) {
+                        const profNorm = normalizeString(professor.nome || '');
+                        const profEmail = (professor.email || '').toLowerCase().trim();
+                        const aval = avaliacoesMap.get(profNorm) || (profEmail ? avaliacoesMap.get(profEmail) : null);
+                        avalBadgeHTML = aval 
+                            ? `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-size: 0.74rem; border: 1px solid rgba(16, 185, 129, 0.3);"><i class="fas fa-check-circle"></i> Avaliação: Concluída</span>`
+                            : `<span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #b45309; font-size: 0.74rem; border: 1px solid rgba(245, 158, 11, 0.25);"><i class="fas fa-clock"></i> Avaliação: Pendente</span>`;
+                    }
+
                     let adminActionsHTML = '';
                     if (auth.currentUser) {
                         adminActionsHTML = `
@@ -1241,7 +1320,7 @@ function renderTable() {
                                     <i class="fas fa-envelope"></i> <span>${emailLink}</span>
                                 </div>` : ''}
                             </div>
-                            ${presencaBadgeHTML ? `<div class="prof-card-footer"><span style="font-size: 0.8em; font-weight: 600; color: var(--text-secondary);">Frequência:</span> ${presencaBadgeHTML}</div>` : ''}
+                            ${(presencaBadgeHTML || avalBadgeHTML) ? `<div class="prof-card-footer" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;"><span style="font-size: 0.8em; font-weight: 600; color: var(--text-secondary);">Status:</span> ${presencaBadgeHTML} ${avalBadgeHTML}</div>` : ''}
                         </div>`;
                 });
                 
@@ -1263,22 +1342,25 @@ function renderTable() {
                     headers.push({ label: `Presença (${presencaDateFormatted})`, key: presencaKey });
                 }
                 if (auth.currentUser) {
+                    headers.push({ label: 'Avaliação 2026', key: 'avaliacao_status' });
+                }
+                if (auth.currentUser) {
                     headers.push({ label: 'Ações', key: 'actions' });
                 }
 
                 let tableHTML = '<table>';
                 tableHTML += '<thead><tr>';
                 headers.forEach(h => {
-                    let icon = (h.key !== 'actions') ? '<i class="fas fa-sort" style="opacity: 0.2; margin-left: 5px;"></i>' : '';
+                    let icon = (h.key !== 'actions' && h.key !== 'avaliacao_status') ? '<i class="fas fa-sort" style="opacity: 0.2; margin-left: 5px;"></i>' : '';
                     if (sortConfig.key === h.key) {
                         icon = sortConfig.direction === 'asc' 
                             ? ' <i class="fas fa-sort-up" style="margin-left: 5px;"></i>' 
                             : ' <i class="fas fa-sort-down" style="margin-left: 5px;"></i>';
                     }
-                    let adminClass = h.key === 'actions' ? 'admin-only' : '';
-                    let style = h.key === 'actions' ? 'style="cursor: default;"' : '';
-                    let centerClass = ['ano', 'turma', 'turno', 'actions', presencaKey].includes(h.key) ? 'text-center' : '';
-                    tableHTML += `<th onclick="setSort('${h.key}')" class="col-${h.key} ${adminClass} ${centerClass}" ${style}>${h.label}${icon}</th>`;
+                    let adminClass = (h.key === 'actions' || h.key === 'avaliacao_status') ? 'admin-only' : '';
+                    let style = (h.key === 'actions' || h.key === 'avaliacao_status') ? 'style="cursor: default;"' : '';
+                    let centerClass = ['ano', 'turma', 'turno', 'actions', 'avaliacao_status', presencaKey].includes(h.key) ? 'text-center' : '';
+                    tableHTML += `<th onclick="${h.key !== 'actions' && h.key !== 'avaliacao_status' ? `setSort('${h.key}')` : ''}" class="col-${h.key} ${adminClass} ${centerClass}" ${style}>${h.label}${icon}</th>`;
                 });
                 tableHTML += '</tr></thead><tbody>';
 
@@ -1317,6 +1399,18 @@ function renderTable() {
                     }
 
                     if (auth.currentUser) {
+                        const profNorm = normalizeString(professor.nome || '');
+                        const profEmail = (professor.email || '').toLowerCase().trim();
+                        const aval = avaliacoesMap.get(profNorm) || (profEmail ? avaliacoesMap.get(profEmail) : null);
+                        if (aval) {
+                            const d = aval.createdAt ? new Date(aval.createdAt).toLocaleDateString('pt-BR') : '';
+                            tableHTML += `<td class="text-center col-avaliacao-status admin-only"><span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3);" title="Entregue em ${d} - Protocolo ${escapeHTML(aval.protocolo || '')}"><i class="fas fa-check-circle"></i> Concluída</span></td>`;
+                        } else {
+                            tableHTML += `<td class="text-center col-avaliacao-status admin-only"><span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.25);" title="Avaliação 2026 pendente"><i class="fas fa-clock"></i> Pendente</span></td>`;
+                        }
+                    }
+
+                    if (auth.currentUser) {
                         tableHTML += `<td class="col-acoes admin-only text-center">
                             <div class="action-btns">
                                 <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
@@ -1351,6 +1445,8 @@ if (btnClearFilters) {
         if (searchInput) searchInput.value = '';
         if (schoolFilter) schoolFilter.value = '';
         if (disciplineFilter) disciplineFilter.value = '';
+        const filterAvaliacaoEl = document.getElementById('filter-avaliacao');
+        if (filterAvaliacaoEl) filterAvaliacaoEl.value = '';
         selectedYears = [];
         const selectAllCb = document.getElementById('year-select-all');
         if (selectAllCb) selectAllCb.checked = true;
@@ -1377,6 +1473,8 @@ uppercaseFields.forEach(id => {
 
 if (schoolFilter) schoolFilter.addEventListener('change', debouncedRenderTable);
 if (disciplineFilter) disciplineFilter.addEventListener('change', debouncedRenderTable);
+const filterAvaliacaoEl = document.getElementById('filter-avaliacao');
+if (filterAvaliacaoEl) filterAvaliacaoEl.addEventListener('change', debouncedRenderTable);
 
 window.addEventListener('load', () => {
     const params = new URLSearchParams(window.location.search);
