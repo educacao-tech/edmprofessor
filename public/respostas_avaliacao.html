@@ -1424,9 +1424,24 @@
         window.handleAdminGoogleLogin = async () => {
             try {
                 const provider = new GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
                 await signInWithPopup(auth, provider);
             } catch (err) {
                 console.error("Erro no login Google:", err);
+                if (err.code === 'auth/popup-closed-by-user') return;
+                
+                if (err.code === 'auth/unauthorized-domain') {
+                    const host = window.location.hostname;
+                    if (host === '127.0.0.1') {
+                        const targetUrl = window.location.href.replace('127.0.0.1', 'localhost');
+                        if (confirm("O Google não permite login pelo endereço numérico '127.0.0.1', mas permite normalmente por 'localhost'.\n\nDeseja alternar agora para 'localhost'?")) {
+                            window.location.href = targetUrl;
+                            return;
+                        }
+                    }
+                    alert(`Domínio não autorizado no Firebase (${host}).\n\nSolução:\n1. Acesse via 'localhost' em vez de '127.0.0.1'; OU\n2. Adicione '${host}' no Firebase Console > Authentication > Settings > Authorized domains.`);
+                    return;
+                }
                 alert("Erro ao autenticar com Google: " + (err.message || err.code));
             }
         };
