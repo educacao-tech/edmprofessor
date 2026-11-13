@@ -2562,6 +2562,14 @@
 
             const btn = document.getElementById('btnGoogleAuthAction');
             const originalHtml = btn ? btn.innerHTML : '';
+            if (window.location.hostname === '127.0.0.1') {
+                const targetUrl = window.location.href.replace('127.0.0.1', 'localhost');
+                if (confirm("O Google Authentication bloqueia o endereço '127.0.0.1' por segurança, mas aceita normalmente por 'localhost'.\n\nDeseja alternar agora para 'localhost'?")) {
+                    window.location.href = targetUrl;
+                    return;
+                }
+            }
+
             if (btn) {
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando à Conta Google...';
@@ -2591,6 +2599,15 @@
                     console.warn("Popup bloqueado, acionando redirect...");
                     await signInWithRedirect(auth, provider);
                     return;
+                }
+                const isUnauthorized = err.code === 'auth/unauthorized-domain' || 
+                    (err.message && err.message.toLowerCase().includes('unauthorized-domain'));
+                if (isUnauthorized && window.location.hostname === '127.0.0.1') {
+                    const targetUrl = window.location.href.replace('127.0.0.1', 'localhost');
+                    if (confirm("O Google bloqueia autenticação por '127.0.0.1'. Deseja abrir por 'localhost' agora?")) {
+                        window.location.href = targetUrl;
+                        return;
+                    }
                 }
                 if (err.code !== 'auth/popup-closed-by-user') {
                     alert("Aviso de Login Google: " + (err.message || err.code) + "\nVocê pode usar a identificação rápida abaixo se preferir.");
