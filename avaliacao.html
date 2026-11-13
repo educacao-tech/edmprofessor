@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // Redireciona automaticamente de 127.0.0.1 para localhost para garantir compatibilidade nativa com Google Auth no Firebase
+        if (window.location.hostname === '127.0.0.1') {
+            window.location.hostname = 'localhost';
+        }
+    </script>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -1095,6 +1101,358 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.28), 0 6px 16px rgba(0, 0, 0, 0.35) !important;
         }
 
+        /* ==========================================================================
+           Cores Semânticas nas Escalas de Avaliação (Likert)
+           ========================================================================== */
+        .option-label[data-sentiment="positive"]:hover {
+            border-color: rgba(16, 185, 129, 0.5);
+            background-color: rgba(16, 185, 129, 0.05);
+        }
+        .option-label[data-sentiment="positive"].checked,
+        .option-label[data-sentiment="positive"]:has(input:checked) {
+            border-color: #10b981 !important;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.04) 100%) !important;
+            color: #047857 !important;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25), 0 4px 12px rgba(16, 185, 129, 0.14) !important;
+        }
+        html[data-theme="dark"] .option-label[data-sentiment="positive"].checked,
+        html[data-theme="dark"] .option-label[data-sentiment="positive"]:has(input:checked) {
+            color: #34d399 !important;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(16, 185, 129, 0.08) 100%) !important;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .option-label[data-sentiment="good"]:hover {
+            border-color: rgba(37, 99, 235, 0.5);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+        .option-label[data-sentiment="good"].checked,
+        .option-label[data-sentiment="good"]:has(input:checked) {
+            border-color: #2563eb !important;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0.04) 100%) !important;
+            color: #1d4ed8 !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.22), 0 4px 12px rgba(37, 99, 235, 0.12) !important;
+        }
+        html[data-theme="dark"] .option-label[data-sentiment="good"].checked,
+        html[data-theme="dark"] .option-label[data-sentiment="good"]:has(input:checked) {
+            color: #93c5fd !important;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.22) 0%, rgba(37, 99, 235, 0.08) 100%) !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .option-label[data-sentiment="neutral"]:hover {
+            border-color: rgba(245, 158, 11, 0.5);
+            background-color: rgba(245, 158, 11, 0.05);
+        }
+        .option-label[data-sentiment="neutral"].checked,
+        .option-label[data-sentiment="neutral"]:has(input:checked) {
+            border-color: #f59e0b !important;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(245, 158, 11, 0.04) 100%) !important;
+            color: #b45309 !important;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25), 0 4px 12px rgba(245, 158, 11, 0.14) !important;
+        }
+        html[data-theme="dark"] .option-label[data-sentiment="neutral"].checked,
+        html[data-theme="dark"] .option-label[data-sentiment="neutral"]:has(input:checked) {
+            color: #fcd34d !important;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(245, 158, 11, 0.08) 100%) !important;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .option-label[data-sentiment="negative"]:hover {
+            border-color: rgba(239, 68, 68, 0.5);
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+        .option-label[data-sentiment="negative"].checked,
+        .option-label[data-sentiment="negative"]:has(input:checked) {
+            border-color: #ef4444 !important;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(239, 68, 68, 0.04) 100%) !important;
+            color: #b91c1c !important;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25), 0 4px 12px rgba(239, 68, 68, 0.14) !important;
+        }
+        html[data-theme="dark"] .option-label[data-sentiment="negative"].checked,
+        html[data-theme="dark"] .option-label[data-sentiment="negative"]:has(input:checked) {
+            color: #f87171 !important;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.22) 0%, rgba(239, 68, 68, 0.08) 100%) !important;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .option-sentiment-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            margin-right: 2px;
+            opacity: 0.9;
+        }
+        .option-label[data-sentiment="positive"] .option-sentiment-icon { color: #10b981; }
+        .option-label[data-sentiment="good"] .option-sentiment-icon { color: #3b82f6; }
+        .option-label[data-sentiment="neutral"] .option-sentiment-icon { color: #f59e0b; }
+        .option-label[data-sentiment="negative"] .option-sentiment-icon { color: #ef4444; }
+
+        /* ==========================================================================
+           Gaveta / Modal do Mapa de Questões (1 a 28)
+           ========================================================================== */
+        .questions-map-content {
+            max-width: 620px;
+            width: 95%;
+            padding: 24px 28px;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35);
+        }
+
+        .map-legend-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 14px;
+            background: var(--zebra-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 18px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            flex-wrap: wrap;
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        .legend-dot.answered { background: #10b981; }
+        .legend-dot.pending { background: #94a3b8; }
+        .legend-dot.current { background: #2563eb; }
+
+        .map-blocks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 52vh;
+            overflow-y: auto;
+            padding-right: 6px;
+            scrollbar-width: thin;
+        }
+
+        .map-block-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        html[data-theme="dark"] .map-block-section {
+            background: rgba(19, 29, 53, 0.6);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .map-block-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .map-pills-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .q-map-pill {
+            min-width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border-color);
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            padding: 0 8px;
+        }
+
+        .q-map-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border-color: #2563eb;
+            color: var(--text-color);
+        }
+
+        .q-map-pill.answered {
+            background: rgba(16, 185, 129, 0.14);
+            border-color: #10b981;
+            color: #059669;
+        }
+
+        html[data-theme="dark"] .q-map-pill.answered {
+            background: rgba(16, 185, 129, 0.22);
+            color: #34d399;
+            border-color: #10b981;
+        }
+
+        .q-map-pill.current-step {
+            box-shadow: 0 0 0 2px #2563eb;
+            color: #2563eb;
+        }
+
+        /* Botão Flutuante Mobile para o Mapa */
+        .floating-map-btn {
+            display: none;
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            z-index: 99;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            border: none;
+            border-radius: 9999px;
+            padding: 10px 18px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+            cursor: pointer;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .floating-map-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(37, 99, 235, 0.55);
+        }
+
+        @media (max-width: 768px) {
+            .floating-map-btn {
+                display: flex;
+            }
+        }
+
+        /* ==========================================================================
+           Card de Revisão Prévia das Respostas
+           ========================================================================== */
+        .eval-review-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 22px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        html[data-theme="dark"] .eval-review-card {
+            background: rgba(19, 29, 53, 0.7);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .eval-review-header {
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            background: var(--zebra-bg);
+            border-bottom: 1px solid transparent;
+            user-select: none;
+            transition: background 0.2s;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .eval-review-header:hover {
+            background: rgba(37, 99, 235, 0.06);
+        }
+
+        .eval-review-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(59, 130, 246, 0.08));
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(37, 99, 235, 0.22);
+        }
+
+        html[data-theme="dark"] .eval-review-badge {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.1));
+            color: #60a5fa;
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        .eval-review-body {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .review-block-section {
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .review-block-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .review-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .review-block-header h4 {
+            margin: 0;
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .review-item-row {
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            line-height: 1.45;
+        }
+
+        .review-item-q {
+            font-weight: 700;
+            color: var(--text-color);
+            margin-right: 6px;
+        }
+
+        .review-item-a {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .review-item-a.empty {
+            color: #ef4444;
+            font-style: italic;
+        }
+
         /* Campo de texto aberto para "Outros" */
         .other-input-wrap {
             margin-top: 8px;
@@ -1237,43 +1595,201 @@
             margin-bottom: 16px;
         }
 
-        /* Estilos de Impressão */
+        /* Banner Flutuante de Modo de Impressão */
+        .print-blank-banner {
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            background: #ffffff;
+            border-bottom: 2px solid #2563eb;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            padding: 12px 20px;
+            margin-bottom: 16px;
+        }
+        .print-blank-banner-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* Estilos de Impressão Otimizados para Folha A4 / Papel */
         @media print {
             body {
-                background: white !important;
-                color: black !important;
+                background: #ffffff !important;
+                color: #000000 !important;
                 padding: 0 !important;
+                font-size: 11pt !important;
+                line-height: 1.35 !important;
             }
-            .eval-container {
-                max-width: 100% !important;
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-            }
+            .no-print,
+            .print-blank-banner,
             .eval-top-nav,
             .eval-footer-actions,
             .eval-stepper-container,
             .step-nav-footer,
             .eval-progress-container,
-            #theme-toggle {
+            .floating-map-btn,
+            .draft-status-pill,
+            .badge-auto-tag,
+            #theme-toggle,
+            #questionsMapModal,
+            #btnToggleMap,
+            #evalReviewBox,
+            #chamadaBanner,
+            #alreadySubmittedCard,
+            .ident-presence-pill,
+            .char-counter,
+            .btn-submit-eval,
+            button,
+            datalist {
                 display: none !important;
+            }
+            .eval-container {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 5px !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .eval-logos-row {
+                margin-bottom: 14px !important;
+            }
+            .eval-logo-img {
+                height: 48px !important;
+            }
+            .eval-header-title h1 {
+                font-size: 1.35rem !important;
+                color: #000000 !important;
+                margin-bottom: 4px !important;
+            }
+            .eval-header-title p {
+                font-size: 0.88rem !important;
+                color: #334155 !important;
             }
             .eval-step-pane {
                 display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                transform: none !important;
             }
-            .eval-block {
-                border: 1px solid #ccc !important;
-                page-break-inside: avoid;
-                margin-bottom: 20px !important;
+            .eval-block, .ident-card, .eval-question-card, .question-card {
+                border: 1px solid #94a3b8 !important;
+                background: #ffffff !important;
+                box-shadow: none !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                margin-bottom: 14px !important;
+                padding: 12px 16px !important;
+                border-radius: 6px !important;
+            }
+            .eval-block-header h2 {
+                color: #000000 !important;
+                font-size: 1.1rem !important;
+            }
+            .eval-block-header p {
+                color: #475569 !important;
+                font-size: 0.84rem !important;
+            }
+            .question-title {
+                color: #000000 !important;
+                font-size: 0.95rem !important;
+                font-weight: 700 !important;
+            }
+            /* Linhas para preenchimento manual na identificação */
+            .print-blank-mode input[type="text"],
+            .print-blank-mode input[type="email"],
+            .print-blank-mode input[type="date"] {
+                border: none !important;
+                border-bottom: 1.5px solid #000000 !important;
+                border-radius: 0 !important;
+                background: transparent !important;
+                color: transparent !important;
+                height: 28px !important;
+                box-shadow: none !important;
+            }
+            .print-blank-mode select {
+                display: none !important;
+            }
+            .print-only-ident-boxes,
+            .print-only-signature {
+                display: block !important;
+            }
+            /* Opções e alternativas como caixas/círculos nítidos */
+            .options-grid {
+                display: block !important;
             }
             .option-label {
-                border: 1px solid #ddd !important;
+                border: 1px solid #cbd5e1 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                box-shadow: none !important;
+                padding: 5px 8px !important;
+                margin-bottom: 5px !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                font-size: 0.88rem !important;
+            }
+            .option-label input[type="radio"],
+            .option-label input[type="checkbox"] {
+                appearance: auto !important;
+                -webkit-appearance: auto !important;
+                display: inline-block !important;
+                margin-right: 4px !important;
+            }
+            /* Linhas pautadas para questões dissertativas */
+            .eval-textarea {
+                display: block !important;
+                width: 100% !important;
+                height: 90px !important;
+                min-height: 90px !important;
+                border: 1px solid #94a3b8 !important;
+                background-color: transparent !important;
+                background-image: repeating-linear-gradient(transparent, transparent 23px, #cbd5e1 24px) !important;
+                line-height: 24px !important;
+                resize: none !important;
+                color: transparent !important;
+                box-shadow: none !important;
+            }
+            /* Cabeçalhos nítidos */
+            h1, h2, h3, h4, h5 {
+                color: #000000 !important;
             }
         }
     </style>
 </head>
 <body>
     <div id="notification-area"></div>
+
+    <!-- Banner Flutuante de Modo de Impressão do Formulário em Branco -->
+    <div id="printBlankBanner" class="print-blank-banner no-print" style="display: none;">
+        <div class="print-blank-banner-content">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(37,99,235,0.12); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                    <i class="fas fa-print"></i>
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1e293b;">Modo de Impressão do Formulário de Avaliação em Branco</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.82rem; color: #64748b;">Todas as 28 questões e campos de identificação configurados para impressão e preenchimento manual.</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="window.print()" style="padding: 8px 16px; font-weight: 700;">
+                    <i class="fas fa-print"></i> Imprimir Agora
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="window.close()" style="padding: 8px 14px;">
+                    <i class="fas fa-times"></i> Fechar Janela
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div class="eval-container">
         <!-- Barra de Navegação Superior -->
@@ -1286,8 +1802,8 @@
                 <span class="draft-status-pill" id="draftStatus">
                     <i class="fas fa-cloud-arrow-up"></i> Rascunho salvo
                 </span>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()" title="Imprimir formulário em branco ou preenchido">
-                    <i class="fas fa-print"></i> Imprimir
+                <button type="button" class="btn btn-secondary btn-sm" onclick="printBlankFormDirectly()" title="Imprimir formulário oficial em branco para preenchimento manual em papel">
+                    <i class="fas fa-print"></i> Imprimir em Branco
                 </button>
                 <button type="button" id="theme-toggle" class="btn-icon" title="Alternar Modo Escuro/Claro">
                     <i class="fas fa-moon"></i>
@@ -1356,6 +1872,9 @@
                     <span id="evalProgressText" style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 2px;">0 de 28 respondidas</span>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnToggleMap" onclick="toggleQuestionsMap()" title="Ver o mapa completo de todas as 28 questões" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700;">
+                        <i class="fas fa-th"></i> Mapa das Questões
+                    </button>
                     <button type="button" class="btn btn-secondary btn-sm" id="btnNextUnanswered" onclick="goToNextUnanswered()" title="Rola diretamente para a próxima questão ainda não respondida" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px;">
                         <i class="fas fa-arrow-down"></i> Próxima Pendente
                     </button>
@@ -1566,6 +2085,22 @@
                         <input type="date" id="eval-data" required readonly tabindex="-1" class="input-readonly input-date-lock" title="Data gerada automaticamente pelo sistema para comprovação da sua presença">
                     </div>
                 </div> <!-- /ident-fields-layout -->
+
+                <!-- Caixas para Preenchimento Manual no Formulário Impresso -->
+                <div class="print-only-ident-boxes" style="display: none; margin-top: 10px; padding: 10px 14px; border: 1px dashed #94a3b8; border-radius: 6px; font-size: 0.84rem; line-height: 1.6;">
+                    <div style="margin-bottom: 6px;">
+                        <strong>Escola de Atuação:</strong>&nbsp;
+                        ( &nbsp; ) ALZIRA &nbsp;&nbsp;&nbsp; ( &nbsp; ) ANNA &nbsp;&nbsp;&nbsp; ( &nbsp; ) BRAGA &nbsp;&nbsp;&nbsp; ( &nbsp; ) CAIC &nbsp;&nbsp;&nbsp; ( &nbsp; ) CÉLIA &nbsp;&nbsp;&nbsp; ( &nbsp; ) ESTHER &nbsp;&nbsp;&nbsp; ( &nbsp; ) PADRE &nbsp;&nbsp;&nbsp; ( &nbsp; ) OUTRA: _____________________
+                    </div>
+                    <div style="margin-bottom: 6px;">
+                        <strong>Ano e Turmas:</strong>&nbsp;
+                        ( &nbsp; ) 1º Ano &nbsp;&nbsp; ( &nbsp; ) 2º Ano &nbsp;&nbsp; ( &nbsp; ) 3º Ano &nbsp;&nbsp; ( &nbsp; ) 4º Ano &nbsp;&nbsp; ( &nbsp; ) 5º Ano &nbsp;&nbsp; ( &nbsp; ) Ed. Infantil / EJA &nbsp;&nbsp;&nbsp;&nbsp; <strong>Turma(s):</strong> _____________________
+                    </div>
+                    <div>
+                        <strong>Turno:</strong>&nbsp;
+                        ( &nbsp; ) Manhã &nbsp;&nbsp;&nbsp; ( &nbsp; ) Tarde &nbsp;&nbsp;&nbsp; ( &nbsp; ) Integral &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Data:</strong> _____ / _____ / 2026
+                    </div>
+                </div>
             </div> <!-- /ident-card -->
 
             <div class="step-nav-footer">
@@ -1974,10 +2509,51 @@
                 </div>
             </div>
 
+            <!-- Card de Revisão Prévia das Respostas -->
+            <div class="eval-review-card" id="evalReviewBox">
+                <div class="eval-review-header" onclick="toggleReviewAccordion()">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="eval-review-badge">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--text-color);">Revisão das suas Respostas</h3>
+                            <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">Clique para conferir ou ajustar suas respostas antes do envio definitivo</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnToggleReview" style="font-weight: 700; font-size: 0.78rem;">
+                        <span id="reviewToggleText">Abrir Resumo</span> <i class="fas fa-chevron-down" id="reviewChevron" style="margin-left: 4px;"></i>
+                    </button>
+                </div>
+                <div class="eval-review-body" id="evalReviewBody" style="display: none;">
+                    <div id="reviewBlocksContent">
+                        <!-- Gerado dinamicamente via renderReviewContent() -->
+                    </div>
+                </div>
+            </div>
+
             <!-- Agradecimento & Ações de Envio -->
             <div class="eval-presentation-card" style="border-left-color: #10b981; background: rgba(16, 185, 129, 0.08); margin-bottom: 20px;">
                 <h3 style="color: #059669;"><i class="fas fa-check-circle"></i> Agradecemos sua participação e contribuição!</h3>
                 <p>Sua reflexão é fundamental para que possamos construir práticas pedagógicas cada vez mais significativas, inclusivas e alinhadas às necessidades dos nossos alunos.</p>
+            </div>
+
+            <!-- Bloco de Confirmação e Assinatura para Formulário Impresso em Papel -->
+            <div class="print-only-signature" style="display: none; margin-top: 24px; padding: 20px 22px; border: 1.5px solid #334155; border-radius: 8px; break-inside: avoid; page-break-inside: avoid;">
+                <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; text-transform: uppercase; font-weight: 800; color: #000;">
+                    <i class="fas fa-signature"></i> Termo de Confirmação e Assinatura Docente
+                </h4>
+                <p style="font-size: 0.84rem; line-height: 1.5; margin-bottom: 32px; color: #334155;">
+                    Declaro que participei das atividades formativas e pedagógicas de Educação Digital e Midiática (EDM) no ano letivo de 2026 e que as informações e reflexões registradas neste formulário expressam fielmente minha prática docente.
+                </p>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px;">
+                    <div style="flex: 1; border-top: 1.5px solid #000; text-align: center; padding-top: 6px; font-size: 0.85rem; font-weight: 700;">
+                        Assinatura do(a) Professor(a)
+                    </div>
+                    <div style="width: 220px; border-top: 1.5px solid #000; text-align: center; padding-top: 6px; font-size: 0.85rem; font-weight: 700;">
+                        Data: _____ / _____ / 2026
+                    </div>
+                </div>
             </div>
 
             <div class="step-nav-footer" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.3);">
@@ -2032,6 +2608,54 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal / Gaveta do Mapa de Questões (1 a 28) -->
+    <div id="questionsMapModal" class="modal" style="display: none;" onclick="if(event.target===this) toggleQuestionsMap(false)">
+        <div class="modal-content questions-map-content">
+            <div class="modal-header" style="margin-bottom: 16px; padding-bottom: 12px;">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(59, 130, 246, 0.08)); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.25);">
+                        <i class="fas fa-th"></i>
+                    </div>
+                    <div>
+                        <h2 style="font-size: 1.2rem; margin: 0; font-weight: 800;">Mapa das 28 Questões</h2>
+                        <p class="modal-subtitle" style="margin-top: 2px;">Clique no número para ir direto à questão</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="toggleQuestionsMap(false)" title="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Legenda -->
+            <div class="map-legend-bar">
+                <span><span class="legend-dot answered"></span> Respondida</span>
+                <span><span class="legend-dot pending"></span> Pendente</span>
+                <span><span class="legend-dot current"></span> Bloco Selecionado</span>
+            </div>
+
+            <!-- Grade de Blocos e Questões -->
+            <div class="map-blocks-container" id="mapBlocksContainer">
+                <!-- Gerado dinamicamente via updateQuestionsMapUI() -->
+            </div>
+
+            <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 14px;">
+                <span id="mapSummaryCount" style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">
+                    0 de 28 respondidas
+                </span>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleQuestionsMap(false)">
+                    Fechar Mapa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão Flutuante Mobile para o Mapa de Questões -->
+    <button type="button" id="floatingMapBtn" class="floating-map-btn" onclick="toggleQuestionsMap()" title="Ver Mapa de Questões">
+        <i class="fas fa-th"></i>
+        <span>Mapa</span>
+        <span class="floating-map-count" id="floatingMapCount" style="background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 9999px; font-size: 0.74rem;">0/28</span>
+    </button>
 
     <!-- Modal de Identificação Obrigatória / Chamada Oficial -->
     <div id="authGateModal" class="auth-gate-modal">
@@ -3208,6 +3832,251 @@
             }
         }
 
+        // ==========================================================================
+        // MAPA DAS 28 QUESTÕES (DRAWER / POPUP INTERATIVO)
+        // ==========================================================================
+        window.toggleQuestionsMap = (open) => {
+            const modal = document.getElementById('questionsMapModal');
+            if (!modal) return;
+            const shouldOpen = open !== undefined ? open : modal.style.display !== 'block';
+            modal.style.display = shouldOpen ? 'block' : 'none';
+            if (shouldOpen) {
+                updateQuestionsMapUI();
+            }
+        };
+
+        window.updateQuestionsMapUI = () => {
+            const container = document.getElementById('mapBlocksContainer');
+            if (!container) return;
+
+            let html = '';
+            // Identificação
+            const identComplete = isStepComplete(0);
+            html += `
+                <div class="map-block-section">
+                    <div class="map-block-title">
+                        <span><i class="fas fa-id-card"></i> Identificação Inicial</span>
+                        <span style="color: ${identComplete ? '#10b981' : '#f59e0b'}; font-size: 0.75rem;">
+                            ${identComplete ? '<i class="fas fa-check"></i> Preenchida' : '<i class="fas fa-clock"></i> Pendente'}
+                        </span>
+                    </div>
+                    <div class="map-pills-grid">
+                        <button type="button" class="q-map-pill ${identComplete ? 'answered' : 'pending'} ${currentStep === 0 ? 'current-step' : ''}" onclick="jumpToStep(0)" style="width: auto; padding: 0 12px; gap: 6px;">
+                            <i class="fas fa-user-check"></i> Dados do Docente & Escola
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Blocos 1 a 6
+            for (let i = 1; i <= 6; i++) {
+                const stepDef = STEP_DEFINITIONS[i];
+                if (!stepDef) continue;
+                const blockComplete = isStepComplete(i);
+
+                html += `
+                    <div class="map-block-section">
+                        <div class="map-block-title">
+                            <span><strong>Bloco ${i}:</strong> ${escapeHtml(stepDef.label || stepDef.title)}</span>
+                            <span style="color: ${blockComplete ? '#10b981' : 'var(--text-secondary)'}; font-size: 0.75rem;">
+                                ${blockComplete ? '<i class="fas fa-check"></i> Concluído' : ''}
+                            </span>
+                        </div>
+                        <div class="map-pills-grid">
+                            ${stepDef.questions.map(qKey => {
+                                const num = qKey.replace('q', '');
+                                const answered = isQuestionAnswered(qKey);
+                                const isCurrent = i === currentStep;
+                                return `
+                                    <button type="button" class="q-map-pill ${answered ? 'answered' : 'pending'} ${isCurrent ? 'current-step' : ''}" onclick="jumpToQuestion('${qKey}', ${i})" title="Questão ${num}">
+                                        Q${num}
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+
+            const countTxt = document.getElementById('mapSummaryCount');
+            const badgeTxt = document.getElementById('evalProgressText')?.textContent || '';
+            if (countTxt) countTxt.textContent = badgeTxt;
+
+            const floatCount = document.getElementById('floatingMapCount');
+            if (floatCount) {
+                const answered = ALL_QUESTION_KEYS.filter(q => isQuestionAnswered(q.key)).length;
+                floatCount.textContent = `${answered}/28`;
+            }
+        };
+
+        window.jumpToStep = (stepIdx) => {
+            toggleQuestionsMap(false);
+            goToStep(stepIdx, true);
+        };
+
+        window.jumpToQuestion = (qKey, stepIdx) => {
+            toggleQuestionsMap(false);
+            goToStep(stepIdx, true);
+            setTimeout(() => {
+                let el = document.querySelector(`[name="${qKey}"]`) || document.getElementById(qKey);
+                if (el) {
+                    const card = el.closest('.question-item');
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        card.classList.add('unanswered-highlight');
+                        setTimeout(() => card.classList.remove('unanswered-highlight'), 1800);
+                        const focusable = card.querySelector('input, textarea');
+                        if (focusable) focusable.focus();
+                    }
+                }
+            }, 180);
+        };
+
+        // ==========================================================================
+        // CARD DE REVISÃO PRÉVIA (ANTES DO ENVIO OFICIAL)
+        // ==========================================================================
+        window.toggleReviewAccordion = () => {
+            const body = document.getElementById('evalReviewBody');
+            const btnTxt = document.getElementById('reviewToggleText');
+            const chevron = document.getElementById('reviewChevron');
+            if (!body) return;
+
+            const isVisible = body.style.display !== 'none';
+            if (isVisible) {
+                body.style.display = 'none';
+                if (btnTxt) btnTxt.textContent = 'Abrir Resumo';
+                if (chevron) chevron.className = 'fas fa-chevron-down';
+            } else {
+                body.style.display = 'block';
+                if (btnTxt) btnTxt.textContent = 'Recolher Resumo';
+                if (chevron) chevron.className = 'fas fa-chevron-up';
+                renderReviewContent();
+            }
+        };
+
+        function getQuestionAnswerText(qKey) {
+            const q = ALL_QUESTION_KEYS.find(item => item.key === qKey);
+            if (!q) return '';
+
+            if (q.type === 'radio') {
+                const checked = document.querySelector(`input[name="${qKey}"]:checked`);
+                return checked ? checked.value : '';
+            } else if (q.type === 'checkbox') {
+                const checkedBoxes = Array.from(document.querySelectorAll(`input[name="${qKey}"]:checked`)).map(c => c.value);
+                const outrosCheck = document.getElementById(`${qKey}-outros-check`);
+                const outrosText = document.getElementById(`${qKey}-outros-text`);
+                if (outrosCheck && outrosCheck.checked && outrosText && outrosText.value.trim()) {
+                    checkedBoxes.push(`Outros: ${outrosText.value.trim()}`);
+                }
+                return checkedBoxes.join(' • ');
+            } else if (q.type === 'text' || q.type === 'conditional_text') {
+                const text = document.querySelector(`[name="${qKey}"]`)?.value.trim();
+                return text || '';
+            }
+            return '';
+        }
+
+        window.renderReviewContent = () => {
+            const container = document.getElementById('reviewBlocksContent');
+            if (!container) return;
+
+            let html = '';
+
+            // Dados de Identificação
+            const profNome = document.getElementById('eval-professor')?.value.trim() || 'Não preenchido';
+            const profEmail = document.getElementById('eval-email')?.value.trim() || 'Não preenchido';
+            const profEscola = document.getElementById('eval-escola')?.value || 'Não selecionada';
+            const profTurmas = (document.getElementById('eval-ano')?.value || '') + ' ' + (document.getElementById('eval-turma')?.value || '');
+            const profTurno = document.getElementById('eval-periodo')?.value || '-';
+
+            html += `
+                <div class="review-block-section">
+                    <div class="review-block-header">
+                        <h4><i class="fas fa-id-card text-primary"></i> Identificação do Docente</h4>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="goToStep(0, true)" style="font-size: 0.74rem; padding: 3px 8px;">
+                            <i class="fas fa-pencil"></i> Ajustar
+                        </button>
+                    </div>
+                    <div style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
+                        <div><strong>Docente:</strong> <span style="color: var(--text-color);">${escapeHtml(profNome)}</span> • <strong>E-mail:</strong> <span style="color: var(--text-color);">${escapeHtml(profEmail)}</span></div>
+                        <div><strong>Escola:</strong> <span style="color: var(--text-color);">${escapeHtml(profEscola)}</span> • <strong>Turmas:</strong> <span style="color: var(--text-color);">${escapeHtml(profTurmas)}</span> (${escapeHtml(profTurno)})</div>
+                    </div>
+                </div>
+            `;
+
+            // Blocos 1 a 6
+            for (let i = 1; i <= 6; i++) {
+                const stepDef = STEP_DEFINITIONS[i];
+                if (!stepDef) continue;
+
+                html += `
+                    <div class="review-block-section">
+                        <div class="review-block-header">
+                            <h4><i class="fas fa-layer-group text-primary"></i> Bloco ${i} – ${escapeHtml(stepDef.label || stepDef.title)}</h4>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="goToStep(${i}, true)" style="font-size: 0.74rem; padding: 3px 8px;">
+                                <i class="fas fa-pencil"></i> Ajustar
+                            </button>
+                        </div>
+                        <div>
+                            ${stepDef.questions.map(qKey => {
+                                const num = qKey.replace('q', '');
+                                let answer = getQuestionAnswerText(qKey);
+                                const isEmpty = !answer || answer.trim() === '';
+
+                                return `
+                                    <div class="review-item-row">
+                                        <span class="review-item-q">Q${num}.</span>
+                                        <span class="review-item-a ${isEmpty ? 'empty' : ''}">
+                                            ${isEmpty ? '<i class="fas fa-triangle-exclamation"></i> Pendente' : escapeHtml(answer)}
+                                        </span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        };
+
+        // ==========================================================================
+        // CORES SEMÂNTICAS E ÍCONES NAS ESCALAS LIKERT
+        // ==========================================================================
+        function initOptionSentiments() {
+            document.querySelectorAll('.option-label').forEach(label => {
+                const text = label.textContent.trim().toLowerCase();
+                let sentiment = null;
+                let iconHtml = '';
+
+                if (text.includes('excelente') || text.includes('sempre') || text.includes('plenamente') || text.includes('muito satisfat') || text.includes('com certeza') || text.includes('muito alto') || text.includes('totalmente suficientes') || text.includes('significativos')) {
+                    sentiment = 'positive';
+                    iconHtml = '<i class="fas fa-circle-check option-sentiment-icon"></i>';
+                } else if (text.includes('bom') || text.includes('satisfatórias') || text.includes('na maioria') || text.includes('frequentemente') || text.includes('alto') || text.includes('sim, foi') || text.includes('moderados')) {
+                    sentiment = 'good';
+                    iconHtml = '<i class="fas fa-thumbs-up option-sentiment-icon"></i>';
+                } else if (text.includes('regular') || text.includes('parcialmente') || text.includes('algumas vezes') || text.includes('médio') || text.includes('dúvida') || text.includes('às vezes')) {
+                    sentiment = 'neutral';
+                    iconHtml = '<i class="fas fa-minus-circle option-sentiment-icon"></i>';
+                } else if (text.includes('melhorar') || text.includes('insatisfat') || text.includes('pouco') || text.includes('raramente') || text.includes('insuficiente') || text.includes('não') || text.includes('baixo')) {
+                    sentiment = 'negative';
+                    iconHtml = '<i class="fas fa-circle-xmark option-sentiment-icon"></i>';
+                }
+
+                if (sentiment) {
+                    label.setAttribute('data-sentiment', sentiment);
+                    if (!label.querySelector('.option-sentiment-icon')) {
+                        const input = label.querySelector('input');
+                        if (input) {
+                            input.insertAdjacentHTML('afterend', ` ${iconHtml} `);
+                        }
+                    }
+                }
+            });
+        }
+
         window.goToStep = (targetStep, skipValidation = false) => {
             if (targetStep < 0 || targetStep >= TOTAL_STEPS) return;
 
@@ -3234,6 +4103,10 @@
 
             currentStep = targetStep;
             updateStepperUI();
+            updateQuestionsMapUI();
+            if (currentStep === 6) {
+                renderReviewContent();
+            }
             saveDraft();
 
             // Rola suavemente até o topo da área do formulário
@@ -3340,7 +4213,11 @@
                     if (!localData || !localData._savedAt || (cloudData._savedAt && new Date(cloudData._savedAt) > new Date(localData._savedAt))) {
                         localStorage.setItem(DRAFT_KEY, JSON.stringify(cloudData));
                         restoreDraft();
-        initCharCounters();
+                        initCharCounters();
+                        initOptionSentiments();
+                        if (typeof window.updateQuestionsMapUI === 'function') {
+                            window.updateQuestionsMapUI();
+                        }
                         if (draftStatus) {
                             draftStatus.innerHTML = '<i class="fas fa-cloud-arrow-down"></i> Rascunho sincronizado';
                             draftStatus.style.color = '#3b82f6';
@@ -3353,6 +4230,7 @@
         }
 
         function saveDraft() {
+            if (document.body.classList.contains('print-blank-mode')) return;
             const form = document.getElementById('evaluationForm');
             if (!form) return;
             const formData = new FormData(form);
@@ -3505,8 +4383,54 @@
             });
         }
 
-        restoreDraft();
+        // ==========================================================================
+        // MODO DE IMPRESSÃO DE FORMULÁRIO EM BRANCO (?print=blank)
+        // ==========================================================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const isPrintBlank = urlParams.get('print') === 'blank' || urlParams.get('modo') === 'imprimir_em_branco';
+
+        if (isPrintBlank) {
+            document.body.classList.add('print-blank-mode');
+            const printBanner = document.getElementById('printBlankBanner');
+            if (printBanner) printBanner.style.display = 'block';
+
+            // Abre todas as 7 etapas para impressão integral e corrida
+            document.querySelectorAll('.eval-step-pane').forEach(el => {
+                el.classList.add('active');
+                el.style.display = 'block';
+            });
+
+            // Reseta inputs e desativa valores pré-gravados
+            const form = document.getElementById('evaluationForm');
+            if (form) form.reset();
+            const prof = document.getElementById('eval-professor');
+            if (prof) prof.value = '';
+            const email = document.getElementById('eval-email');
+            if (email) email.value = '';
+
+            document.title = "Avaliação Anual EDM 2026 – Formulário em Branco Oficial";
+
+            // Dispara diálogo de impressão após renderizar
+            setTimeout(() => {
+                window.print();
+            }, 600);
+        } else {
+            restoreDraft();
+        }
+
         initCharCounters();
+        initOptionSentiments();
+        if (typeof window.updateQuestionsMapUI === 'function') {
+            window.updateQuestionsMapUI();
+        }
+
+        window.printBlankFormDirectly = () => {
+            if (window.location.search.includes('print=blank')) {
+                window.print();
+            } else {
+                window.open('avaliacao.html?print=blank', '_blank');
+            }
+        };
 
         // Força letras maiúsculas no nome do professor e autocompleta dados cadastrais
         ['eval-professor', 'quickNome'].forEach(id => {
