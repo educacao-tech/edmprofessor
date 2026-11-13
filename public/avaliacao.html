@@ -961,18 +961,21 @@
         /* Textarea para respostas abertas */
         .eval-textarea {
             width: 100%;
-            min-height: 90px;
-            padding: 12px 14px;
+            height: 96px;
+            max-height: 110px;
+            padding: 10px 14px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             background: var(--card-bg);
             color: var(--text-color);
             font-size: 0.88rem;
             font-family: inherit;
-            line-height: 1.5;
-            resize: vertical;
+            line-height: 1.45;
+            resize: none;
             outline: none;
             box-sizing: border-box;
+            word-break: break-word;
+            overflow-wrap: anywhere;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
@@ -980,6 +983,29 @@
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
         }
+        /* Contador de Caracteres para Questões Dissertativas */
+        .char-counter {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            transition: color 0.2s ease;
+        }
+
+        .char-counter.warning {
+            color: #d97706 !important;
+            font-weight: 700;
+        }
+
+        .char-counter.limit {
+            color: #dc2626 !important;
+            font-weight: 800;
+        }
+
 
         /* Questão Condicional 28 */
         .q28-conditional-box {
@@ -1262,7 +1288,7 @@
         </div>
 
         <!-- Formulário Principal -->
-        <form id="evaluationForm">
+        <form id="evaluationForm" novalidate onsubmit="submitEvaluationForm(event)">
             <!-- ETAPA 1: IDENTIFICAÇÃO -->
             <div class="eval-step-pane active" id="step-pane-0">
                 <div class="ident-card">
@@ -1290,9 +1316,9 @@
                     <div class="ident-field col-email">
                         <label for="eval-email">
                             <span><i class="fas fa-envelope text-primary"></i> E-mail Institucional <span class="required-star">*</span></span>
-                            <span class="badge-auto-tag"><i class="fas fa-lock"></i> Google</span>
+                            <span class="badge-auto-tag" id="badgeEmailLock" style="display: none;"><i class="fas fa-lock"></i> Google</span>
                         </label>
-                        <input type="email" id="eval-email" placeholder="seuemail@gmail.com" required readonly class="input-readonly" title="Identificado automaticamente pela sua conta autenticada">
+                        <input type="email" id="eval-email" placeholder="seuemail@gmail.com" required title="E-mail do professor(a)">
                     </div>
 
                     <!-- Escola -->
@@ -1430,7 +1456,8 @@
                 <!-- Q4 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">4.</span> Quais foram as principais dificuldades encontradas na organização e no planejamento das aulas? <span style="color:#e11d48">*</span></p>
-                    <textarea class="eval-textarea" name="q4" rows="3" placeholder="Descreva aqui as dificuldades encontradas ou 'Nenhuma' se correu tudo bem..." required></textarea>
+                    <textarea class="eval-textarea" maxlength="250" name="q4" rows="4" placeholder="Descreva aqui as dificuldades encontradas ou 'Nenhuma' se correu tudo bem..." required></textarea>
+                    <div class="char-counter" data-for="q4"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
                 </div>
             </div>
 
@@ -1494,7 +1521,8 @@
                 <!-- Q8 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">8.</span> Quais atividades ou experiências você considera que tiveram maior sucesso durante o ano? Por quê? <span style="color:#e11d48">*</span></p>
-                    <textarea class="eval-textarea" name="q8" rows="3" placeholder="Compartilhe as atividades que mais deram certo e o motivo..." required></textarea>
+                    <textarea class="eval-textarea" maxlength="250" name="q8" rows="4" placeholder="Compartilhe as atividades que mais deram certo e o motivo..." required></textarea>
+                    <div class="char-counter" data-for="q8"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
                 </div>
             </div>
 
@@ -1571,7 +1599,8 @@
                 <!-- Q13 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">13.</span> Quais aprendizagens você considera mais significativas para os alunos neste ano? Há alguma habilidade que precisa ser retomada ou fortalecida? <span style="color:#e11d48">*</span></p>
-                    <textarea class="eval-textarea" name="q13" rows="3" placeholder="Sua reflexão sobre as aprendizagens construídas e pontos a fortalecer..." required></textarea>
+                    <textarea class="eval-textarea" maxlength="250" name="q13" rows="4" placeholder="Sua reflexão sobre as aprendizagens construídas e pontos a fortalecer..." required></textarea>
+                    <div class="char-counter" data-for="q13"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
                 </div>
             </div>
 
@@ -1624,7 +1653,8 @@
                 <!-- Q16 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">16.</span> Que recursos, materiais, formações ou orientações poderiam contribuir para melhorar seu trabalho em 2027? <span style="color:#e11d48">*</span></p>
-                    <textarea class="eval-textarea" name="q16" rows="3" placeholder="Sugestões de formações, equipamentos ou materiais de apoio..." required></textarea>
+                    <textarea class="eval-textarea" maxlength="250" name="q16" rows="4" placeholder="Sugestões de formações, equipamentos ou materiais de apoio..." required></textarea>
+                    <div class="char-counter" data-for="q16"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
                 </div>
             </div>
 
@@ -1707,13 +1737,15 @@
                 <!-- Q22 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">22.</span> Olhando para sua trajetória neste ano, o que você considera que realizou bem? O que faria diferente se pudesse recomeçar? <span style="color:#e11d48">*</span></p>
-                    <textarea class="eval-textarea" name="q22" rows="3" placeholder="Destaque seus pontos fortes e o que gostaria de aprimorar..." required></textarea>
+                    <textarea class="eval-textarea" maxlength="250" name="q22" rows="4" placeholder="Destaque seus pontos fortes e o que gostaria de aprimorar..." required></textarea>
+                    <div class="char-counter" data-for="q22"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
                 </div>
 
                 <!-- Q23 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">23.</span> Em qual aspecto da sua prática pedagógica você gostaria de investir mais para o próximo ano? <span style="color:#e11d48">*</span></p>
-                    <textarea class="eval-textarea" name="q23" rows="3" placeholder="Áreas de formação, recursos, metodologias..." required></textarea>
+                    <textarea class="eval-textarea" maxlength="250" name="q23" rows="4" placeholder="Áreas de formação, recursos, metodologias..." required></textarea>
+                    <div class="char-counter" data-for="q23"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
                 </div>
             </div>
 
@@ -1739,19 +1771,22 @@
                 <!-- Q24 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">24.</span> Que mudanças você considera necessárias para tornar as aulas mais significativas, atrativas e eficientes? <span style="color:#e11d48">*</span></p>
-                    <textarea class="eval-textarea" name="q24" rows="3" placeholder="Propostas para o currículo, rotina, materiais..." required></textarea>
+                    <textarea class="eval-textarea" maxlength="250" name="q24" rows="4" placeholder="Propostas para o currículo, rotina, materiais..." required></textarea>
+                    <div class="char-counter" data-for="q24"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
                 </div>
 
                 <!-- Q25 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">25.</span> Deixe uma sugestão ou contribuição que possa colaborar com a organização e o fortalecimento do trabalho de Educação Digital e Midiática em nossa rede de ensino. <span style="color:#e11d48">*</span></p>
-                    <textarea class="eval-textarea" name="q25" rows="3" placeholder="Sua contribuição para a rede de ensino..." required></textarea>
+                    <textarea class="eval-textarea" maxlength="250" name="q25" rows="4" placeholder="Sua contribuição para a rede de ensino..." required></textarea>
+                    <div class="char-counter" data-for="q25"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
                 </div>
 
                 <!-- Q26 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">26.</span> Em poucas palavras, como você definiria sua experiência como professor(a) de Educação Digital e Midiática em 2026? <span style="color:#e11d48">*</span></p>
-                    <textarea class="eval-textarea" name="q26" rows="2" placeholder="Uma frase ou síntese da sua experiência..." required></textarea>
+                    <textarea class="eval-textarea" maxlength="250" name="q26" rows="4" placeholder="Uma frase ou síntese da sua experiência..." required></textarea>
+                    <div class="char-counter" data-for="q26"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
                 </div>
 
                 <!-- Q27 -->
@@ -1767,7 +1802,8 @@
                     <!-- Q28 (com destaque condicional) -->
                     <div class="q28-conditional-box" id="q28-container">
                         <p class="question-title" style="margin-bottom:8px;"><span class="q-num">28.</span> Caso tenha marcado "Não" ou "Em dúvida" na pergunta anterior, poderia nos contar o principal motivo?</p>
-                        <textarea class="eval-textarea" name="q28" id="q28-textarea" rows="2" placeholder="Compartilhe seu motivo para podermos compreender melhor e aprimorar o suporte..."></textarea>
+                        <textarea class="eval-textarea" maxlength="250" name="q28" id="q28-textarea" rows="4" placeholder="Compartilhe seu motivo para podermos compreender melhor e aprimorar o suporte..."></textarea>
+                    <div class="char-counter" data-for="q28"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
                     </div>
                 </div>
             </div>
@@ -1787,7 +1823,7 @@
                     <button type="button" class="btn btn-secondary" onclick="exportEvaluationPDF()">
                         <i class="fas fa-file-pdf"></i> Baixar / Gerar PDF
                     </button>
-                    <button type="submit" class="btn-submit-eval" id="btnSubmit">
+                    <button type="button" class="btn-submit-eval" id="btnSubmit" onclick="submitEvaluationForm(event)">
                         <i class="fas fa-paper-plane"></i> Enviar Avaliação 2026
                     </button>
                 </div>
@@ -1833,7 +1869,8 @@
 
     <!-- Modal de Identificação Obrigatória / Chamada Oficial -->
     <div id="authGateModal" class="auth-gate-modal">
-        <div class="auth-gate-card">
+        <div class="auth-gate-card" style="position: relative;">
+            <button type="button" onclick="window.closeAuthGateModal()" title="Fechar" style="position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; color: var(--text-secondary);">&times;</button>
             <div style="text-align: center; margin-bottom: 20px;">
                 <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(37,99,235,0.1); color: var(--primary-color); padding: 4px 12px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">
                     <span class="chamada-pulse-dot" style="width: 8px; height: 8px;"></span>
@@ -1872,17 +1909,17 @@
             <!-- Formulário Manual Alternativo -->
             <form id="quickAuthForm" onsubmit="window.handleQuickAuthSubmit(event)">
                 <div style="margin-bottom: 12px; text-align: left;">
-                    <label for="quickEmail" style="display: block; font-size: 0.80rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">
-                        <i class="fas fa-envelope"></i> E-mail (@gmail.com ou institucional) <span style="color:#e11d48">*</span>
-                    </label>
-                    <input type="email" id="quickEmail" placeholder="seuemail@gmail.com" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-size: 0.90rem; font-family: inherit;">
-                </div>
-
-                <div style="margin-bottom: 12px; text-align: left;">
                     <label for="quickNome" style="display: block; font-size: 0.80rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">
                         <i class="fas fa-user-graduate"></i> Nome Completo Oficial <span style="color:#e11d48">*</span>
                     </label>
                     <input type="text" id="quickNome" placeholder="DIGITE OU SELECIONE SEU NOME" required list="professoresDatalist" style="text-transform: uppercase; width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-size: 0.90rem; font-family: inherit;" autocomplete="name">
+                </div>
+
+                <div style="margin-bottom: 12px; text-align: left;">
+                    <label for="quickEmail" style="display: block; font-size: 0.80rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">
+                        <i class="fas fa-envelope"></i> E-mail (@gmail.com ou institucional) <span style="color:#e11d48">*</span>
+                    </label>
+                    <input type="email" id="quickEmail" placeholder="seuemail@gmail.com" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-size: 0.90rem; font-family: inherit;">
                 </div>
 
                 <div style="margin-bottom: 20px; text-align: left;">
@@ -2019,21 +2056,38 @@
                 .replace(/\s+/g, ' ');
         }
 
-        // Carregar lista de professores para autocompletar e validação
+        // Carregar lista de professores para autocompletar e validação (prioriza Firestore com fallback offline)
         async function loadProfessorsList() {
             const datalist = document.getElementById('professoresDatalist');
+            let loaded = false;
             try {
-                const resp = await fetch('backup_professores_2026-05-18.json');
-                if (resp.ok) {
-                    const data = await resp.json();
-                    professoresListCache = data.professores || [];
-                    if (datalist) {
-                        const profs = Array.from(new Set(professoresListCache.map(p => p.nome).filter(Boolean))).sort();
-                        datalist.innerHTML = profs.map(name => `<option value="${name}">`).join('');
-                    }
+                const snap = await getDocs(collection(db, "professores"));
+                if (!snap.empty) {
+                    professoresListCache = [];
+                    snap.forEach(docSnap => {
+                        professoresListCache.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    loaded = true;
                 }
-            } catch (e) {
-                console.warn("Aviso ao carregar lista de professores:", e);
+            } catch (errDb) {
+                console.warn("Aviso ao buscar professores do Firestore, usando backup:", errDb);
+            }
+
+            if (!loaded || professoresListCache.length === 0) {
+                try {
+                    const resp = await fetch('backup_professores_2026-05-18.json');
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        professoresListCache = data.professores || [];
+                    }
+                } catch (e) {
+                    console.warn("Aviso ao carregar lista de professores do backup:", e);
+                }
+            }
+
+            if (datalist && professoresListCache.length > 0) {
+                const profs = Array.from(new Set(professoresListCache.map(p => (p.nome || '').trim()).filter(Boolean))).sort();
+                datalist.innerHTML = profs.map(name => `<option value="${name}">`).join('');
             }
         }
         loadProfessorsList();
@@ -2075,11 +2129,121 @@
             }
 
             if (cleanNome && professoresListCache.length > 0) {
-                const matchByNome = professoresListCache.find(p => normalizeStr(p.nome) === cleanNome);
-                if (matchByNome) return matchByNome;
+                // Correspondência exata (normalizada sem acentos)
+                let match = professoresListCache.find(p => normalizeStr(p.nome) === cleanNome);
+                if (match) return match;
+
+                // Correspondência parcial segura (se o nome digitado contém ou está contido no nome completo)
+                if (cleanNome.length >= 4) {
+                    match = professoresListCache.find(p => {
+                        const normP = normalizeStr(p.nome);
+                        return normP && (normP === cleanNome || normP.startsWith(cleanNome) || cleanNome.startsWith(normP));
+                    });
+                    if (match) return match;
+                }
             }
 
             return null;
+        }
+
+        // Auto-preenchimento e vinculação ao selecionar ou digitar o nome do docente
+        function onTeacherNameChange(inputEl, isQuickModal = false) {
+            if (!inputEl) return;
+            const rawVal = inputEl.value.trim();
+            if (!rawVal || rawVal.length < 3) return;
+
+            const matched = findTeacherInCache(null, rawVal);
+            if (!matched) return;
+
+            if (isQuickModal) {
+                const quickEmail = document.getElementById('quickEmail');
+                const quickEscola = document.getElementById('quickEscola');
+                if (quickEmail && matched.email && !quickEmail.value) {
+                    quickEmail.value = matched.email;
+                }
+                if (quickEscola && matched.escola && !quickEscola.value) {
+                    const options = Array.from(quickEscola.options);
+                    const opt = options.find(o => matched.escola.toUpperCase().includes(o.value.toUpperCase()));
+                    if (opt) quickEscola.value = opt.value;
+                }
+            } else {
+                const evalEmail = document.getElementById('eval-email');
+                const evalEscola = document.getElementById('eval-escola');
+                const evalAno = document.getElementById('eval-ano');
+                const evalTurma = document.getElementById('eval-turma');
+                const evalPeriodo = document.getElementById('eval-periodo');
+                const evalTurmas = document.getElementById('eval-turmas');
+                const evalTelefone = document.getElementById('eval-telefone');
+
+                if (evalEmail && matched.email && !evalEmail.value) {
+                    evalEmail.value = matched.email;
+                }
+                if (evalEscola && matched.escola) {
+                    const options = Array.from(evalEscola.options);
+                    const opt = options.find(o => matched.escola.toUpperCase().includes(o.value.toUpperCase()));
+                    if (opt) evalEscola.value = opt.value;
+                }
+                if (evalAno && matched.ano) {
+                    const options = Array.from(evalAno.options);
+                    const opt = options.find(o => o.value.toUpperCase().includes(matched.ano.toUpperCase()) || matched.ano.toUpperCase().includes(o.value.toUpperCase()));
+                    if (opt) evalAno.value = opt.value;
+                }
+                if (evalTurma && matched.turma) {
+                    const options = Array.from(evalTurma.options);
+                    const opt = options.find(o => o.value.toUpperCase() === matched.turma.toUpperCase());
+                    if (opt) evalTurma.value = opt.value;
+                }
+                if (evalPeriodo && matched.turno) {
+                    const options = Array.from(evalPeriodo.options);
+                    const opt = options.find(o => o.value.toUpperCase() === matched.turno.toUpperCase());
+                    if (opt) evalPeriodo.value = opt.value;
+                }
+                if (evalTurmas) {
+                    const tComposta = [matched.ano, matched.turma ? `Turma ${matched.turma}` : '', matched.turno ? `(${matched.turno})` : ''].filter(Boolean).join(' ');
+                    if (tComposta) evalTurmas.value = tComposta;
+                }
+                if (evalTelefone && matched.telefone) {
+                    evalTelefone.value = matched.telefone;
+                }
+
+                // Se o professor localizado possui e-mail cadastrado, conecta e exibe perfil
+                if (matched.email && (!currentDocente || currentDocente.email !== matched.email.toLowerCase())) {
+                    setAuthenticatedTeacher({
+                        nome: (matched.nome || rawVal).toUpperCase(),
+                        email: matched.email.toLowerCase(),
+                        escola: matched.escola || '',
+                        ano: matched.ano || '',
+                        turma: matched.turma || '',
+                        turno: matched.turno || '',
+                        turmas: matched.turma ? `${matched.ano || ''} ${matched.turma}` : '',
+                        isGoogle: false
+                    });
+                }
+            }
+        }
+
+        // Auto-preenchimento ao digitar ou colar e-mail
+        function onTeacherEmailChange(inputEl, isQuickModal = false) {
+            if (!inputEl) return;
+            const rawEmail = inputEl.value.trim().toLowerCase();
+            if (!rawEmail || !rawEmail.includes('@') || rawEmail.length < 5) return;
+
+            const matched = findTeacherInCache(rawEmail, null);
+            if (!matched) return;
+
+            if (isQuickModal) {
+                const quickNome = document.getElementById('quickNome');
+                const quickEscola = document.getElementById('quickEscola');
+                if (quickNome && !quickNome.value) quickNome.value = matched.nome;
+                if (quickEscola && !quickEscola.value && matched.escola) {
+                    const opt = Array.from(quickEscola.options).find(o => matched.escola.toUpperCase().includes(o.value.toUpperCase()));
+                    if (opt) quickEscola.value = opt.value;
+                }
+            } else {
+                const evalProf = document.getElementById('eval-professor');
+                if (evalProf && !evalProf.value) evalProf.value = matched.nome;
+                onTeacherNameChange(evalProf || { value: matched.nome }, false);
+            }
         }
 
         // Verifica se o(a) professor(a) já realizou e enviou a avaliação (limite de 1 resposta)
@@ -2189,10 +2353,68 @@
 
         // Atualiza a interface com o Docente Autenticado
         function setAuthenticatedTeacher(profile) {
-            if (!profile || !profile.email) return;
+            if (!profile) return;
+
+            // Se o e-mail não veio no perfil, tenta resgatar dos campos
+            if (!profile.email) {
+                const evalEmail = document.getElementById('eval-email')?.value.trim();
+                const quickEmail = document.getElementById('quickEmail')?.value.trim();
+                if (evalEmail) profile.email = evalEmail;
+                else if (quickEmail) profile.email = quickEmail;
+            }
 
             if (profile.nome) {
                 profile.nome = profile.nome.replace(/[^a-zA-ZÀ-ÿ\s']/g, '').toUpperCase();
+            }
+
+            // Preenche os campos de identificação do formulário
+            const inputProf = document.getElementById('eval-professor');
+            const inputEmail = document.getElementById('eval-email');
+            const selectEscola = document.getElementById('eval-escola');
+            const selectAno = document.getElementById('eval-ano');
+            const selectTurma = document.getElementById('eval-turma');
+            const selectPeriodo = document.getElementById('eval-periodo');
+            const badgeEmailLock = document.getElementById('badgeEmailLock');
+
+            if (inputProf && profile.nome) inputProf.value = profile.nome;
+            if (inputEmail && profile.email) inputEmail.value = profile.email;
+            if (selectEscola && profile.escola) {
+                const options = Array.from(selectEscola.options);
+                const matchingOpt = options.find(opt => profile.escola.toUpperCase().includes(opt.value.toUpperCase()));
+                if (matchingOpt) selectEscola.value = matchingOpt.value;
+            }
+            if (selectAno && profile.ano) {
+                const options = Array.from(selectAno.options);
+                const matchingOpt = options.find(opt => opt.value.toUpperCase().includes(profile.ano.toUpperCase()) || profile.ano.toUpperCase().includes(opt.value.toUpperCase()));
+                if (matchingOpt) selectAno.value = matchingOpt.value;
+            }
+            if (selectTurma && profile.turma) {
+                const options = Array.from(selectTurma.options);
+                const matchingOpt = options.find(opt => opt.value.toUpperCase() === profile.turma.toUpperCase());
+                if (matchingOpt) selectTurma.value = matchingOpt.value;
+            }
+            if (selectPeriodo && profile.turno) {
+                const options = Array.from(selectPeriodo.options);
+                const matchingOpt = options.find(opt => opt.value.toUpperCase() === profile.turno.toUpperCase());
+                if (matchingOpt) selectPeriodo.value = matchingOpt.value;
+            }
+
+            // Controle de edição do e-mail
+            if (inputEmail) {
+                if (profile.isGoogle) {
+                    inputEmail.readOnly = true;
+                    inputEmail.classList.add('input-readonly');
+                    if (badgeEmailLock) badgeEmailLock.style.display = 'inline-flex';
+                } else {
+                    inputEmail.readOnly = false;
+                    inputEmail.classList.remove('input-readonly');
+                    if (badgeEmailLock) badgeEmailLock.style.display = 'none';
+                }
+            }
+
+            // Se ainda não temos e-mail, permite que o docente digite
+            if (!profile.email) {
+                return;
             }
 
             currentDocente = profile;
@@ -2236,37 +2458,6 @@
                 docenteAvatarFallback.textContent = initials;
                 docenteAvatarFallback.style.display = 'flex';
                 if (docenteAvatarImg) docenteAvatarImg.style.display = 'none';
-            }
-
-            // Preenche os campos de identificação do formulário
-            const inputProf = document.getElementById('eval-professor');
-            const inputEmail = document.getElementById('eval-email');
-            const selectEscola = document.getElementById('eval-escola');
-            const selectAno = document.getElementById('eval-ano');
-            const selectTurma = document.getElementById('eval-turma');
-            const selectPeriodo = document.getElementById('eval-periodo');
-
-            if (inputProf) inputProf.value = profile.nome;
-            if (inputEmail) inputEmail.value = profile.email;
-            if (selectEscola && profile.escola) {
-                const options = Array.from(selectEscola.options);
-                const matchingOpt = options.find(opt => profile.escola.toUpperCase().includes(opt.value.toUpperCase()));
-                if (matchingOpt) selectEscola.value = matchingOpt.value;
-            }
-            if (selectAno && profile.ano) {
-                const options = Array.from(selectAno.options);
-                const matchingOpt = options.find(opt => opt.value.toUpperCase().includes(profile.ano.toUpperCase()) || profile.ano.toUpperCase().includes(opt.value.toUpperCase()));
-                if (matchingOpt) selectAno.value = matchingOpt.value;
-            }
-            if (selectTurma && profile.turma) {
-                const options = Array.from(selectTurma.options);
-                const matchingOpt = options.find(opt => opt.value.toUpperCase() === profile.turma.toUpperCase());
-                if (matchingOpt) selectTurma.value = matchingOpt.value;
-            }
-            if (selectPeriodo && profile.turno) {
-                const options = Array.from(selectPeriodo.options);
-                const matchingOpt = options.find(opt => opt.value.toUpperCase() === profile.turno.toUpperCase());
-                if (matchingOpt) selectPeriodo.value = matchingOpt.value;
             }
 
             // Fecha modal de identificação
@@ -2703,11 +2894,25 @@
                 const periodo = document.getElementById('eval-periodo');
 
                 if (!prof?.value.trim()) return { valid: false, message: "Por favor, informe seu nome completo na identificação.", element: prof };
-                if (!email?.value.trim()) return { valid: false, message: "Por favor, realize a identificação obrigatória com a Conta Google.", element: email };
+                if (!email?.value.trim()) return { valid: false, message: "Por favor, informe seu e-mail institucional na identificação (ou conecte com a Conta Google).", element: email };
                 if (!escola?.value) return { valid: false, message: "Por favor, selecione a Escola de atuação.", element: escola };
                 if (!ano?.value) return { valid: false, message: "Por favor, selecione o Ano de atuação.", element: ano };
                 if (!turma?.value) return { valid: false, message: "Por favor, selecione a Turma de atuação.", element: turma };
                 if (!periodo?.value) return { valid: false, message: "Por favor, selecione o Período / Turno.", element: periodo };
+
+                // Auto-sincroniza currentDocente caso ainda não esteja instanciado
+                if (!currentDocente || !currentDocente.email) {
+                    setAuthenticatedTeacher({
+                        nome: prof.value.trim().toUpperCase(),
+                        email: email.value.trim().toLowerCase(),
+                        escola: escola.value,
+                        ano: ano.value,
+                        turma: turma.value,
+                        turno: periodo.value,
+                        turmas: turma.value ? `${ano.value} ${turma.value}` : '',
+                        isGoogle: false
+                    });
+                }
 
                 return { valid: true };
             }
@@ -2763,6 +2968,20 @@
                         return {
                             valid: false,
                             message: `Por favor, responda à reflexão da ${q.label} antes de avançar.`,
+                            element: textEl?.closest('.question-item') || textEl
+                        };
+                    }
+                    if (textEl.value.length > 250) {
+                        return {
+                            valid: false,
+                            message: `A resposta da ${q.label} ultrapassou o limite máximo de 250 caracteres (atual: ${textEl.value.length}). Por favor, resuma o texto para avançar.`,
+                            element: textEl?.closest('.question-item') || textEl
+                        };
+                    }
+                    if (textEl.value.split('\n').length > 4) {
+                        return {
+                            valid: false,
+                            message: `A resposta da ${q.label} ultrapassou o limite máximo de 4 linhas. Por favor, resuma o texto para avançar.`,
                             element: textEl?.closest('.question-item') || textEl
                         };
                     }
@@ -2923,6 +3142,7 @@
                     if (!localData || !localData._savedAt || (cloudData._savedAt && new Date(cloudData._savedAt) > new Date(localData._savedAt))) {
                         localStorage.setItem(DRAFT_KEY, JSON.stringify(cloudData));
                         restoreDraft();
+        initCharCounters();
                         if (draftStatus) {
                             draftStatus.innerHTML = '<i class="fas fa-cloud-arrow-down"></i> Rascunho sincronizado';
                             draftStatus.style.color = '#3b82f6';
@@ -3015,12 +3235,87 @@
             }
         }
 
-        restoreDraft();
+        
+        // ==========================================================================
+        // LIMITADOR E CONTADOR PARA DISSERTATIVAS (250 CARACTERES E MÁXIMO 4 LINHAS)
+        // ==========================================================================
+        function initCharCounters() {
+            document.querySelectorAll('.eval-textarea').forEach(textarea => {
+                textarea.setAttribute('maxlength', '250');
+                const qName = textarea.getAttribute('name');
+                let counter = textarea.parentNode.querySelector(`.char-counter[data-for="${qName}"]`);
+                if (!counter) {
+                    counter = document.createElement('div');
+                    counter.className = 'char-counter';
+                    counter.setAttribute('data-for', qName);
+                    counter.innerHTML = '<span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas';
+                    textarea.insertAdjacentElement('afterend', counter);
+                }
 
-        // Força e aceita apenas letras maiúsculas no nome do(a) professor(a)
+                const countSpan = counter.querySelector('.char-count');
+                const lineSpan = counter.querySelector('.line-count');
+
+                const enforceLimits = () => {
+                    let val = textarea.value;
+                    let lines = val.split('\n');
+                    let modified = false;
+
+                    if (lines.length > 4) {
+                        val = lines.slice(0, 4).join('\n');
+                        modified = true;
+                    }
+
+                    if (val.length > 250) {
+                        val = val.slice(0, 250);
+                        modified = true;
+                    }
+
+                    if (modified) {
+                        textarea.value = val;
+                    }
+
+                    const currentLen = textarea.value.length;
+                    const currentLines = textarea.value ? textarea.value.split('\n').length : 1;
+
+                    if (countSpan) countSpan.textContent = currentLen;
+                    if (lineSpan) lineSpan.textContent = currentLines;
+
+                    if (currentLen >= 250 || currentLines >= 4) {
+                        counter.classList.add('limit');
+                        counter.classList.remove('warning');
+                    } else if (currentLen >= 220 || currentLines >= 3) {
+                        counter.classList.add('warning');
+                        counter.classList.remove('limit');
+                    } else {
+                        counter.classList.remove('warning', 'limit');
+                    }
+                };
+
+                textarea.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const currentLines = textarea.value.split('\n').length;
+                        if (currentLines >= 4) {
+                            e.preventDefault();
+                        }
+                    }
+                });
+
+                textarea.addEventListener('input', enforceLimits);
+                textarea.addEventListener('paste', () => setTimeout(enforceLimits, 10));
+                textarea.addEventListener('change', enforceLimits);
+                enforceLimits();
+            });
+        }
+
+        restoreDraft();
+        initCharCounters();
+
+        // Força letras maiúsculas no nome do professor e autocompleta dados cadastrais
         ['eval-professor', 'quickNome'].forEach(id => {
             const inputEl = document.getElementById(id);
             if (!inputEl) return;
+            const isQuick = (id === 'quickNome');
+
             inputEl.addEventListener('input', () => {
                 const start = inputEl.selectionStart;
                 const end = inputEl.selectionEnd;
@@ -3028,6 +3323,25 @@
                 if (start !== null && end !== null) {
                     inputEl.setSelectionRange(start, end);
                 }
+                onTeacherNameChange(inputEl, isQuick);
+            });
+
+            inputEl.addEventListener('change', () => {
+                onTeacherNameChange(inputEl, isQuick);
+            });
+        });
+
+        // Autocompleta dados cadastrais caso o professor digite ou altere o e-mail
+        ['eval-email', 'quickEmail'].forEach(id => {
+            const emailEl = document.getElementById(id);
+            if (!emailEl) return;
+            const isQuick = (id === 'quickEmail');
+
+            emailEl.addEventListener('input', () => {
+                onTeacherEmailChange(emailEl, isQuick);
+            });
+            emailEl.addEventListener('change', () => {
+                onTeacherEmailChange(emailEl, isQuick);
             });
         });
 
@@ -3045,18 +3359,38 @@
         });
 
         // Envio do Formulário: Salva Avaliação 2026 E Registra Presença SOMENTE se 100% preenchido
-        const evalForm = document.getElementById('evaluationForm');
-        evalForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+                // ==========================================================================
+        // SUBMISSÃO SEGURA E ROBUSTA DA AVALIAÇÃO
+        // ==========================================================================
+        window.submitEvaluationForm = async (e) => {
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
-            // 1. Validação de Identificação Obrigatória
+            // 1. Validação de Identificação Obrigatória com Auto-recuperação
             if (!currentDocente || !currentDocente.email) {
-                alert("Identificação Obrigatória:\nPara que sua presença no Encontro de EDM seja validada, por favor identifique-se com sua Conta Google.");
+                const emailInput = document.getElementById('eval-email')?.value.trim();
+                const nomeInput = document.getElementById('eval-professor')?.value.trim();
+                const escolaInput = document.getElementById('eval-escola')?.value;
+                const savedSession = sessionStorage.getItem(AUTH_SESSION_KEY) || localStorage.getItem(AUTH_SESSION_KEY);
+                if (savedSession) {
+                    try { currentDocente = JSON.parse(savedSession); } catch(err) {}
+                }
+                if ((!currentDocente || !currentDocente.email) && emailInput && nomeInput) {
+                    currentDocente = {
+                        nome: nomeInput,
+                        email: emailInput,
+                        escola: escolaInput || '',
+                        isGoogle: emailInput.includes('@')
+                    };
+                }
+            }
+
+            if (!currentDocente || !currentDocente.email) {
+                alert("Identificação Obrigatória:\nPara que sua presença no Encontro de EDM seja validada, por favor identifique-se com sua Conta Google ou informe seus dados.");
                 window.openAuthGateModal();
                 return;
             }
 
-            // 2. Validação Estrita de Preenchimento Completo (somente registra presença se o formulário for preenchido!)
+            // 2. Validação Estrita de Preenchimento Completo
             const validation = validateCompleteEvaluation();
             if (!validation.valid) {
                 alert("Preenchimento Incompleto:\n\nPara que sua presença no Encontro Formativo de EDM seja confirmada, você deve responder a todas as questões da avaliação anual.\n\n" + validation.message);
@@ -3082,144 +3416,170 @@
             }
 
             const btn = document.getElementById('btnSubmit');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando e Enviando...';
-
-            const now = new Date();
-            const dateStrBR = now.toLocaleDateString('pt-BR');
-            const timeStrBR = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const timestampFormatted = `${dateStrBR} às ${timeStrBR}`;
-            const protocoloCode = 'EDM-2026-' + Math.floor(100000 + Math.random() * 900000);
-
-            // Coleta de dados da avaliação
-            const formData = new FormData(evalForm);
-            const escolaVal = (document.getElementById('eval-escola').value || currentDocente.escola || '').toUpperCase().trim();
-            const professorVal = (document.getElementById('eval-professor').value || currentDocente.nome || '').toUpperCase().trim();
-            const emailVal = (document.getElementById('eval-email').value || currentDocente.email || '').toLowerCase().trim();
-            const anoVal = (document.getElementById('eval-ano').value || currentDocente.ano || '').toUpperCase().trim();
-            const turmaVal = (document.getElementById('eval-turma').value || currentDocente.turma || '').toUpperCase().trim();
-            const periodoVal = (document.getElementById('eval-periodo').value || currentDocente.turno || '').toUpperCase().trim();
-            const turmasCompostasVal = [anoVal, turmaVal ? `Turma ${turmaVal}` : '', periodoVal ? `(${periodoVal})` : ''].filter(Boolean).join(' ');
-            setSystemDate();
-            const dataAvaliacaoVal = getSystemDateISO();
-
-            // Verificação estrita: Apenas 1 resposta por professor(a)
-            const existing = await checkExistingSubmission(emailVal, professorVal);
-            if (existing) {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Avaliação 2026';
-                alert(`Atenção: Já consta no sistema uma avaliação enviada para o(a) docente ${professorVal} (${emailVal}) com o protocolo ${existing.protocolo || existing.authCode || 'registrado'}.\n\nÉ permitida apenas uma resposta de cada professor(a). Sua presença já está confirmada!`);
-                showAlreadySubmittedCard(existing);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                return;
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando e Enviando...';
             }
 
-            const payloadAvaliacao = {
-                escola: escolaVal,
-                professor: professorVal,
-                email: emailVal,
-                ano: anoVal,
-                turma: turmaVal,
-                periodo: periodoVal,
-                turmas: turmasCompostasVal,
-                dataAvaliacao: dataAvaliacaoVal,
-                createdAt: now.toISOString(),
-                protocolo: protocoloCode,
-                presencaEncontro: true,
-                isGoogleAuth: !!currentDocente.isGoogle,
-                tipo: 'avaliacao_e_presenca',
-                respostas: {}
-            };
+            let isSuccess = false;
 
-            for (let [k, v] of formData.entries()) {
-                if (['eval-escola', 'eval-professor', 'eval-email', 'eval-ano', 'eval-turma', 'eval-periodo', 'eval-turmas', 'eval-data'].includes(k)) continue;
-                if (payloadAvaliacao.respostas[k]) {
-                    if (Array.isArray(payloadAvaliacao.respostas[k])) payloadAvaliacao.respostas[k].push(v);
-                    else payloadAvaliacao.respostas[k] = [payloadAvaliacao.respostas[k], v];
-                } else {
-                    payloadAvaliacao.respostas[k] = v;
+            try {
+                const now = new Date();
+                const dateStrBR = now.toLocaleDateString('pt-BR');
+                const timeStrBR = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const timestampFormatted = `${dateStrBR} às ${timeStrBR}`;
+                const protocoloCode = 'EDM-2026-' + Math.floor(100000 + Math.random() * 900000);
+
+                // Coleta de dados da avaliação
+                const formData = new FormData(document.getElementById('evaluationForm'));
+                const escolaVal = (document.getElementById('eval-escola')?.value || currentDocente.escola || '').toUpperCase().trim();
+                const professorVal = (document.getElementById('eval-professor')?.value || currentDocente.nome || '').toUpperCase().trim();
+                const emailVal = (document.getElementById('eval-email')?.value || currentDocente.email || '').toLowerCase().trim();
+                const anoVal = (document.getElementById('eval-ano')?.value || currentDocente.ano || '').toUpperCase().trim();
+                const turmaVal = (document.getElementById('eval-turma')?.value || currentDocente.turma || '').toUpperCase().trim();
+                const periodoVal = (document.getElementById('eval-periodo')?.value || currentDocente.turno || '').toUpperCase().trim();
+                const turmasCompostasVal = [anoVal, turmaVal ? `Turma ${turmaVal}` : '', periodoVal ? `(${periodoVal})` : ''].filter(Boolean).join(' ');
+                setSystemDate();
+                const dataAvaliacaoVal = getSystemDateISO();
+
+                // Verificação estrita: Apenas 1 resposta por professor(a)
+                const existing = await checkExistingSubmission(emailVal, professorVal);
+                if (existing) {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Avaliação 2026';
+                    }
+                    alert(`Atenção: Já consta no sistema uma avaliação enviada para o(a) docente ${professorVal} (${emailVal}) com o protocolo ${existing.protocolo || existing.authCode || 'registrado'}.
+
+É permitida apenas uma resposta de cada professor(a). Sua presença já está confirmada!`);
+                    showAlreadySubmittedCard(existing);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+
+                const payloadAvaliacao = {
+                    escola: escolaVal,
+                    professor: professorVal,
+                    email: emailVal,
+                    ano: anoVal,
+                    turma: turmaVal,
+                    periodo: periodoVal,
+                    turmas: turmasCompostasVal,
+                    dataAvaliacao: dataAvaliacaoVal,
+                    createdAt: now.toISOString(),
+                    protocolo: protocoloCode,
+                    presencaEncontro: true,
+                    isGoogleAuth: !!currentDocente.isGoogle,
+                    tipo: 'avaliacao_e_presenca',
+                    respostas: {}
+                };
+
+                for (let [k, v] of formData.entries()) {
+                    if (['eval-escola', 'eval-professor', 'eval-email', 'eval-ano', 'eval-turma', 'eval-periodo', 'eval-turmas', 'eval-data'].includes(k)) continue;
+                    if (payloadAvaliacao.respostas[k]) {
+                        if (Array.isArray(payloadAvaliacao.respostas[k])) payloadAvaliacao.respostas[k].push(v);
+                        else payloadAvaliacao.respostas[k] = [payloadAvaliacao.respostas[k], v];
+                    } else {
+                        payloadAvaliacao.respostas[k] = v;
+                    }
+                }
+
+                // Payload para a Coleção de Presença Oficial de EDM
+                const payloadPresenca = {
+                    professor: professorVal,
+                    email: emailVal,
+                    escola: escolaVal,
+                    ano: anoVal,
+                    turma: turmaVal,
+                    periodo: periodoVal,
+                    data: dateStrBR,
+                    timestamp: timestampFormatted,
+                    authCode: protocoloCode,
+                    origem: 'avaliacao_anual_edm',
+                    tipo: 'avaliacao_e_presenca',
+                    isGoogleAuth: !!currentDocente.isGoogle,
+                    createdAt: now.toISOString()
+                };
+
+                const docId = emailVal.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                try {
+                    // 1. Salva Avaliação Anual em avaliacoes_2026 usando docId exclusivo do professor
+                    await setDoc(doc(db, "avaliacoes_2026", docId), payloadAvaliacao);
+                    console.log("Avaliação salva com sucesso!");
+
+                    // 2. Registra Presença Oficial na coleção presencas (compatível com lista_presenca)
+                    try {
+                        const presencaDocId = 'presenca_' + docId;
+                        await setDoc(doc(db, "presencas", presencaDocId), payloadPresenca);
+                        console.log("Presença oficial no Encontro computada com sucesso!");
+                    } catch (presencaErr) {
+                        console.warn("Aviso ao registrar presença oficial:", presencaErr);
+                    }
+                } catch (firestoreErr) {
+                    console.warn("Firestore offline ou restrito, guardando backup local:", firestoreErr);
+                    const savedAll = JSON.parse(localStorage.getItem('edm_avaliacoes_submetidas') || '[]');
+                    savedAll.push(payloadAvaliacao);
+                    localStorage.setItem('edm_avaliacoes_submetidas', JSON.stringify(savedAll));
+                }
+
+                // Salva registro local da avaliação enviada por este e-mail
+                try {
+                    localStorage.setItem('edm_avaliacao_enviada_' + docId, JSON.stringify(payloadAvaliacao));
+                } catch (e) {}
+
+                // Atualiza status do Card de Presença para Confirmado
+                const presenceBadge = document.getElementById('presenceStatusBadge');
+                if (presenceBadge) {
+                    presenceBadge.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+                    presenceBadge.style.color = '#059669';
+                    presenceBadge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                    presenceBadge.innerHTML = '<i class="fas fa-check-double"></i> Presença no Encontro CONFIRMADA';
+                }
+
+                // Limpa rascunho local e na nuvem
+                localStorage.removeItem(DRAFT_KEY);
+                const emailForDraft = emailVal || currentDocente?.email;
+                if (emailForDraft) {
+                    const docId = emailForDraft.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                    deleteDoc(doc(db, "rascunhos_avaliacoes_2026", docId)).catch(() => {});
+                }
+
+                // Exibe modal de confirmação comemorativo
+                document.getElementById('successProtocol').textContent = protocoloCode;
+                document.getElementById('successTeacher').textContent = `${professorVal} (${escolaVal})`;
+                document.getElementById('successModal').style.display = 'block';
+
+                // Efeito de confetes festivos
+                if (typeof confetti === 'function') {
+                    try {
+                        confetti({
+                            particleCount: 90,
+                            spread: 70,
+                            origin: { y: 0.6 }
+                        });
+                    } catch (confettiErr) {}
+                }
+
+                isSuccess = true;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check-double"></i> Enviado & Presença Confirmada!';
+                }
+            } catch (err) {
+                console.error("Erro ao enviar avaliação:", err);
+                alert("Ocorreu um erro ao enviar a avaliação:\n" + (err.message || err) + "\n\nPor favor, tente novamente.");
+            } finally {
+                if (!isSuccess && btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Avaliação 2026';
                 }
             }
+        };
 
-            // Payload para a Coleção de Presença Oficial de EDM
-            const payloadPresenca = {
-                professor: professorVal,
-                email: emailVal,
-                escola: escolaVal,
-                ano: anoVal,
-                turma: turmaVal,
-                periodo: periodoVal,
-                data: dateStrBR,
-                timestamp: timestampFormatted,
-                authCode: protocoloCode,
-                origem: 'avaliacao_anual_edm',
-                tipo: 'avaliacao_e_presenca',
-                isGoogleAuth: !!currentDocente.isGoogle,
-                createdAt: now.toISOString()
-            };
-
-            const docId = emailVal.toLowerCase().replace(/[^a-z0-9]/g, '_');
-            try {
-                // 1. Salva Avaliação Anual em avaliacoes_2026 usando docId exclusivo do professor
-                await setDoc(doc(db, "avaliacoes_2026", docId), payloadAvaliacao);
-                console.log("Avaliação salva com sucesso!");
-
-                // 2. Registra Presença Oficial na coleção presencas (compatível com lista_presenca)
-                try {
-                    const presencaDocId = 'presenca_' + docId;
-                    await setDoc(doc(db, "presencas", presencaDocId), payloadPresenca);
-                    console.log("Presença oficial no Encontro computada com sucesso!");
-                } catch (presencaErr) {
-                    console.warn("Aviso ao registrar presença oficial:", presencaErr);
-                }
-            } catch (firestoreErr) {
-                console.warn("Firestore offline ou restrito, guardando backup local:", firestoreErr);
-                const savedAll = JSON.parse(localStorage.getItem('edm_avaliacoes_submetidas') || '[]');
-                savedAll.push(payloadAvaliacao);
-                localStorage.setItem('edm_avaliacoes_submetidas', JSON.stringify(savedAll));
-            }
-
-            // Salva registro local da avaliação enviada por este e-mail
-            try {
-                localStorage.setItem('edm_avaliacao_enviada_' + docId, JSON.stringify(payloadAvaliacao));
-            } catch (e) {}
-
-            // Atualiza status do Card de Presença para Confirmado
-            const presenceBadge = document.getElementById('presenceStatusBadge');
-            if (presenceBadge) {
-                presenceBadge.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
-                presenceBadge.style.color = '#059669';
-                presenceBadge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-                presenceBadge.innerHTML = '<i class="fas fa-check-double"></i> Presença no Encontro CONFIRMADA';
-            }
-
-            // Limpa rascunho local e na nuvem
-            localStorage.removeItem(DRAFT_KEY);
-            const emailForDraft = emailVal || currentDocente?.email;
-            if (emailForDraft) {
-                const docId = emailForDraft.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                deleteDoc(doc(db, "rascunhos_avaliacoes_2026", docId)).catch(() => {});
-            }
-
-            // Exibe modal de confirmação comemorativo
-            document.getElementById('successProtocol').textContent = protocoloCode;
-            document.getElementById('successTeacher').textContent = `${professorVal} (${escolaVal})`;
-            document.getElementById('successModal').style.display = 'block';
-
-            // Efeito de confetes festivos
-            if (typeof confetti === 'function') {
-                try {
-                    confetti({
-                        particleCount: 90,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
-                } catch (confettiErr) {}
-            }
-
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check-double"></i> Enviado & Presença Confirmada!';
-        });
+        const evalForm = document.getElementById('evaluationForm');
+        if (evalForm) {
+            evalForm.addEventListener('submit', window.submitEvaluationForm);
+        }
 
         // Navegador Rápido de Questões Pendentes
         window.goToNextUnanswered = () => {

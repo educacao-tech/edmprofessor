@@ -1960,9 +1960,9 @@ function renderTable() {
                         const aval = avaliacoesMap.get(profNorm) || (profEmail ? avaliacoesMap.get(profEmail) : null);
                         if (aval) {
                             const d = aval.createdAt ? new Date(aval.createdAt).toLocaleDateString('pt-BR') : '';
-                            tableHTML += `<td class="text-center col-avaliacao-status admin-only"><span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3);" title="Entregue em ${d} - Protocolo ${escapeHTML(aval.protocolo || '')}"><i class="fas fa-check-circle"></i> Concluída</span></td>`;
+                            tableHTML += `<td class="text-center col-avaliacao-status admin-only"><span class="badge badge-avaliacao-concluida" title="Entregue em ${d} - Protocolo ${escapeHTML(aval.protocolo || '')}"><i class="fas fa-check-circle"></i> Concluída</span></td>`;
                         } else {
-                            tableHTML += `<td class="text-center col-avaliacao-status admin-only"><span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.25);" title="Avaliação 2026 pendente"><i class="fas fa-clock"></i> Pendente</span></td>`;
+                            tableHTML += `<td class="text-center col-avaliacao-status admin-only"><span class="badge badge-avaliacao-pendente" title="Avaliação 2026 pendente"><i class="fas fa-clock"></i> Pendente</span></td>`;
                         }
                     }
 

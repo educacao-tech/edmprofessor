@@ -1,27 +1,45 @@
 :root {
-    --primary-color: #007bff;
-    --primary-hover: #0056b3;
-    --bg-color: #f8f9fa;
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-light: #eff6ff;
+    --primary-gradient: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    --bg-color: #f8fafc;
     --card-bg: #ffffff;
-    --text-color: #2d3436;
-    --text-secondary: #636e72;
-    --border-color: #dfe6e9;
-    --success-color: #27ae60;
-    --danger-color: #d63031;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --zebra-bg: rgba(0, 0, 0, 0.035);
+    --text-color: #0f172a;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --success-color: #10b981;
+    --success-light: #ecfdf5;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --danger-light: #fef2f2;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    --zebra-bg: rgba(248, 250, 252, 0.65);
+    --hover-bg: rgba(37, 99, 235, 0.045);
 }
 
 html[data-theme="dark"] {
-    --bg-color: #121212;
-    --card-bg: #1e1e1e;
-    --text-color: #e0e0e0;
-    --text-secondary: #b0b0b0;
-    --border-color: #333333;
-    --primary-color: #3791f9;
-    --primary-hover: #56a2f9;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-    --zebra-bg: rgba(255, 255, 255, 0.035);
+    --primary-color: #3b82f6;
+    --primary-hover: #60a5fa;
+    --primary-light: rgba(59, 130, 246, 0.15);
+    --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    --bg-color: #0b0f19;
+    --card-bg: #111827;
+    --text-color: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #1e293b;
+    --success-color: #34d399;
+    --success-light: rgba(16, 185, 129, 0.15);
+    --warning-color: #fbbf24;
+    --danger-color: #f87171;
+    --danger-light: rgba(239, 68, 68, 0.15);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+    --zebra-bg: rgba(255, 255, 255, 0.02);
+    --hover-bg: rgba(59, 130, 246, 0.08);
 }
 
 html {
@@ -371,29 +389,35 @@ table {
 }
 
 th, td {
-    padding: 3px 8px;
+    padding: 6px 10px;
     text-align: left;
     vertical-align: middle;
     border-bottom: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
+    border-right: none;
     font-size: 0.81rem;
-    line-height: 1.2;
+    line-height: 1.35;
+    transition: background-color 0.15s ease;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+tbody tr {
     transition: background-color 0.15s ease;
 }
 
-td:hover {
+tbody tr:hover td {
+    background-color: var(--hover-bg) !important;
+}
+
+tbody tr:nth-child(even) td {
     background-color: var(--zebra-bg);
 }
 
-th:last-child, td:last-child {
-    border-right: none;
-}
-
 th {
-    padding: 5px 8px;
-    background-color: var(--primary-color);
-    color: white;
-    font-size: 0.73rem;
+    padding: 7px 10px;
+    background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
+    color: #ffffff;
+    font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     position: sticky;
@@ -402,12 +426,24 @@ th {
     font-weight: 700;
     cursor: pointer;
     user-select: none;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
     white-space: nowrap;
+    border-bottom: 2px solid #1e3a8a;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 th:hover {
-    background-color: var(--primary-hover);
+    background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+html[data-theme="dark"] th {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    color: #f1f5f9;
+    border-bottom: 2px solid #334155;
+}
+
+html[data-theme="dark"] th:hover {
+    background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
 }
 
 .badge {
@@ -484,20 +520,12 @@ body.is-admin .badge {
 }
 
 body.is-admin .badge:hover {
-    filter: brightness(1.1);
-    transform: scale(1.05);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
 }
 
 body.is-admin .badge:active {
-    transform: scale(0.95);
-}
-
-.badge-presente {
-    background-color: var(--success-color);
-}
-
-.badge-ausente {
-    background-color: var(--danger-color);
+    transform: scale(0.97);
 }
 
 /* Tags Coloridas para Turnos */
@@ -3174,4 +3202,222 @@ html[data-theme="dark"] .filters {
 .metadata-item-row.is-active-encontro {
     background: rgba(16, 185, 129, 0.05);
     border-left: 3px solid #10b981;
+}
+
+
+/* === REFINAMENTOS VISUAIS MODERNOS (SAAS/DASHBOARD) === */
+/* Efeito de Vidro e Sombra no Cabeçalho */
+.header-section.header-unified {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="dark"] .header-section.header-unified {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.75) 100%);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Badge EDM com Gradiente Moderno */
+.header-badge {
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25) !important;
+    border-radius: 5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.06em !important;
+}
+
+/* Botões com Micro-interações */
+.btn {
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-primary {
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25) !important;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Barra de Filtros Refinada */
+.filters {
+    background: var(--card-bg) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03) !important;
+    border-radius: 10px !important;
+}
+
+html[data-theme="dark"] .filters {
+    background: rgba(30, 41, 59, 0.4) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+.filters input[type="text"]:focus,
+.filters select:focus,
+.filters .multiselect-btn:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Badges de Avaliação 2026 */
+.badge-avaliacao-concluida {
+    background: rgba(16, 185, 129, 0.14) !important;
+    color: #047857 !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    font-weight: 700;
+    font-size: 0.74rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+html[data-theme="dark"] .badge-avaliacao-concluida {
+    background: rgba(16, 185, 129, 0.22) !important;
+    color: #34d399 !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+.badge-avaliacao-pendente {
+    background: rgba(245, 158, 11, 0.14) !important;
+    color: #b45309 !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    font-weight: 700;
+    font-size: 0.74rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+html[data-theme="dark"] .badge-avaliacao-pendente {
+    background: rgba(245, 158, 11, 0.22) !important;
+    color: #fbbf24 !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Botão do WhatsApp na Tabela */
+.table-phone-link {
+    color: #059669;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(16, 185, 129, 0.09);
+    transition: all 0.15s ease;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.table-phone-link:hover {
+    background: rgba(16, 185, 129, 0.2);
+    color: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.15);
+}
+
+.table-phone-link i {
+    color: #25d366;
+    font-size: 0.88rem;
+}
+
+html[data-theme="dark"] .table-phone-link {
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.15);
+}
+
+html[data-theme="dark"] .table-phone-link:hover {
+    background: rgba(16, 185, 129, 0.25);
+    color: #6ee7b7;
+}
+
+/* Link de E-mail na Tabela */
+.email-table-link {
+    color: var(--text-color);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    max-width: 210px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.email-table-link:hover {
+    color: var(--primary-color);
+    background: var(--hover-bg);
+}
+
+.email-table-link i {
+    color: var(--primary-color);
+    opacity: 0.85;
+}
+
+/* Animação Suave no Dot de Presença */
+.dot-presente {
+    background-color: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    animation: pulseDot 2s infinite;
+}
+
+.dot-ausente {
+    background-color: #ef4444;
+}
+
+@keyframes pulseDot {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+    70% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Controles de Densidade e Visualização Segmentados */
+.density-toggle,
+.view-mode-toggle {
+    background: var(--bg-color) !important;
+    padding: 2px !important;
+    border-radius: 8px !important;
+    gap: 2px !important;
+}
+
+.btn-toggle {
+    border-radius: 6px !important;
+}
+
+.btn-toggle.active {
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25) !important;
+}
+
+/* Cartões com Elevação e Avatar Gradiente */
+.prof-card {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.prof-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.08) !important;
+    border-color: rgba(37, 99, 235, 0.3) !important;
+}
+
+.prof-card-avatar {
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
 }
