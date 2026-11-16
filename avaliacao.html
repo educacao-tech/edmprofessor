@@ -702,19 +702,79 @@
             100% { background-position: 0 0; }
         }
 
-        /* Destaque para Questão Não Preenchida */
+        /* Destaque e Pulsação Amigável para Questão Pendente */
+        .unanswered-friendly-pulse,
         .unanswered-highlight {
-            outline: 2.5px solid #ef4444 !important;
-            outline-offset: 4px;
-            background-color: rgba(239, 68, 68, 0.06) !important;
-            border-radius: 14px !important;
-            animation: shakeHighlight 0.4s ease-in-out;
+            position: relative !important;
+            border-color: #f43f5e !important;
+            box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.22), 0 10px 25px rgba(244, 63, 94, 0.12) !important;
+            background-color: rgba(244, 63, 94, 0.04) !important;
+            border-radius: 16px !important;
+            animation: friendlyPulse 1.8s infinite ease-in-out, shakeHighlight 0.4s ease-in-out;
+            transition: all 0.3s ease;
+        }
+
+        html[data-theme="dark"] .unanswered-friendly-pulse,
+        html[data-theme="dark"] .unanswered-highlight {
+            border-color: #fb7185 !important;
+            box-shadow: 0 0 0 4px rgba(251, 113, 133, 0.28), 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+            background-color: rgba(244, 63, 94, 0.08) !important;
+        }
+
+        @keyframes friendlyPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.45), 0 8px 20px rgba(244, 63, 94, 0.12);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(244, 63, 94, 0.08), 0 12px 28px rgba(244, 63, 94, 0.18);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(244, 63, 94, 0), 0 8px 20px rgba(244, 63, 94, 0.12);
+            }
         }
 
         @keyframes shakeHighlight {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
+            20%, 60% { transform: translateX(-4px); }
+            40%, 80% { transform: translateX(4px); }
+        }
+
+        /* Aviso em Balão (Tooltip) Anexado ao Card da Questão Pendente */
+        .pending-balloon-tag {
+            position: absolute;
+            top: -14px;
+            right: 20px;
+            background: linear-gradient(135deg, #e11d48, #be123c);
+            color: #ffffff !important;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 10;
+            pointer-events: none;
+            animation: popInBalloon 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .pending-balloon-tag::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            right: 18px;
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: #be123c transparent;
+            display: block;
+            width: 0;
+        }
+
+        @keyframes popInBalloon {
+            0% { transform: scale(0.7) translateY(8px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
         }
 
         /* ==========================================================================
@@ -3941,8 +4001,8 @@
                     const card = el.closest('.question-item');
                     if (card) {
                         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        card.classList.add('unanswered-highlight');
-                        setTimeout(() => card.classList.remove('unanswered-highlight'), 1800);
+                        card.classList.add('unanswered-friendly-pulse');
+                        setTimeout(() => card.classList.remove('unanswered-friendly-pulse'), 1800);
                         const focusable = card.querySelector('input, textarea');
                         if (focusable) focusable.focus();
                     }
@@ -4093,21 +4153,80 @@
             });
         }
 
+        // ==========================================================================
+        // VALIDAÇÃO AMIGÁVEL COM FOCO AUTOMÁTICO E AVISO EM BALÃO
+        // ==========================================================================
+        window.highlightUnanswered = (validation) => {
+            if (!validation) return;
+
+            // Limpa destaques e balões anteriores
+            document.querySelectorAll('.unanswered-friendly-pulse, .unanswered-highlight').forEach(el => {
+                el.classList.remove('unanswered-friendly-pulse', 'unanswered-highlight');
+            });
+            document.querySelectorAll('.pending-balloon-tag').forEach(b => b.remove());
+
+            if (!validation.element) {
+                if (validation.message) {
+                    showToast(validation.message, "warning");
+                }
+                return;
+            }
+
+            const el = validation.element;
+            const card = el.closest('.question-item') || el.closest('.ident-field') || el.closest('.ident-card') || el;
+
+            // Aplica a pulsação suave amigável
+            card.classList.add('unanswered-friendly-pulse');
+
+            // Cria e anexa o balão de aviso amigável
+            const balloon = document.createElement('div');
+            balloon.className = 'pending-balloon-tag';
+            balloon.innerHTML = '<i class="fas fa-hand-point-right"></i> Preenchimento obrigatório';
+            card.style.position = 'relative';
+            card.appendChild(balloon);
+
+            // Rola suavemente até o elemento mantendo margem superior confortável
+            const yOffset = -105;
+            const rect = card.getBoundingClientRect();
+            const targetY = rect.top + window.pageYOffset + yOffset;
+            window.scrollTo({
+                top: Math.max(0, targetY),
+                behavior: 'smooth'
+            });
+
+            // Foca o campo interativo sem salto brusco
+            const focusable = card.querySelector('input:not([type="hidden"]), textarea, select');
+            if (focusable) {
+                try { focusable.focus({ preventScroll: true }); } catch (err) {}
+            }
+
+            // Exibe notificação flutuante suave (toast)
+            if (validation.message) {
+                showToast(validation.message, "warning");
+            }
+
+            // Remove automaticamente a pulsação e o balão assim que houver preenchimento
+            const clearPending = () => {
+                card.classList.remove('unanswered-friendly-pulse');
+                balloon.style.opacity = '0';
+                balloon.style.transform = 'scale(0.8)';
+                balloon.style.transition = 'all 0.3s ease';
+                setTimeout(() => balloon.remove(), 300);
+                card.removeEventListener('input', clearPending);
+                card.removeEventListener('change', clearPending);
+            };
+            card.addEventListener('input', clearPending, { once: true });
+            card.addEventListener('change', clearPending, { once: true });
+        };
+
         window.goToStep = (targetStep, skipValidation = false) => {
             if (targetStep < 0 || targetStep >= TOTAL_STEPS) return;
 
-            // Se estiver tentando avançar além da etapa atual, valida a etapa atual
+            // Se estiver tentando avançar além da etapa atual, valida a etapa atual de forma amigável
             if (!skipValidation && targetStep > currentStep) {
                 const validation = validateStep(currentStep);
                 if (!validation.valid) {
-                    alert(validation.message);
-                    document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
-                    if (validation.element) {
-                        validation.element.classList.add('unanswered-highlight');
-                        validation.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        const focusable = validation.element.querySelector('input, textarea, select');
-                        if (focusable) focusable.focus();
-                    }
+                    highlightUnanswered(validation);
                     return;
                 }
             }
@@ -4638,25 +4757,19 @@
             // 2. Validação Estrita de Preenchimento Completo
             const validation = validateCompleteEvaluation();
             if (!validation.valid) {
-                alert("Preenchimento Incompleto:\n\nPara que sua presença no Encontro Formativo de EDM seja confirmada, você deve responder a todas as questões da avaliação anual.\n\n" + validation.message);
-                
-                if (validation.stepIndex !== undefined) {
+                if (validation.stepIndex !== undefined && validation.stepIndex !== currentStep) {
                     goToStep(validation.stepIndex, true);
                 } else if (validation.element) {
                     const targetPane = validation.element.closest('.eval-step-pane');
                     if (targetPane) {
                         const stepIdx = parseInt(targetPane.id.replace('step-pane-', ''), 10);
-                        if (!isNaN(stepIdx)) goToStep(stepIdx, true);
+                        if (!isNaN(stepIdx) && stepIdx !== currentStep) goToStep(stepIdx, true);
                     }
                 }
 
-                document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
-                if (validation.element) {
-                    validation.element.classList.add('unanswered-highlight');
-                    validation.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    const focusable = validation.element.querySelector('input, textarea, select');
-                    if (focusable) focusable.focus();
-                }
+                setTimeout(() => {
+                    highlightUnanswered(validation);
+                }, 220);
                 return;
             }
 
@@ -4830,28 +4943,27 @@
         window.goToNextUnanswered = () => {
             const validation = validateCompleteEvaluation();
             if (!validation.valid) {
-                if (validation.stepIndex !== undefined) {
+                if (validation.stepIndex !== undefined && validation.stepIndex !== currentStep) {
                     goToStep(validation.stepIndex, true);
                 } else if (validation.element) {
                     const targetPane = validation.element.closest('.eval-step-pane');
                     if (targetPane) {
                         const stepIdx = parseInt(targetPane.id.replace('step-pane-', ''), 10);
-                        if (!isNaN(stepIdx)) goToStep(stepIdx, true);
+                        if (!isNaN(stepIdx) && stepIdx !== currentStep) goToStep(stepIdx, true);
                     }
                 }
 
-                document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
-                if (validation.element) {
-                    validation.element.classList.add('unanswered-highlight');
-                    validation.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    const focusable = validation.element.querySelector('input, textarea, select');
-                    if (focusable) focusable.focus();
-                }
+                setTimeout(() => {
+                    highlightUnanswered(validation);
+                }, 220);
             } else {
-                alert("Parabéns! Todas as questões foram preenchidas. Você já pode enviar sua avaliação.");
+                showToast("Parabéns! Todas as 28 questões foram preenchidas. Você já pode enviar sua avaliação.", "success");
                 goToStep(6, true);
                 const btnSubmit = document.getElementById('btnSubmit');
-                if (btnSubmit) btnSubmit.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (btnSubmit) {
+                    btnSubmit.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    btnSubmit.focus();
+                }
             }
         };
 
