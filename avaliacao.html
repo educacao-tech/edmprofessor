@@ -1139,6 +1139,54 @@
             position: relative;
         }
 
+        /* Badge com dica de tecla de atalho numérico (1 a 4) */
+        .shortcut-key-badge {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 4px;
+            font-size: 0.72rem;
+            font-family: inherit;
+            font-weight: 800;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        html[data-theme="dark"] .shortcut-key-badge {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+        }
+
+        .option-label:hover .shortcut-key-badge {
+            opacity: 1;
+            border-color: rgba(37, 99, 235, 0.5);
+            color: var(--primary-color);
+        }
+
+        .option-label.checked .shortcut-key-badge {
+            opacity: 1;
+            background: rgba(37, 99, 235, 0.16);
+            color: var(--primary-color);
+            border-color: rgba(37, 99, 235, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .shortcut-key-badge {
+                display: none !important;
+            }
+        }
+
         .option-label:hover {
             background-color: var(--zebra-bg);
             border-color: rgba(37, 99, 235, 0.45);
@@ -1875,6 +1923,9 @@
                 <span class="draft-status-pill" id="draftStatus">
                     <i class="fas fa-cloud-arrow-up"></i> Rascunho salvo
                 </span>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleShortcutsModal()" title="Ver atalhos rápidos de teclado (Alt + Setas, Enter, Teclas 1 a 4)">
+                    <i class="fas fa-keyboard"></i> Atalhos
+                </button>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="printBlankFormDirectly()" title="Imprimir formulário oficial em branco para preenchimento manual em papel">
                     <i class="fas fa-print"></i> Imprimir em Branco
                 </button>
@@ -2721,6 +2772,50 @@
                 </span>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="toggleQuestionsMap(false)">
                     Fechar Mapa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Atalhos de Teclado -->
+    <div id="shortcutsModal" class="modal" style="display: none;" onclick="if(event.target===this) toggleShortcutsModal(false)">
+        <div class="modal-content" style="max-width: 500px; padding: 24px; border-radius: 20px;">
+            <div class="modal-header" style="margin-bottom: 18px; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(37,99,235,0.12); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                        <i class="fas fa-keyboard"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-color);">Atalhos de Teclado</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">Navegue e responda mais rápido pelo computador</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="toggleShortcutsModal(false)" title="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.88rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--zebra-bg); border-radius: 10px; border: 1px solid var(--border-color);">
+                    <span>Avançar para o próximo bloco</span>
+                    <span style="display: flex; gap: 4px; align-items: center;"><kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">Alt</kbd> + <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">→</kbd> ou <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">Enter</kbd></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--zebra-bg); border-radius: 10px; border: 1px solid var(--border-color);">
+                    <span>Retornar ao bloco anterior</span>
+                    <span style="display: flex; gap: 4px; align-items: center;"><kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">Alt</kbd> + <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">←</kbd></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--zebra-bg); border-radius: 10px; border: 1px solid var(--border-color);">
+                    <span>Selecionar alternativa na questão</span>
+                    <span style="display: flex; gap: 4px; align-items: center;"><kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">1</kbd> <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">2</kbd> <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">3</kbd> <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">4</kbd></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--zebra-bg); border-radius: 10px; border: 1px solid var(--border-color);">
+                    <span>Fechar janelas e modais</span>
+                    <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">Esc</kbd>
+                </div>
+            </div>
+            <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.78rem; color: var(--text-secondary);"><i class="fas fa-info-circle"></i> As teclas numéricas não afetam caixas de texto.</span>
+                <button type="button" class="btn btn-primary btn-sm" onclick="toggleShortcutsModal(false)" style="padding: 7px 18px; font-weight: 700;">
+                    Entendido
                 </button>
             </div>
         </div>
@@ -4151,6 +4246,17 @@
                     }
                 }
             });
+
+            // Adiciona badges numéricos de atalho (1 a 4) nas questões de escolha única para desktop
+            document.querySelectorAll('.question-item').forEach(item => {
+                const radios = Array.from(item.querySelectorAll('.option-label input[type="radio"]'));
+                radios.forEach((r, idx) => {
+                    const label = r.closest('.option-label');
+                    if (label && !label.querySelector('.shortcut-key-badge') && idx < 4) {
+                        label.insertAdjacentHTML('beforeend', `<kbd class="shortcut-key-badge" title="Pressione a tecla ${idx + 1} no teclado para selecionar">${idx + 1}</kbd>`);
+                    }
+                });
+            });
         }
 
         // ==========================================================================
@@ -4258,6 +4364,118 @@
         window.prevStep = () => {
             goToStep(Math.max(0, currentStep - 1), true);
         };
+
+        // ==========================================================================
+        // ATALHOS DE TECLADO PARA NAVEGAÇÃO E PREENCHIMENTO RÁPIDO
+        // ==========================================================================
+        window.toggleShortcutsModal = (open) => {
+            const modal = document.getElementById('shortcutsModal');
+            if (!modal) return;
+            const shouldOpen = (open !== undefined) ? open : (modal.style.display !== 'block');
+            modal.style.display = shouldOpen ? 'block' : 'none';
+        };
+
+        function getActiveOrVisibleQuestion(currentPane) {
+            if (!currentPane) return null;
+
+            // 1. Se o foco atual já está dentro de uma questão
+            if (document.activeElement && currentPane.contains(document.activeElement)) {
+                const parentQ = document.activeElement.closest('.question-item');
+                if (parentQ) return parentQ;
+            }
+
+            // 2. Localiza a questão que está mais próxima do campo de visão central
+            const questions = Array.from(currentPane.querySelectorAll('.question-item')).filter(q => q.offsetParent !== null);
+            if (questions.length === 0) return null;
+
+            const triggerY = window.innerHeight * 0.45;
+            for (let q of questions) {
+                const rect = q.getBoundingClientRect();
+                if (rect.top <= triggerY && rect.bottom >= triggerY) {
+                    return q;
+                }
+            }
+
+            // 3. Fallback: primeira questão visível no viewport
+            const firstVisible = questions.find(q => {
+                const rect = q.getBoundingClientRect();
+                return rect.bottom > 80 && rect.top < window.innerHeight;
+            });
+
+            return firstVisible || questions[0];
+        }
+
+        document.addEventListener('keydown', (e) => {
+            // Em modo de impressão, desativa atalhos
+            if (document.body.classList.contains('print-blank-mode')) return;
+
+            // Se algum modal estiver aberto
+            const openModal = document.querySelector('.modal[style*="display: block"], .auth-gate-modal[style*="display: block"]');
+            if (openModal) {
+                if (e.key === 'Escape') {
+                    if (typeof window.closeAuthGateModal === 'function') window.closeAuthGateModal();
+                    if (typeof window.toggleShortcutsModal === 'function') window.toggleShortcutsModal(false);
+                    if (typeof window.toggleQuestionsMap === 'function') window.toggleQuestionsMap(false);
+                    openModal.style.display = 'none';
+                }
+                return;
+            }
+
+            const activeTag = document.activeElement ? document.activeElement.tagName.toUpperCase() : '';
+            const isTextarea = (activeTag === 'TEXTAREA');
+            const isTextInput = (activeTag === 'INPUT' && ['text', 'email', 'search', 'password', 'number'].includes(document.activeElement.type));
+
+            // 1. Alt + Seta Direita ou Enter (para avançar bloco)
+            // Se estiver em textarea, NÃO intercepta Enter (permite quebra de linha normal)
+            if (e.altKey && e.key === 'ArrowRight') {
+                e.preventDefault();
+                nextStep();
+                return;
+            }
+
+            if (e.key === 'Enter' && !isTextarea) {
+                // Não submete se estiver focado em um botão (deixa o clique nativo acontecer)
+                if (activeTag === 'BUTTON') return;
+                e.preventDefault();
+                nextStep();
+                return;
+            }
+
+            // 2. Alt + Seta Esquerda (para retornar bloco)
+            if (e.altKey && e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevStep();
+                return;
+            }
+
+            // 3. Teclas numéricas 1 a 4 (seleção de alternativa na escala)
+            // Ignora se estiver digitando em campos de texto (para não impedir números no nome/email/dissertativa)
+            if (!isTextarea && !isTextInput && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                let num = null;
+                if (e.key >= '1' && e.key <= '4') num = parseInt(e.key, 10);
+                else if (e.code && e.code.startsWith('Numpad')) {
+                    const digit = parseInt(e.code.replace('Numpad', ''), 10);
+                    if (digit >= 1 && digit <= 4) num = digit;
+                }
+
+                if (num !== null) {
+                    const currentPane = document.querySelector('.eval-step-pane.active');
+                    if (currentPane) {
+                        const targetQuestion = getActiveOrVisibleQuestion(currentPane);
+                        if (targetQuestion) {
+                            const radios = Array.from(targetQuestion.querySelectorAll('input[type="radio"]'));
+                            if (radios.length > 0 && num <= radios.length) {
+                                e.preventDefault();
+                                const chosenRadio = radios[num - 1];
+                                chosenRadio.checked = true;
+                                chosenRadio.dispatchEvent(new Event('change', { bubbles: true }));
+                                chosenRadio.focus({ preventScroll: true });
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
         // Validação Estrita de Preenchimento Completo (confere todas as etapas)
         function validateCompleteEvaluation() {
