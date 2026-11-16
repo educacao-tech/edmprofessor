@@ -1067,6 +1067,102 @@
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.32), 0 8px 24px rgba(0, 0, 0, 0.45) !important;
         }
 
+        /* ==========================================================================
+           MODO FOCO / LEITURA LIMPA
+           Atenua questões vizinhas e ilumina a questão atualmente em foco
+           ========================================================================== */
+        body.focus-mode-active .question-item {
+            opacity: 0.38;
+            filter: grayscale(25%);
+            transform: scale(0.995);
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease, transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body.focus-mode-active .question-item:hover {
+            opacity: 0.82;
+            filter: none;
+            transform: scale(1);
+        }
+
+        body.focus-mode-active .question-item.active-focus-item,
+        body.focus-mode-active .question-item:focus-within {
+            opacity: 1 !important;
+            filter: none !important;
+            transform: scale(1.008) !important;
+            border-color: #8b5cf6 !important;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25), 0 10px 28px -4px rgba(139, 92, 246, 0.15) !important;
+            z-index: 3;
+            background: var(--card-bg) !important;
+            position: relative;
+        }
+
+        html[data-theme="dark"] body.focus-mode-active .question-item.active-focus-item,
+        html[data-theme="dark"] body.focus-mode-active .question-item:focus-within {
+            border-color: #a78bfa !important;
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3), 0 12px 32px -4px rgba(0, 0, 0, 0.55) !important;
+            background: rgba(30, 41, 59, 0.96) !important;
+        }
+
+        body.focus-mode-active .question-item.active-focus-item .question-title .q-num,
+        body.focus-mode-active .question-item:focus-within .question-title .q-num {
+            background: #8b5cf6 !important;
+            color: #ffffff !important;
+            border-color: #7c3aed !important;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
+        }
+
+        /* Badge indicando a Questão em Foco */
+        body.focus-mode-active .question-item.active-focus-item::after {
+            content: "🎯 Em Foco";
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #7c3aed;
+            background: rgba(139, 92, 246, 0.12);
+            padding: 3px 10px;
+            border-radius: 9999px;
+            border: 1px solid rgba(139, 92, 246, 0.28);
+            pointer-events: none;
+            letter-spacing: -0.01em;
+            animation: fadeInFocusBadge 0.25s ease;
+        }
+
+        html[data-theme="dark"] body.focus-mode-active .question-item.active-focus-item::after {
+            color: #c4b5fd;
+            background: rgba(139, 92, 246, 0.25);
+            border-color: rgba(167, 139, 250, 0.4);
+        }
+
+        @keyframes fadeInFocusBadge {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            body.focus-mode-active .question-item.active-focus-item::after {
+                top: 10px;
+                right: 12px;
+                font-size: 0.68rem;
+                padding: 2px 8px;
+            }
+        }
+
+        /* Elementos que devem permanecer nítidos sem atenuação */
+        body.focus-mode-active .ident-card,
+        body.focus-mode-active .eval-block-header,
+        body.focus-mode-active .step-nav-footer,
+        body.focus-mode-active .eval-presentation-card,
+        body.focus-mode-active .eval-review-box,
+        body.focus-mode-active .eval-progress-container,
+        body.focus-mode-active .eval-stepper-container,
+        body.focus-mode-active .chamada-banner,
+        body.focus-mode-active .docente-connected-card {
+            opacity: 1 !important;
+            filter: none !important;
+        }
+
         .question-title {
             font-size: 0.98rem;
             font-weight: 700;
@@ -1988,6 +2084,9 @@
                     <span id="evalProgressText" style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 2px;">0 de 28 respondidas</span>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnToggleFocusMode" onclick="toggleFocusMode()" title="Ativar ou desativar o Modo Foco (destaca a questão atual e atenua as demais para leitura limpa) [Atalho: Alt + F]" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-bullseye" style="color: var(--text-secondary); opacity: 0.6;"></i> <span>Modo Foco: <strong id="focusModeStatusText">Desativado</strong></span>
+                    </button>
                     <button type="button" class="btn btn-secondary btn-sm" id="btnToggleAutoScroll" onclick="toggleAutoScroll()" title="Ativar ou desativar rolagem suave automática para a próxima questão ao selecionar alternativas" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
                         <i class="fas fa-bolt" style="color: #2563eb;"></i> <span>Auto-Scroll: <strong>Ativado</strong></span>
                     </button>
@@ -2806,6 +2905,10 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--zebra-bg); border-radius: 10px; border: 1px solid var(--border-color);">
                     <span>Selecionar alternativa na questão</span>
                     <span style="display: flex; gap: 4px; align-items: center;"><kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">1</kbd> <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">2</kbd> <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">3</kbd> <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">4</kbd></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--zebra-bg); border-radius: 10px; border: 1px solid var(--border-color);">
+                    <span>Alternar Modo Foco / Leitura Limpa</span>
+                    <span style="display: flex; gap: 4px; align-items: center;"><kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">Alt</kbd> + <kbd style="padding: 3px 8px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 700; font-size: 0.8rem;">F</kbd></span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--zebra-bg); border-radius: 10px; border: 1px solid var(--border-color);">
                     <span>Fechar janelas e modais</span>
@@ -4348,6 +4451,9 @@
             if (currentStep === 6) {
                 renderReviewContent();
             }
+            if (typeof isFocusModeEnabled !== 'undefined' && isFocusModeEnabled && typeof window.ensureActiveFocusItemInCurrentPane === 'function') {
+                setTimeout(() => window.ensureActiveFocusItemInCurrentPane(), 60);
+            }
             saveDraft();
 
             // Rola suavemente até o topo da área do formulário
@@ -4448,7 +4554,16 @@
                 return;
             }
 
-            // 3. Teclas numéricas 1 a 4 (seleção de alternativa na escala)
+            // 3. Alt + F (alternar Modo Foco / Leitura Limpa)
+            if (e.altKey && (e.key === 'f' || e.key === 'F')) {
+                e.preventDefault();
+                if (typeof window.toggleFocusMode === 'function') {
+                    window.toggleFocusMode();
+                }
+                return;
+            }
+
+            // 4. Teclas numéricas 1 a 4 (seleção de alternativa na escala)
             // Ignora se estiver digitando em campos de texto (para não impedir números no nome/email/dissertativa)
             if (!isTextarea && !isTextInput && !e.ctrlKey && !e.altKey && !e.metaKey) {
                 let num = null;
@@ -4561,6 +4676,9 @@
 
                 if (nextTarget.classList.contains('question-item')) {
                     nextTarget.classList.add('q-active-focus');
+                    if (typeof isFocusModeEnabled !== 'undefined' && isFocusModeEnabled && typeof window.setActiveFocusItem === 'function') {
+                        window.setActiveFocusItem(nextTarget);
+                    }
                     setTimeout(() => nextTarget.classList.remove('q-active-focus'), 1800);
                 }
 
@@ -4575,6 +4693,98 @@
                 });
             }, 300);
         }
+
+        // ==========================================================================
+        // MODO FOCO / LEITURA LIMPA
+        // Destaca nitidamente a questão atual e atenua as vizinhas para foco total
+        // ==========================================================================
+        let isFocusModeEnabled = localStorage.getItem('edm_focus_mode_enabled') === 'true';
+
+        window.toggleFocusMode = () => {
+            isFocusModeEnabled = !isFocusModeEnabled;
+            localStorage.setItem('edm_focus_mode_enabled', isFocusModeEnabled ? 'true' : 'false');
+            applyFocusModeUI();
+            if (typeof window.showToast === 'function') {
+                window.showToast(
+                    isFocusModeEnabled ? "🎯 Modo Foco ativado: questão atual destacada com leitura limpa." : "Modo Foco desativado: visualização normal restaurada.",
+                    isFocusModeEnabled ? "info" : "warning"
+                );
+            }
+        };
+
+        window.setActiveFocusItem = (targetItem) => {
+            if (!targetItem || !targetItem.classList.contains('question-item')) return;
+            document.querySelectorAll('.question-item.active-focus-item').forEach(el => {
+                if (el !== targetItem) el.classList.remove('active-focus-item');
+            });
+            targetItem.classList.add('active-focus-item');
+        };
+
+        window.ensureActiveFocusItemInCurrentPane = () => {
+            const activePane = document.querySelector('.eval-step-pane.active');
+            if (!activePane) return;
+            let currentActive = activePane.querySelector('.question-item.active-focus-item');
+            if (!currentActive) {
+                const questions = Array.from(activePane.querySelectorAll('.question-item'));
+                for (const q of questions) {
+                    if (q.id === 'q28-container' && q.style.display === 'none') continue;
+                    const inputs = q.querySelectorAll('input, textarea, select');
+                    let answered = false;
+                    for (const inp of inputs) {
+                        if ((inp.type === 'radio' || inp.type === 'checkbox') && inp.checked) answered = true;
+                        if ((inp.tagName === 'TEXTAREA' || inp.type === 'text') && inp.value.trim().length > 0) answered = true;
+                    }
+                    if (!answered) {
+                        currentActive = q;
+                        break;
+                    }
+                }
+                if (!currentActive && questions.length > 0) {
+                    currentActive = questions[0];
+                }
+            }
+            if (currentActive) {
+                window.setActiveFocusItem(currentActive);
+            }
+        };
+
+        function applyFocusModeUI() {
+            document.body.classList.toggle('focus-mode-active', isFocusModeEnabled);
+            const btn = document.getElementById('btnToggleFocusMode');
+            if (btn) {
+                if (isFocusModeEnabled) {
+                    btn.innerHTML = '<i class="fas fa-bullseye" style="color: #8b5cf6;"></i> <span>Modo Foco: <strong>Ativado</strong></span>';
+                    btn.style.borderColor = 'rgba(139, 92, 246, 0.45)';
+                    btn.style.backgroundColor = 'rgba(139, 92, 246, 0.12)';
+                    btn.style.color = '#7c3aed';
+                    btn.title = "Modo Foco ativado (destaque na questão atual). Clique para desativar [Alt + F].";
+                } else {
+                    btn.innerHTML = '<i class="fas fa-bullseye" style="color: var(--text-secondary); opacity: 0.6;"></i> <span>Modo Foco: <strong>Desativado</strong></span>';
+                    btn.style.borderColor = 'var(--border-color)';
+                    btn.style.backgroundColor = 'transparent';
+                    btn.style.color = 'var(--text-color)';
+                    btn.title = "Ativar Modo Foco para leitura limpa com destaque na questão ativa [Alt + F].";
+                }
+            }
+            if (isFocusModeEnabled) {
+                window.ensureActiveFocusItemInCurrentPane();
+            }
+        }
+
+        // Listener global para cliques e foco em questões (ativa o foco da questão selecionada)
+        document.addEventListener('click', (e) => {
+            const qItem = e.target.closest('.question-item');
+            if (qItem && typeof window.setActiveFocusItem === 'function') {
+                window.setActiveFocusItem(qItem);
+            }
+        });
+
+        document.addEventListener('focusin', (e) => {
+            const qItem = e.target.closest('.question-item');
+            if (qItem && typeof window.setActiveFocusItem === 'function') {
+                window.setActiveFocusItem(qItem);
+            }
+        });
 
         // Sistema de Notificações Toast
         window.showToast = (message, type = 'info') => {
@@ -4880,6 +5090,9 @@
         initCharCounters();
         initOptionSentiments();
         updateAutoScrollButtonUI();
+        if (typeof applyFocusModeUI === 'function') {
+            applyFocusModeUI();
+        }
         if (typeof window.updateQuestionsMapUI === 'function') {
             window.updateQuestionsMapUI();
         }
