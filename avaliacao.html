@@ -994,6 +994,19 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18), 0 8px 24px -4px rgba(0, 0, 0, 0.4) !important;
         }
 
+        /* Destaque suave na próxima questão durante Auto-Scroll */
+        .question-item.q-active-focus {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.28), 0 8px 24px rgba(37, 99, 235, 0.12) !important;
+            transform: translateY(-2px);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html[data-theme="dark"] .question-item.q-active-focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.32), 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+        }
+
         .question-title {
             font-size: 0.98rem;
             font-weight: 700;
@@ -1872,6 +1885,9 @@
                     <span id="evalProgressText" style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 2px;">0 de 28 respondidas</span>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnToggleAutoScroll" onclick="toggleAutoScroll()" title="Ativar ou desativar rolagem suave automática para a próxima questão ao selecionar alternativas" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-bolt" style="color: #2563eb;"></i> <span>Auto-Scroll: <strong>Ativado</strong></span>
+                    </button>
                     <button type="button" class="btn btn-secondary btn-sm" id="btnToggleMap" onclick="toggleQuestionsMap()" title="Ver o mapa completo de todas as 28 questões" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700;">
                         <i class="fas fa-th"></i> Mapa das Questões
                     </button>
@@ -4141,6 +4157,105 @@
             return { valid: true };
         }
 
+        // ==========================================================================
+        // ROLAGEM SUAVE AUTOMÁTICA (AUTO-SCROLL AO RESPONDER)
+        // ==========================================================================
+        let isAutoScrollEnabled = localStorage.getItem('edm_autoscroll_enabled') !== 'false';
+        let autoScrollTimer = null;
+
+        window.toggleAutoScroll = () => {
+            isAutoScrollEnabled = !isAutoScrollEnabled;
+            localStorage.setItem('edm_autoscroll_enabled', isAutoScrollEnabled ? 'true' : 'false');
+            updateAutoScrollButtonUI();
+            if (typeof window.showToast === 'function') {
+                window.showToast(isAutoScrollEnabled ? "⚡ Auto-Scroll ativado: a tela descerá para a próxima questão." : "Auto-Scroll desativado.", isAutoScrollEnabled ? "info" : "warning");
+            }
+        };
+
+        function updateAutoScrollButtonUI() {
+            const btn = document.getElementById('btnToggleAutoScroll');
+            if (!btn) return;
+            if (isAutoScrollEnabled) {
+                btn.innerHTML = '<i class="fas fa-bolt" style="color: #2563eb;"></i> <span>Auto-Scroll: <strong>Ativado</strong></span>';
+                btn.style.borderColor = 'rgba(37, 99, 235, 0.4)';
+                btn.style.backgroundColor = 'rgba(37, 99, 235, 0.08)';
+                btn.title = "Rolagem suave automática ativada. Clique para desativar.";
+            } else {
+                btn.innerHTML = '<i class="fas fa-bolt" style="color: var(--text-secondary); opacity: 0.6;"></i> <span>Auto-Scroll: <strong>Desativado</strong></span>';
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.backgroundColor = 'transparent';
+                btn.title = "Rolagem suave automática desativada. Clique para ativar.";
+            }
+        }
+
+        function triggerAutoScroll(currentItem, currentPane) {
+            if (!isAutoScrollEnabled || document.body.classList.contains('print-blank-mode')) return;
+            if (!currentItem || !currentPane) return;
+
+            // Encontra todas as questões deste bloco/etapa
+            const items = Array.from(currentPane.querySelectorAll('.question-item'));
+            const currentIndex = items.indexOf(currentItem);
+
+            // Procura a próxima questão visível no bloco
+            let nextTarget = null;
+            if (currentIndex >= 0 && currentIndex < items.length - 1) {
+                for (let i = currentIndex + 1; i < items.length; i++) {
+                    const item = items[i];
+                    // Se for o container da Q28, verifica se está visível
+                    if (item.id === 'q28-container' && item.style.display === 'none') {
+                        continue;
+                    }
+                    nextTarget = item;
+                    break;
+                }
+            }
+
+            // Se não houver próxima pergunta visível no bloco, direciona suavemente para o rodapé do bloco (botão de avançar)
+            if (!nextTarget) {
+                nextTarget = currentPane.querySelector('.step-nav-footer');
+            }
+
+            if (!nextTarget) return;
+
+            if (autoScrollTimer) clearTimeout(autoScrollTimer);
+            autoScrollTimer = setTimeout(() => {
+                // Remove destaque anterior
+                document.querySelectorAll('.question-item.q-active-focus').forEach(el => el.classList.remove('q-active-focus'));
+
+                if (nextTarget.classList.contains('question-item')) {
+                    nextTarget.classList.add('q-active-focus');
+                    setTimeout(() => nextTarget.classList.remove('q-active-focus'), 1800);
+                }
+
+                // Cálculo de scroll com folga para o topo (cabeçalho/progresso)
+                const yOffset = -95;
+                const rect = nextTarget.getBoundingClientRect();
+                const targetY = rect.top + window.pageYOffset + yOffset;
+
+                window.scrollTo({
+                    top: Math.max(0, targetY),
+                    behavior: 'smooth'
+                });
+            }, 300);
+        }
+
+        // Sistema de Notificações Toast
+        window.showToast = (message, type = 'info') => {
+            const area = document.getElementById('notification-area');
+            if (!area) return;
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            const iconClass = type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-info-circle';
+            notif.innerHTML = `<i class="fas ${iconClass}" style="margin-right: 8px;"></i> ${escapeHtml(message)}`;
+            area.appendChild(notif);
+            setTimeout(() => {
+                notif.style.opacity = '0';
+                notif.style.transform = 'translateX(100%)';
+                notif.style.transition = 'all 0.4s ease';
+                setTimeout(() => notif.remove(), 400);
+            }, 3200);
+        };
+
         // Estilização interativa das opções (checked visual)
         document.querySelectorAll('.option-label input').forEach(input => {
             input.addEventListener('change', () => {
@@ -4155,6 +4270,13 @@
                 input.closest('.question-item')?.classList.remove('unanswered-highlight');
                 saveDraft();
                 updateProgressUI();
+
+                // Dispara Auto-Scroll apenas para escolha única (rádios marcados)
+                if (input.type === 'radio' && input.checked) {
+                    const currentItem = input.closest('.question-item');
+                    const currentPane = input.closest('.eval-step-pane');
+                    triggerAutoScroll(currentItem, currentPane);
+                }
             });
         });
 
@@ -4420,6 +4542,7 @@
 
         initCharCounters();
         initOptionSentiments();
+        updateAutoScrollButtonUI();
         if (typeof window.updateQuestionsMapUI === 'function') {
             window.updateQuestionsMapUI();
         }
