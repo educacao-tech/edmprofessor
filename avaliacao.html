@@ -1809,6 +1809,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            width: 100%;
         }
 
         .char-progress-track {
@@ -1828,25 +1829,57 @@
             transition: width 0.15s ease, background-color 0.2s ease;
         }
 
-        .char-counter-text {
+        .char-counter-row {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             font-size: 0.74rem;
             color: var(--text-secondary);
             font-weight: 600;
-            letter-spacing: 0.02em;
+            white-space: nowrap;
+            width: 100%;
+            gap: 8px;
+        }
+
+        .char-counter-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            opacity: 0.85;
+            white-space: nowrap;
+        }
+
+        .char-counter-stats {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+            margin-left: auto;
+            letter-spacing: 0.01em;
             transition: color 0.2s ease;
         }
 
-        .char-counter.warning .char-counter-text {
+        .char-counter.warning .char-counter-stats {
             color: #d97706 !important;
             font-weight: 700;
         }
 
-        .char-counter.limit .char-counter-text {
+        .char-counter.limit .char-counter-stats {
             color: #dc2626 !important;
             font-weight: 800;
+        }
+
+        /* Fallback de segurança se não houver .char-counter-row */
+        .char-counter:not(:has(.char-counter-row)) {
+            flex-direction: row !important;
+            justify-content: flex-end !important;
+            align-items: center !important;
+            white-space: nowrap !important;
+            font-size: 0.74rem !important;
+            color: var(--text-secondary) !important;
+            font-weight: 600 !important;
         }
 
 
@@ -2487,7 +2520,13 @@
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">4.</span> Quais foram as principais dificuldades encontradas na organização e no planejamento das aulas? <span style="color:#e11d48">*</span></p>
                     <textarea class="eval-textarea" maxlength="250" name="q4" rows="4" placeholder="Descreva aqui as dificuldades encontradas ou 'Nenhuma' se correu tudo bem..." required></textarea>
-                    <div class="char-counter" data-for="q4"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
+                    <div class="char-counter" data-for="q4">
+                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                        <div class="char-counter-row">
+                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2552,7 +2591,13 @@
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">8.</span> Quais atividades ou experiências você considera que tiveram maior sucesso durante o ano? Por quê? <span style="color:#e11d48">*</span></p>
                     <textarea class="eval-textarea" maxlength="250" name="q8" rows="4" placeholder="Compartilhe as atividades que mais deram certo e o motivo..." required></textarea>
-                    <div class="char-counter" data-for="q8"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
+                    <div class="char-counter" data-for="q8">
+                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                        <div class="char-counter-row">
+                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2630,7 +2675,13 @@
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">13.</span> Quais aprendizagens você considera mais significativas para os alunos neste ano? Há alguma habilidade que precisa ser retomada ou fortalecida? <span style="color:#e11d48">*</span></p>
                     <textarea class="eval-textarea" maxlength="250" name="q13" rows="4" placeholder="Sua reflexão sobre as aprendizagens construídas e pontos a fortalecer..." required></textarea>
-                    <div class="char-counter" data-for="q13"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
+                    <div class="char-counter" data-for="q13">
+                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                        <div class="char-counter-row">
+                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2684,7 +2735,13 @@
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">16.</span> Que recursos, materiais, formações ou orientações poderiam contribuir para melhorar seu trabalho em 2027? <span style="color:#e11d48">*</span></p>
                     <textarea class="eval-textarea" maxlength="250" name="q16" rows="4" placeholder="Sugestões de formações, equipamentos ou materiais de apoio..." required></textarea>
-                    <div class="char-counter" data-for="q16"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
+                    <div class="char-counter" data-for="q16">
+                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                        <div class="char-counter-row">
+                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2768,14 +2825,26 @@
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">22.</span> Olhando para sua trajetória neste ano, o que você considera que realizou bem? O que faria diferente se pudesse recomeçar? <span style="color:#e11d48">*</span></p>
                     <textarea class="eval-textarea" maxlength="250" name="q22" rows="4" placeholder="Destaque seus pontos fortes e o que gostaria de aprimorar..." required></textarea>
-                    <div class="char-counter" data-for="q22"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
+                    <div class="char-counter" data-for="q22">
+                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                        <div class="char-counter-row">
+                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Q23 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">23.</span> Em qual aspecto da sua prática pedagógica você gostaria de investir mais para o próximo ano? <span style="color:#e11d48">*</span></p>
                     <textarea class="eval-textarea" maxlength="250" name="q23" rows="4" placeholder="Áreas de formação, recursos, metodologias..." required></textarea>
-                    <div class="char-counter" data-for="q23"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
+                    <div class="char-counter" data-for="q23">
+                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                        <div class="char-counter-row">
+                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2802,21 +2871,39 @@
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">24.</span> Que mudanças você considera necessárias para tornar as aulas mais significativas, atrativas e eficientes? <span style="color:#e11d48">*</span></p>
                     <textarea class="eval-textarea" maxlength="250" name="q24" rows="4" placeholder="Propostas para o currículo, rotina, materiais..." required></textarea>
-                    <div class="char-counter" data-for="q24"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
+                    <div class="char-counter" data-for="q24">
+                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                        <div class="char-counter-row">
+                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Q25 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">25.</span> Deixe uma sugestão ou contribuição que possa colaborar com a organização e o fortalecimento do trabalho de Educação Digital e Midiática em nossa rede de ensino. <span style="color:#e11d48">*</span></p>
                     <textarea class="eval-textarea" maxlength="250" name="q25" rows="4" placeholder="Sua contribuição para a rede de ensino..." required></textarea>
-                    <div class="char-counter" data-for="q25"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
+                    <div class="char-counter" data-for="q25">
+                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                        <div class="char-counter-row">
+                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Q26 -->
                 <div class="question-item">
                     <p class="question-title"><span class="q-num">26.</span> Em poucas palavras, como você definiria sua experiência como professor(a) de Educação Digital e Midiática em 2026? <span style="color:#e11d48">*</span></p>
                     <textarea class="eval-textarea" maxlength="250" name="q26" rows="4" placeholder="Uma frase ou síntese da sua experiência..." required></textarea>
-                    <div class="char-counter" data-for="q26"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
+                    <div class="char-counter" data-for="q26">
+                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                        <div class="char-counter-row">
+                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Q27 -->
@@ -2833,7 +2920,13 @@
                     <div class="q28-conditional-box" id="q28-container">
                         <p class="question-title" style="margin-bottom:8px;"><span class="q-num">28.</span> Caso tenha marcado "Não" ou "Em dúvida" na pergunta anterior, poderia nos contar o principal motivo?</p>
                         <textarea class="eval-textarea" maxlength="250" name="q28" id="q28-textarea" rows="4" placeholder="Compartilhe seu motivo para podermos compreender melhor e aprimorar o suporte..."></textarea>
-                    <div class="char-counter" data-for="q28"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
+                        <div class="char-counter" data-for="q28">
+                            <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                            <div class="char-counter-row">
+                                <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                                <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5099,12 +5192,18 @@
                     counter = document.createElement('div');
                     counter.className = 'char-counter';
                     counter.setAttribute('data-for', qName);
-                    counter.innerHTML = `
-                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
-                        <div class="char-counter-text"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</div>
-                    `;
                     textarea.insertAdjacentElement('afterend', counter);
                 }
+
+                counter.innerHTML = `
+                    <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                    <div class="char-counter-row">
+                        <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                        <span class="char-counter-stats">
+                            <span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas
+                        </span>
+                    </div>
+                `;
 
                 const countSpan = counter.querySelector('.char-count');
                 const lineSpan = counter.querySelector('.line-count');
