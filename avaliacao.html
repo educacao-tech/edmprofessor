@@ -22,6 +22,10 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
     <style>
         /* Estilos Customizados para o Formulário de Avaliação */
+        :root {
+            --eval-font-scale: 1;
+        }
+
         html, body {
             height: auto !important;
             min-height: 100% !important;
@@ -82,6 +86,119 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Controle de Tamanho de Fonte (Acessibilidade) */
+        .font-size-pill {
+            display: inline-flex;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+        }
+
+        .font-size-btn {
+            background: none;
+            border: none;
+            padding: 5px 9px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .font-size-btn:hover {
+            background-color: var(--zebra-bg);
+            color: var(--primary-color);
+        }
+
+        .font-size-btn.font-reset {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            padding: 5px 8px;
+            min-width: 44px;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .font-size-btn.font-reset:hover,
+        .font-size-btn.font-reset.active {
+            color: var(--primary-color);
+            font-weight: 800;
+            background: rgba(37, 99, 235, 0.08);
+        }
+
+        /* Toast Comemorativo de Conclusão de Bloco */
+        .block-congrats-toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-24px);
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: #ffffff;
+            padding: 10px 22px;
+            border-radius: 9999px;
+            font-size: 0.90rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.45), 0 2px 8px rgba(0, 0, 0, 0.12);
+            z-index: 10002;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .block-congrats-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .block-congrats-toast .toast-icon {
+            font-size: 1.2rem;
+            display: inline-block;
+            animation: bounceCelebration 0.6s ease;
+        }
+
+        @keyframes bounceCelebration {
+            0% { transform: scale(0.4) rotate(-20deg); }
+            50% { transform: scale(1.3) rotate(15deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        /* Animação comemorativa do badge do stepper */
+        @keyframes stepCelebratePulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8);
+            }
+            40% {
+                transform: scale(1.26);
+                box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+            }
+            80% {
+                transform: scale(0.94);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.45);
+            }
+        }
+
+        .stepper-step.step-celebrate-burst .step-badge {
+            animation: stepCelebratePulse 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         /* Logos e Cabeçalho Institucional */
@@ -160,8 +277,8 @@
             border-radius: 8px;
             padding: 10px 14px;
             margin-bottom: 12px;
-            font-size: 0.83rem;
-            line-height: 1.45;
+            font-size: calc(0.83rem * var(--eval-font-scale, 1));
+            line-height: calc(1.45 * var(--eval-font-scale, 1));
         }
 
         .eval-presentation-card h3 {
@@ -1274,7 +1391,7 @@
         }
 
         .question-title {
-            font-size: 0.98rem;
+            font-size: calc(0.98rem * var(--eval-font-scale, 1));
             font-weight: 700;
             color: var(--text-color);
             margin: 0 0 14px 0;
@@ -1332,7 +1449,7 @@
         }
 
         .question-hint {
-            font-size: 0.80rem;
+            font-size: calc(0.80rem * var(--eval-font-scale, 1));
             color: var(--text-secondary);
             font-weight: 500;
             margin-left: 6px;
@@ -1377,7 +1494,7 @@
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             background-color: var(--card-bg);
             user-select: none;
-            font-size: 0.86rem;
+            font-size: calc(0.86rem * var(--eval-font-scale, 1));
             font-weight: 600;
             position: relative;
         }
@@ -1854,7 +1971,7 @@
             border-radius: 12px;
             background: var(--card-bg);
             color: var(--text-color);
-            font-size: 0.88rem;
+            font-size: calc(0.88rem * var(--eval-font-scale, 1));
             font-family: inherit;
             line-height: 1.45;
             resize: none;
@@ -2215,6 +2332,12 @@
         </div>
     </div>
 
+    <!-- Toast Comemorativo de Conclusão de Bloco -->
+    <div id="blockCongratsToast" class="block-congrats-toast" role="status" aria-live="polite">
+        <span class="toast-icon" id="blockCongratsIcon">🎉</span>
+        <span id="blockCongratsText">Bloco concluído!</span>
+    </div>
+
     <div class="eval-container">
         <!-- Barra de Navegação Superior -->
         <div class="eval-top-nav">
@@ -2226,6 +2349,18 @@
                 <span class="draft-status-pill" id="draftStatus">
                     <i class="fas fa-cloud-arrow-up"></i> Rascunho salvo
                 </span>
+                <!-- Controle de Tamanho de Fonte (Acessibilidade) -->
+                <div class="font-size-pill" title="Ajustar tamanho da fonte para leitura confortável">
+                    <button type="button" class="font-size-btn" onclick="adjustFontSize(-1)" title="Diminuir tamanho da fonte (A-)">
+                        <i class="fas fa-minus" style="font-size: 0.6rem;"></i> A
+                    </button>
+                    <button type="button" class="font-size-btn font-reset" id="fontSizeDisplay" onclick="resetFontSize()" title="Redefinir tamanho padrão (100%)">
+                        100%
+                    </button>
+                    <button type="button" class="font-size-btn" onclick="adjustFontSize(1)" title="Aumentar tamanho da fonte (A+)">
+                        A <i class="fas fa-plus" style="font-size: 0.6rem;"></i>
+                    </button>
+                </div>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="toggleShortcutsModal()" title="Ver atalhos rápidos de teclado (Alt + Setas, Enter, Teclas 1 a 4)">
                     <i class="fas fa-keyboard"></i> Atalhos
                 </button>
@@ -4194,6 +4329,13 @@
             }
 
             updateStepperUI();
+
+            // Dispara feedback visual comemorativo no momento em que o bloco atual atinge 100%
+            if (typeof isStepComplete === 'function' && typeof triggerBlockCelebration === 'function') {
+                if (isStepComplete(currentStep) && !celebratedSteps.has(currentStep) && currentStep < 6) {
+                    triggerBlockCelebration(currentStep);
+                }
+            }
         }
 
         // ==========================================================================
@@ -4739,6 +4881,10 @@
                     highlightUnanswered(validation);
                     return;
                 }
+                // Celebra a conclusão do bloco que acabou de ser finalizado
+                if (typeof triggerBlockCelebration === 'function') {
+                    triggerBlockCelebration(currentStep);
+                }
             }
 
             // Oculta todas as panes e ativa a selecionada
@@ -4770,6 +4916,101 @@
 
         window.prevStep = () => {
             goToStep(Math.max(0, currentStep - 1), true);
+        };
+
+        // ==========================================================================
+        // ACESSIBILIDADE: CONTROLE DINÂMICO DE TAMANHO DA FONTE (A- / A+)
+        // ==========================================================================
+        const FONT_SCALES = [0.9, 1.0, 1.15, 1.3, 1.45];
+        let currentFontScaleIndex = 1; // 1.0 (100%)
+
+        function applyFontSize(index) {
+            currentFontScaleIndex = Math.max(0, Math.min(FONT_SCALES.length - 1, index));
+            const scale = FONT_SCALES[currentFontScaleIndex];
+            document.documentElement.style.setProperty('--eval-font-scale', scale);
+            const display = document.getElementById('fontSizeDisplay');
+            if (display) {
+                display.textContent = `${Math.round(scale * 100)}%`;
+                display.classList.toggle('active', scale !== 1.0);
+            }
+            try {
+                localStorage.setItem('eval_font_scale_index', currentFontScaleIndex);
+            } catch (e) {}
+        }
+
+        window.adjustFontSize = (delta) => {
+            applyFontSize(currentFontScaleIndex + delta);
+        };
+
+        window.resetFontSize = () => {
+            applyFontSize(1); // 100%
+        };
+
+        function initFontSize() {
+            try {
+                const saved = localStorage.getItem('eval_font_scale_index');
+                if (saved !== null) {
+                    const parsed = parseInt(saved, 10);
+                    if (!isNaN(parsed) && parsed >= 0 && parsed < FONT_SCALES.length) {
+                        applyFontSize(parsed);
+                        return;
+                    }
+                }
+            } catch (e) {}
+            applyFontSize(1);
+        }
+
+        // ==========================================================================
+        // FEEDBACK COMEMORATIVO DE CONCLUSÃO DE BLOCO (MICRO-CONFETES & TOAST)
+        // ==========================================================================
+        const celebratedSteps = new Set();
+        let congratsToastTimer = null;
+
+        window.triggerBlockCelebration = (stepIdx) => {
+            if (celebratedSteps.has(stepIdx)) return;
+            celebratedSteps.add(stepIdx);
+
+            // 1. Destaca o botão do stepper correspondente com animação pulsante
+            const stepBtn = document.getElementById(`step-btn-${stepIdx}`);
+            if (stepBtn) {
+                stepBtn.classList.add('step-celebrate-burst');
+                setTimeout(() => stepBtn.classList.remove('step-celebrate-burst'), 1200);
+            }
+
+            // 2. Micro-confetes elegante via canvas-confetti (já presente na página)
+            if (typeof confetti === 'function') {
+                try {
+                    confetti({
+                        particleCount: 26,
+                        spread: 55,
+                        origin: { y: 0.18 },
+                        colors: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4']
+                    });
+                } catch (e) {}
+            }
+
+            // 3. Exibe o toast comemorativo elegante
+            const toast = document.getElementById('blockCongratsToast');
+            const toastIcon = document.getElementById('blockCongratsIcon');
+            const toastText = document.getElementById('blockCongratsText');
+            if (toast && toastText) {
+                clearTimeout(congratsToastTimer);
+                if (stepIdx === 0) {
+                    if (toastIcon) toastIcon.textContent = '✨';
+                    toastText.textContent = 'Identificação concluída! Vamos iniciar a avaliação.';
+                } else if (stepIdx >= 1 && stepIdx <= 5) {
+                    if (toastIcon) toastIcon.textContent = '🎉';
+                    toastText.textContent = `Bloco ${stepIdx} concluído com sucesso! Excelente avanço.`;
+                } else if (stepIdx === 6) {
+                    if (toastIcon) toastIcon.textContent = '🏆';
+                    toastText.textContent = 'Todas as etapas concluídas! Pronto para enviar.';
+                }
+
+                toast.classList.add('show');
+                congratsToastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2400);
+            }
         };
 
         // ==========================================================================
@@ -5425,6 +5666,7 @@
             restoreDraft();
         }
 
+        initFontSize();
         initCharCounters();
         initOptionSentiments();
         updateAutoScrollButtonUI();
