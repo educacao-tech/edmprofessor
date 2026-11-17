@@ -45,7 +45,7 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 20px 24px;
+            padding: 16px 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
             position: relative;
         }
@@ -61,11 +61,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
             border-bottom: 1px solid var(--border-color);
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
 
         .eval-back-link {
@@ -206,15 +206,15 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 24px;
-            margin-bottom: 14px;
-            padding-bottom: 12px;
+            gap: 16px;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
             border-bottom: 1.5px dashed var(--border-color);
             flex-wrap: nowrap;
         }
 
         .eval-logo-img {
-            max-height: 42px;
+            max-height: 38px;
             width: auto;
             object-fit: contain;
             transition: transform 0.2s ease;
@@ -222,49 +222,51 @@
         }
 
         .eval-logo-img.logo-batatais {
-            max-height: 40px;
+            max-height: 36px;
         }
 
         .eval-logo-img.logo-secretaria {
-            max-height: 52px;
-            transform: scale(1.18);
+            max-height: 46px;
+            transform: scale(1.14);
             transform-origin: center;
         }
 
         .eval-logo-img.logo-edm {
-            max-height: 42px;
+            max-height: 38px;
         }
 
         @media (max-width: 640px) {
             .eval-logos-row {
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 14px;
+                gap: 10px;
+                margin-bottom: 6px;
+                padding-bottom: 6px;
             }
             .eval-logo-img {
-                max-height: 34px;
+                max-height: 30px;
             }
             .eval-logo-img.logo-secretaria {
-                max-height: 44px;
+                max-height: 38px;
             }
         }
 
         .eval-header-title {
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .eval-header-title h1 {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 800;
             color: var(--primary-color);
-            margin: 0 0 3px 0;
-            letter-spacing: -0.02em;
+            margin: 0 0 2px 0;
+            letter-spacing: -0.01em;
             text-transform: uppercase;
         }
 
         .eval-header-title p {
-            font-size: 0.84rem;
+            font-size: 0.80rem;
             color: var(--text-secondary);
             margin: 0;
             font-weight: 500;
@@ -518,61 +520,78 @@
             color: var(--text-secondary);
         }
 
-        /* Card de Docente Autenticado */
+        /* Card de Docente Autenticado - Layout Executivo Compacto */
         .docente-connected-card {
-            background-color: var(--zebra-bg);
-            border: 1.5px solid rgba(16, 185, 129, 0.35);
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid #10b981;
             border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 12px;
+            padding: 8px 14px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
             transition: all 0.2s ease;
         }
 
         .docente-profile-wrap {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
+            flex: 1;
+            min-width: 260px;
         }
 
         .docente-avatar {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2.5px solid #10b981;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+            border: 2px solid #10b981;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+            flex-shrink: 0;
         }
 
         .docente-avatar-fallback {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: linear-gradient(135deg, #2563eb, #10b981);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: 800;
             flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        .docente-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
         }
 
         .docente-info h4 {
-            margin: 0 0 3px 0;
-            font-size: 1rem;
+            margin: 0;
+            font-size: 0.94rem;
             font-weight: 800;
             letter-spacing: -0.01em;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .docente-info p {
-            margin: 0 0 6px 0;
-            font-size: 0.82rem;
+            margin: 0;
+            font-size: 0.78rem;
             color: var(--text-secondary);
             display: flex;
             align-items: center;
@@ -584,12 +603,12 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            padding: 1px 8px;
+            padding: 1px 7px;
             border-radius: 6px;
             background: rgba(37, 99, 235, 0.08);
             color: #2563eb;
             font-weight: 600;
-            font-size: 0.76rem;
+            font-size: 0.74rem;
             border: 1px solid rgba(37, 99, 235, 0.18);
         }
 
@@ -794,9 +813,9 @@
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 8px 14px;
-            margin-bottom: 10px;
-            box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            padding: 7px 14px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
             position: sticky;
             top: 6px;
             z-index: 100;
@@ -806,9 +825,9 @@
         }
 
         html[data-theme="dark"] .eval-progress-container {
-            background: rgba(19, 29, 53, 0.92);
+            background: rgba(19, 29, 53, 0.94);
             border-color: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 12px 32px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.5);
         }
 
         .eval-progress-header {
@@ -823,23 +842,32 @@
         .eval-progress-title-wrap {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
+        }
+
+        .eval-progress-title-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .eval-pct-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 2px 10px;
+            padding: 2px 9px;
             border-radius: 9999px;
             background: rgba(37, 99, 235, 0.12);
             color: #2563eb;
             font-weight: 800;
-            font-size: 0.8rem;
+            font-size: 0.80rem;
             letter-spacing: -0.01em;
             border: 1px solid rgba(37, 99, 235, 0.22);
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
+            box-shadow: 0 1px 4px rgba(37, 99, 235, 0.1);
             transition: all 0.3s ease;
         }
 
@@ -849,9 +877,86 @@
             border-color: rgba(96, 165, 250, 0.3);
         }
 
+        .eval-count-badge {
+            font-size: 0.80rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .eval-est-time-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            background: var(--zebra-bg);
+            padding: 2px 7px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .badge-status-progresso {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .eval-toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .eval-toolbar-group .btn-tool-item {
+            font-size: 0.74rem;
+            padding: 4px 9px;
+            border-radius: 8px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.18s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        }
+
+        .eval-toolbar-group .btn-tool-item:hover {
+            background-color: var(--zebra-bg);
+            border-color: rgba(37, 99, 235, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .eval-toolbar-group .btn-tool-pending {
+            border-color: rgba(225, 29, 72, 0.3) !important;
+            color: #e11d48 !important;
+            background: rgba(225, 29, 72, 0.06) !important;
+        }
+
+        .eval-toolbar-group .btn-tool-pending:hover {
+            background: rgba(225, 29, 72, 0.14) !important;
+            box-shadow: 0 2px 8px rgba(225, 29, 72, 0.2) !important;
+        }
+
+        @media (max-width: 680px) {
+            .eval-toolbar-group .btn-tool-item .btn-tool-text-hide {
+                display: none;
+            }
+        }
+
         .eval-progress-track {
             width: 100%;
-            height: 7px;
+            height: 6px;
             background: var(--zebra-bg);
             border-radius: 9999px;
             overflow: hidden;
@@ -1499,27 +1604,133 @@
             position: relative;
         }
 
-        /* Badge com dica de tecla de atalho numérico (1 a 4) */
+        /* Badge com dica de tecla de atalho numérico (1 a 4) - Teclado Keycap Real */
         .shortcut-key-badge {
             margin-left: auto;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             min-width: 22px;
-            height: 22px;
-            padding: 0 4px;
-            font-size: 0.72rem;
-            font-family: inherit;
+            height: 20px;
+            padding: 0 5px;
+            font-size: 0.70rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             font-weight: 800;
             color: var(--text-secondary);
-            background: rgba(0, 0, 0, 0.04);
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+            border-radius: 5px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-            opacity: 0.7;
+            opacity: 0.85;
             transition: all 0.2s ease;
             user-select: none;
             pointer-events: none;
+        }
+
+        /* Barra Flutuante de Ação Rápida (Floating Quick Nav) */
+        .floating-quick-nav {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 9999px;
+            padding: 6px 12px 6px 16px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html[data-theme="dark"] .floating-quick-nav {
+            background: rgba(19, 29, 53, 0.94);
+            border-color: rgba(255, 255, 255, 0.14);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+        }
+
+        .floating-quick-nav.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .floating-quick-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.80rem;
+            font-weight: 700;
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+
+        .floating-step-badge {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-weight: 800;
+            font-size: 0.74rem;
+        }
+
+        html[data-theme="dark"] .floating-step-badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+
+        .floating-count-pill {
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+        }
+
+        .floating-quick-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            white-space: nowrap;
+        }
+
+        .floating-quick-btn.btn-advance {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            animation: pulseAdvanceButton 2s infinite ease-in-out;
+        }
+
+        .floating-quick-btn.btn-advance:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+
+        .floating-quick-btn.btn-pending {
+            background: rgba(225, 29, 72, 0.1);
+            color: #e11d48;
+            border: 1px solid rgba(225, 29, 72, 0.25);
+        }
+
+        .floating-quick-btn.btn-pending:hover {
+            background: rgba(225, 29, 72, 0.18);
+            color: #be123c;
+        }
+
+        @keyframes pulseAdvanceButton {
+            0%, 100% { box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3); }
+            50% { box-shadow: 0 0 16px rgba(37, 99, 235, 0.6); }
         }
 
         html[data-theme="dark"] .shortcut-key-badge {
@@ -2370,6 +2581,17 @@
         <span id="blockCongratsText">Bloco concluído!</span>
     </div>
 
+    <!-- Barra Flutuante de Ação Rápida (Aparece suavemente ao rolar a página) -->
+    <div id="floatingQuickNav" class="floating-quick-nav" aria-label="Navegação rápida do bloco">
+        <div class="floating-quick-info">
+            <span class="floating-step-badge" id="floatingQuickStepTitle">Bloco 1</span>
+            <span class="floating-count-pill" id="floatingQuickCounter">0/4</span>
+        </div>
+        <button type="button" id="floatingQuickActionBtn" class="floating-quick-btn btn-pending" onclick="goToNextUnanswered()">
+            <i class="fas fa-arrow-down"></i> Pendente
+        </button>
+    </div>
+
     <div class="eval-container">
         <!-- Barra de Navegação Superior -->
         <div class="eval-top-nav">
@@ -2453,25 +2675,26 @@
         <div class="eval-progress-container" id="evalProgressBox">
             <div class="eval-progress-header">
                 <div class="eval-progress-title-wrap">
-                    <strong style="font-size: 0.88rem; color: var(--text-color);"><i class="fas fa-tasks text-primary"></i> Progresso do Preenchimento:</strong>
+                    <span class="eval-progress-title-label"><i class="fas fa-tasks text-primary"></i> <strong>Progresso:</strong></span>
                     <span id="evalProgressBadgePct" class="eval-pct-badge">0%</span>
-                    <span id="evalProgressText" style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 2px;">0 de 27 respondidas</span>
-                    <span id="evalProgressStatusBadge" class="badge-status-progresso" style="font-size: 0.74rem; font-weight: 700; padding: 3px 9px; border-radius: 8px; background-color: rgba(245, 158, 11, 0.15); color: #b45309; display: inline-flex; align-items: center; gap: 5px;">
-                        <i class="fas fa-hourglass-half"></i> Presença só é confirmada com 100% preenchido
+                    <span id="evalProgressText" class="eval-count-badge">0 de 27</span>
+                    <span id="evalProgressEstimatedTime" class="eval-est-time-badge" title="Tempo estimado para conclusão da avaliação"><i class="fas fa-stopwatch"></i> ~10 min restantes</span>
+                    <span id="evalProgressStatusBadge" class="badge-status-progresso" style="background-color: rgba(245, 158, 11, 0.15); color: #b45309;" title="Critério para confirmação de presença">
+                        <i class="fas fa-hourglass-half"></i> 100% confirma presença
                     </span>
                 </div>
-                <div class="eval-toolbar-group" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-secondary btn-sm" id="btnToggleFocusMode" onclick="toggleFocusMode()" title="Ativar ou desativar o Modo Foco (destaca a questão atual e atenua as demais para leitura limpa) [Atalho: Alt + F]" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-bullseye" style="color: var(--text-secondary); opacity: 0.6;"></i> <span>Modo Foco: <strong id="focusModeStatusText">Desativado</strong></span>
+                <div class="eval-toolbar-group" role="toolbar" aria-label="Ferramentas de navegação do formulário">
+                    <button type="button" class="btn-tool-item" id="btnToggleFocusMode" onclick="toggleFocusMode()" title="Modo Foco: atenua outras questões para concentração total [Alt + F]">
+                        <i class="fas fa-bullseye" style="color: var(--text-secondary); opacity: 0.7;"></i> <span>Modo Foco: <strong id="focusModeStatusText">Desativado</strong></span>
                     </button>
-                    <button type="button" class="btn btn-secondary btn-sm" id="btnToggleAutoScroll" onclick="toggleAutoScroll()" title="Ativar ou desativar rolagem suave automática para a próxima questão ao selecionar alternativas" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                    <button type="button" class="btn-tool-item" id="btnToggleAutoScroll" onclick="toggleAutoScroll()" title="Auto-Scroll: rola suavemente para a próxima pergunta após selecionar uma alternativa">
                         <i class="fas fa-bolt" style="color: #2563eb;"></i> <span>Auto-Scroll: <strong>Ativado</strong></span>
                     </button>
-                    <button type="button" class="btn btn-secondary btn-sm" id="btnToggleMap" onclick="toggleQuestionsMap()" title="Ver o mapa completo das questões" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700;">
-                        <i class="fas fa-th"></i> Mapa das Questões
+                    <button type="button" class="btn-tool-item" id="btnToggleMap" onclick="toggleQuestionsMap()" title="Ver o mapa completo de todas as questões">
+                        <i class="fas fa-th"></i> <span class="btn-tool-text-hide">Mapa</span>
                     </button>
-                    <button type="button" class="btn btn-secondary btn-sm" id="btnNextUnanswered" onclick="goToNextUnanswered()" title="Rola diretamente para a próxima questão ainda não respondida" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px;">
-                        <i class="fas fa-arrow-down"></i> Próxima Pendente
+                    <button type="button" class="btn-tool-item btn-tool-pending" id="btnNextUnanswered" onclick="goToNextUnanswered()" title="Rola diretamente para a próxima questão ainda não respondida">
+                        <i class="fas fa-arrow-down"></i> <span class="btn-tool-text-hide">Pendente</span>
                     </button>
                 </div>
             </div>
@@ -4381,15 +4604,32 @@
                 if (pct >= 100) {
                     badge.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
                     badge.style.color = '#059669';
-                    badge.innerHTML = '<i class="fas fa-circle-check"></i> 100% Preenchido! Pronto para enviar e confirmar presença.';
+                    badge.innerHTML = '<i class="fas fa-circle-check"></i> 100% Preenchido! Pronto para enviar.';
                 } else {
                     badge.style.backgroundColor = 'rgba(245, 158, 11, 0.15)';
                     badge.style.color = '#b45309';
-                    badge.innerHTML = '<i class="fas fa-hourglass-half"></i> Presença só é confirmada com 100% preenchido';
+                    badge.innerHTML = '<i class="fas fa-hourglass-half"></i> 100% confirma presença';
+                }
+            }
+
+            // Atualiza Tempo Estimado Restante
+            const estTimeEl = document.getElementById('evalProgressEstimatedTime');
+            if (estTimeEl) {
+                const unanswered = Math.max(0, totalQuestions - answeredCount);
+                if (unanswered === 0) {
+                    estTimeEl.innerHTML = '<i class="fas fa-circle-check" style="color: #10b981;"></i> Pronto para envio!';
+                    estTimeEl.style.color = '#059669';
+                } else {
+                    const estMins = Math.max(1, Math.ceil(unanswered * 0.4));
+                    estTimeEl.innerHTML = `<i class="fas fa-stopwatch" style="color: #3b82f6;"></i> ~${estMins} min restantes`;
+                    estTimeEl.style.color = 'var(--text-secondary)';
                 }
             }
 
             updateStepperUI();
+            if (typeof updateFloatingQuickNav === 'function') {
+                updateFloatingQuickNav();
+            }
 
             // Dispara feedback visual comemorativo no momento em que o bloco atual atinge 100%
             if (typeof isStepComplete === 'function' && typeof triggerBlockCelebration === 'function') {
@@ -4956,6 +5196,9 @@
             currentStep = targetStep;
             updateStepperUI();
             updateQuestionsMapUI();
+            if (typeof updateFloatingQuickNav === 'function') {
+                setTimeout(updateFloatingQuickNav, 80);
+            }
             if (currentStep === 6) {
                 renderReviewContent();
             }
@@ -5373,6 +5616,54 @@
                 window.ensureActiveFocusItemInCurrentPane();
             }
         }
+
+        // ==========================================================================
+        // BARRA FLUTUANTE DE AÇÃO RÁPIDA (SMART DYNAMIC PILL)
+        // ==========================================================================
+        window.updateFloatingQuickNav = () => {
+            const nav = document.getElementById('floatingQuickNav');
+            if (!nav) return;
+
+            const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+            const shouldShow = scrollY > 260 && currentStep >= 1 && currentStep <= 6;
+            nav.classList.toggle('show', shouldShow);
+
+            if (!shouldShow) return;
+
+            const stepDef = STEP_DEFINITIONS[currentStep];
+            if (!stepDef) return;
+
+            const totalInStep = stepDef.questions.length;
+            let answeredInStep = 0;
+            stepDef.questions.forEach(k => {
+                if (isQuestionAnswered(k)) answeredInStep++;
+            });
+
+            const isComplete = (answeredInStep === totalInStep);
+            const navTitle = document.getElementById('floatingQuickStepTitle');
+            const navCounter = document.getElementById('floatingQuickCounter');
+            const navAction = document.getElementById('floatingQuickActionBtn');
+
+            if (navTitle) navTitle.textContent = stepDef.title;
+            if (navCounter) navCounter.textContent = `${answeredInStep}/${totalInStep}`;
+            if (navAction) {
+                if (isComplete) {
+                    navAction.className = 'floating-quick-btn btn-advance';
+                    navAction.innerHTML = currentStep === 6 ? 'Revisar & Enviar <i class="fas fa-paper-plane"></i>' : `Próximo Bloco <i class="fas fa-arrow-right"></i>`;
+                    navAction.onclick = () => window.nextStep();
+                } else {
+                    navAction.className = 'floating-quick-btn btn-pending';
+                    navAction.innerHTML = `<i class="fas fa-arrow-down"></i> Pendente (${totalInStep - answeredInStep})`;
+                    navAction.onclick = () => window.goToNextUnanswered();
+                }
+            }
+        };
+
+        window.addEventListener('scroll', () => {
+            if (typeof window.updateFloatingQuickNav === 'function') {
+                window.updateFloatingQuickNav();
+            }
+        }, { passive: true });
 
         // Listener global para cliques e foco em questões (ativa o foco da questão selecionada)
         document.addEventListener('click', (e) => {
