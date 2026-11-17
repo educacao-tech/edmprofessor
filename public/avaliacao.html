@@ -1993,10 +1993,10 @@
         }
         /* Contador de Caracteres para Questões Dissertativas */
         .char-counter {
-            margin-top: 6px;
+            margin-top: 8px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
             width: 100%;
         }
 
@@ -2021,12 +2021,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
             font-size: 0.74rem;
             color: var(--text-secondary);
             font-weight: 600;
-            white-space: nowrap;
             width: 100%;
-            gap: 8px;
+            gap: 6px 10px;
         }
 
         .char-counter-hint {
@@ -2037,37 +2037,69 @@
             color: var(--text-secondary);
             opacity: 0.85;
             white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .char-counter-stats {
             display: inline-flex;
             align-items: center;
-            gap: 3px;
+            gap: 6px;
             white-space: nowrap;
             margin-left: auto;
-            letter-spacing: 0.01em;
-            transition: color 0.2s ease;
+            flex-shrink: 0;
         }
 
-        .char-counter.warning .char-counter-stats {
-            color: #d97706 !important;
+        .char-counter-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            line-height: 1.2;
+            transition: all 0.2s ease;
+        }
+
+        .char-counter-badge strong,
+        .char-counter-badge .char-count,
+        .char-counter-badge .line-count {
+            display: inline !important;
             font-weight: 700;
+            color: var(--text-color);
         }
 
-        .char-counter.limit .char-counter-stats {
+        .char-counter.warning .char-counter-badge {
+            background: rgba(245, 158, 11, 0.1) !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
+            color: #d97706 !important;
+        }
+        .char-counter.warning .char-counter-badge strong,
+        .char-counter.warning .char-counter-badge .char-count,
+        .char-counter.warning .char-counter-badge .line-count {
+            color: #d97706 !important;
+        }
+
+        .char-counter.limit .char-counter-badge {
+            background: rgba(239, 68, 68, 0.1) !important;
+            border-color: rgba(239, 68, 68, 0.35) !important;
+            color: #dc2626 !important;
+        }
+        .char-counter.limit .char-counter-badge strong,
+        .char-counter.limit .char-counter-badge .char-count,
+        .char-counter.limit .char-counter-badge .line-count {
             color: #dc2626 !important;
             font-weight: 800;
         }
 
-        /* Fallback de segurança se não houver .char-counter-row */
-        .char-counter:not(:has(.char-counter-row)) {
-            flex-direction: row !important;
-            justify-content: flex-end !important;
-            align-items: center !important;
-            white-space: nowrap !important;
-            font-size: 0.74rem !important;
-            color: var(--text-secondary) !important;
-            font-weight: 600 !important;
+        /* Fallback de compatibilidade caso elementos antigos ainda existam */
+        .char-counter-stats .char-count,
+        .char-counter-stats .line-count {
+            display: inline !important;
         }
 
 
@@ -2730,7 +2762,7 @@
                         <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                         <div class="char-counter-row">
                             <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span><span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span></span>
                         </div>
                     </div>
                 </div>
@@ -2801,7 +2833,7 @@
                         <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                         <div class="char-counter-row">
                             <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span><span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span></span>
                         </div>
                     </div>
                 </div>
@@ -2885,7 +2917,7 @@
                         <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                         <div class="char-counter-row">
                             <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span><span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span></span>
                         </div>
                     </div>
                 </div>
@@ -2945,7 +2977,7 @@
                         <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                         <div class="char-counter-row">
                             <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span><span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span></span>
                         </div>
                     </div>
                 </div>
@@ -3035,7 +3067,7 @@
                         <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                         <div class="char-counter-row">
                             <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span><span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span></span>
                         </div>
                     </div>
                 </div>
@@ -3048,7 +3080,7 @@
                         <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                         <div class="char-counter-row">
                             <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span><span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span></span>
                         </div>
                     </div>
                 </div>
@@ -3081,7 +3113,7 @@
                         <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                         <div class="char-counter-row">
                             <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span><span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span></span>
                         </div>
                     </div>
                 </div>
@@ -3094,7 +3126,7 @@
                         <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                         <div class="char-counter-row">
                             <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span><span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span></span>
                         </div>
                     </div>
                 </div>
@@ -3107,7 +3139,7 @@
                         <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                         <div class="char-counter-row">
                             <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                            <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span><span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span></span>
                         </div>
                     </div>
                 </div>
@@ -3130,7 +3162,7 @@
                             <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                             <div class="char-counter-row">
                                 <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                                <span class="char-counter-stats"><span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas</span>
+                                <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span><span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span></span>
                             </div>
                         </div>
                     </div>
@@ -3583,6 +3615,35 @@
             }
         }
         loadSchoolsConfig();
+
+        // Carrega configurações customizadas de questões (se houver no Firestore)
+        async function loadDynamicQuestionsConfig() {
+            try {
+                const snap = await getDoc(doc(db, "configuracoes", "questoes_avaliacao"));
+                if (snap.exists() && snap.data().items && Array.isArray(snap.data().items)) {
+                    const customItems = snap.data().items;
+                    customItems.forEach(q => {
+                        if (!q.key) return;
+                        const num = q.key.replace(/\D/g, '');
+                        const qInput = document.querySelector(`[name="${q.key}"]`) || document.getElementById(`${q.key}-container`);
+                        if (qInput) {
+                            const qItem = qInput.closest('.question-item, .q28-conditional-box');
+                            if (qItem) {
+                                const pTitle = qItem.querySelector('.question-title');
+                                if (pTitle && q.title) {
+                                    const reqBadge = q.required !== false ? ' <span style="color:#e11d48">*</span>' : '';
+                                    const cleanText = q.title.replace(/^\d+\.\s*/, '');
+                                    pTitle.innerHTML = `<span class="q-num">${num}.</span> ${cleanText}${reqBadge}`;
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn("Aviso ao carregar configuracoes/questoes_avaliacao:", e);
+            }
+        }
+        loadDynamicQuestionsConfig();
 
         // Localiza professor na base de dados por e-mail ou nome
         function findTeacherInCache(email, nome) {
@@ -5558,7 +5619,8 @@
                     <div class="char-counter-row">
                         <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
                         <span class="char-counter-stats">
-                            <span class="char-count">0</span> / 250 caracteres &bull; <span class="line-count">1</span> / 4 linhas
+                            <span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span>
+                            <span class="char-counter-badge"><i class="fas fa-bars-staggered" style="opacity:0.75;"></i> <strong class="line-count">1</strong> / 4 linhas</span>
                         </span>
                     </div>
                 `;

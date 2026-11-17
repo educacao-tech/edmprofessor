@@ -881,6 +881,251 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
         }
 
+        /* ==========================================================================
+           Aba Administrativa: Gestão de Questões
+           ========================================================================== */
+        .questoes-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding: 16px 20px;
+            background: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            flex-wrap: wrap;
+        }
+
+        .questoes-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .questoes-filters-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+
+        .questoes-count-badge {
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(37, 99, 235, 0.12);
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.22);
+            white-space: nowrap;
+        }
+
+        .questoes-block-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 22px;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease;
+        }
+
+        .questoes-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0.01) 100%);
+            border-bottom: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .questoes-block-header h4 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .questoes-item-row {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            transition: background 0.15s ease;
+        }
+
+        .questoes-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .questoes-item-row:hover {
+            background-color: var(--zebra-bg);
+        }
+
+        .questoes-item-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .questoes-item-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .q-key-badge {
+            font-family: monospace;
+            font-size: 0.76rem;
+            font-weight: 800;
+            background: rgba(37, 99, 235, 0.12);
+            color: #2563eb;
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(37, 99, 235, 0.22);
+        }
+
+        .q-type-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .q-type-badge.radio {
+            background: rgba(16, 185, 129, 0.12);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .q-type-badge.checkbox {
+            background: rgba(139, 92, 246, 0.12);
+            color: #7c3aed;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+        }
+
+        .q-type-badge.text {
+            background: rgba(59, 130, 246, 0.12);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+        }
+
+        .q-type-badge.conditional_text {
+            background: rgba(245, 158, 11, 0.12);
+            color: #b45309;
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
+
+        .questoes-item-title {
+            font-size: 0.94rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0 0 10px 0;
+            line-height: 1.45;
+        }
+
+        .questoes-options-preview {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .q-option-pill {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .questoes-item-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* Formulário do Modal de Questão */
+        .q-form-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 6px;
+        }
+
+        .q-form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.88rem;
+            font-family: inherit;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .q-form-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        html[data-theme="dark"] .questoes-header-bar,
+        html[data-theme="dark"] .questoes-block-card {
+            background: #15203b;
+            border-color: #243457;
+        }
+
+        html[data-theme="dark"] .questoes-block-header {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.18) 0%, rgba(59, 130, 246, 0.02) 100%);
+            border-color: #243457;
+            border-left-color: #3b82f6;
+        }
+
+        html[data-theme="dark"] .questoes-item-row {
+            border-color: #243457;
+        }
+
+        html[data-theme="dark"] .questoes-item-row:hover {
+            background-color: #192644;
+        }
+
+        html[data-theme="dark"] .q-option-pill {
+            background: #0f172a;
+            border-color: #243457;
+            color: #94a3b8;
+        }
+
+        html[data-theme="dark"] .q-form-input {
+            background: #0f172a;
+            border-color: #243457;
+            color: #f1f5f9;
+        }
+
+        html[data-theme="dark"] .q-form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
         /* Otimização para Impressão / Exportação PDF e Prevenção de Transbordamento */
         @media print {
             body {
@@ -1077,6 +1322,9 @@
                 <button type="button" class="admin-tab-btn" onclick="switchAdminTab('qualitativo')" id="tabBtn-qualitativo">
                     <i class="fas fa-comments"></i> Destaques Dissertativos
                 </button>
+                <button type="button" class="admin-tab-btn" onclick="switchAdminTab('questoes')" id="tabBtn-questoes">
+                    <i class="fas fa-sliders"></i> Gerenciar Questões
+                </button>
             </div>
 
             <!-- ABA 1: RELATÓRIO GRÁFICO EXECUTIVO -->
@@ -1219,6 +1467,60 @@
                     </table>
                 </div>
             </div>
+
+            <!-- ABA 4: GESTÃO DA MATRIZ DE QUESTÕES -->
+            <div id="pane-questoes" class="admin-tab-pane">
+                <div class="questoes-header-bar">
+                    <div>
+                        <h3 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 800; color: var(--text-color);">
+                            <i class="fas fa-sliders text-primary"></i> Gestão da Matriz de Questões da Avaliação
+                        </h3>
+                        <p style="margin: 0; font-size: 0.82rem; color: var(--text-secondary);">
+                            Insira novas perguntas, altere enunciados, modifique blocos e personalize alternativas com sincronização em nuvem.
+                        </p>
+                    </div>
+                    <div class="questoes-actions-group">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openNewQuestionModal()">
+                            <i class="fas fa-plus"></i> Nova Questão
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" id="btnSaveQuestionsMatrix" onclick="saveQuestionsMatrixToFirestore()" style="background: #10b981; border-color: #059669;">
+                            <i class="fas fa-cloud-arrow-up"></i> Salvar no Firestore
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="confirmResetQuestionsToDefault()" title="Restaurar a matriz oficial das 28 perguntas originais">
+                            <i class="fas fa-rotate-left"></i> Restaurar Padrão
+                        </button>
+                        <a href="avaliacao.html" target="_blank" class="btn btn-secondary btn-sm" title="Abrir formulário da avaliação em nova guia">
+                            <i class="fas fa-arrow-up-right-from-square"></i> Ver Avaliação
+                        </a>
+                    </div>
+                </div>
+
+                <div class="questoes-filters-row">
+                    <div class="search-box" style="flex: 1; max-width: 440px;">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchQuestionsInput" placeholder="Buscar pergunta, enunciado ou código..." oninput="filterQuestionsList()">
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <select id="filterBlockSelect" onchange="filterQuestionsList()" class="school-filter-select" style="min-width: 250px;">
+                            <option value="">Todos os Blocos (1 ao 6)</option>
+                            <option value="1">Bloco 1 – Planejamento e Organização</option>
+                            <option value="2">Bloco 2 – Práticas Pedagógicas</option>
+                            <option value="3">Bloco 3 – Aprendizagem dos Alunos</option>
+                            <option value="4">Bloco 4 – Desafios e Necessidades</option>
+                            <option value="5">Bloco 5 – Autoavaliação Docente</option>
+                            <option value="6">Bloco 6 – Perspectivas para 2027</option>
+                        </select>
+                        <span id="questionsCountBadge" class="questoes-count-badge">28 questões</span>
+                    </div>
+                </div>
+
+                <!-- Container das Questões Agrupadas por Bloco -->
+                <div id="questoesListContainer" class="questoes-list-container">
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-spinner fa-spin"></i> Carregando matriz de questões...
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     </div>
@@ -1283,10 +1585,122 @@
         </div>
     </div>
 
+    <!-- Modal de Criação e Edição de Questões -->
+    <div id="modalQuestionEdit" class="modal-details" style="display: none;">
+        <div class="modal-details-card" style="max-width: 780px;">
+            <div class="modal-details-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(59, 130, 246, 0.08)); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.25);">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div>
+                        <h2 id="modalQuestionTitle" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-color); letter-spacing: -0.02em;">
+                            Editar Questão
+                        </h2>
+                        <p id="modalQuestionSubtitle" style="margin: 2px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
+                            Configure o enunciado, bloco pedagógico e alternativas de resposta
+                        </p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeQuestionModal()" title="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Formulário de Edição -->
+            <form id="formQuestionEdit" onsubmit="handleSaveQuestionForm(event)">
+                <input type="hidden" id="editQuestionOriginalKey" value="">
+
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-bottom: 14px;">
+                    <div>
+                        <label class="q-form-label">Código / Chave <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="editQuestionKey" class="q-form-input" required placeholder="ex: q1, q29" style="text-transform: lowercase;">
+                        <span style="font-size: 0.72rem; color: var(--text-secondary);">Chave única no banco de dados</span>
+                    </div>
+                    <div>
+                        <label class="q-form-label">Bloco Pedagógico <span style="color:#ef4444;">*</span></label>
+                        <select id="editQuestionBloco" class="q-form-input" required>
+                            <option value="1">Bloco 1 – Planejamento e Organização das Aulas</option>
+                            <option value="2">Bloco 2 – Práticas Pedagógicas e Metodologias</option>
+                            <option value="3">Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos</option>
+                            <option value="4">Bloco 4 – Desafios e Necessidades</option>
+                            <option value="5">Bloco 5 – Autoavaliação Docente</option>
+                            <option value="6">Bloco 6 – Perspectivas e Propostas para 2027</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label class="q-form-label">Enunciado da Pergunta <span style="color:#ef4444;">*</span></label>
+                    <textarea id="editQuestionEnunciado" class="q-form-input" rows="3" required placeholder="Digite o enunciado completo da pergunta..."></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 16px;">
+                    <div>
+                        <label class="q-form-label">Formato de Resposta <span style="color:#ef4444;">*</span></label>
+                        <select id="editQuestionType" class="q-form-input" required onchange="handleQuestionTypeChange()">
+                            <option value="radio">Escolha Única (Radio - apenas 1 resposta)</option>
+                            <option value="checkbox">Múltipla Escolha (Checkbox - seleção múltipla)</option>
+                            <option value="text">Dissertativa / Texto Livre (com contador de 250 carac.)</option>
+                            <option value="conditional_text">Condicional (depende da resposta da Q27)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="q-form-label">Preenchimento</label>
+                        <select id="editQuestionRequired" class="q-form-input">
+                            <option value="true">Obrigatória (100%)</option>
+                            <option value="false">Opcional / Condicional</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Seção de Alternativas (para Radio e Checkbox) -->
+                <div id="editQuestionOptionsWrap" style="background: var(--zebra-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <strong style="font-size: 0.88rem; color: var(--text-color);"><i class="fas fa-list-check text-primary"></i> Alternativas de Resposta:</strong>
+                        <!-- Presets rápidos -->
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 3px 8px;" onclick="applyOptionsPreset('excelente')">
+                                Excelente...
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 3px 8px;" onclick="applyOptionsPreset('frequencia')">
+                                Sempre...
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 3px 8px;" onclick="applyOptionsPreset('sim_nao')">
+                                Sim / Não...
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 3px 8px;" onclick="applyOptionsPreset('autonomia')">
+                                Significativo...
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="optionsInputsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                        <!-- Inputs dinâmicos de opções -->
+                    </div>
+
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addOptionInputRow('')">
+                        <i class="fas fa-plus"></i> Adicionar Alternativa
+                    </button>
+                </div>
+
+                <!-- Botões do Rodapé -->
+                <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeQuestionModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmitQuestionModal">
+                        <i class="fas fa-check"></i> Salvar Questão
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts do Firebase e Lógica de Visualização -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, orderBy, doc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -1643,6 +2057,819 @@
             return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
         }
 
+
+        // Matriz de Questões Padrão Oficiais (28 Questões Nativas)
+        const DEFAULT_QUESTIONS_DATA = [
+    {
+        "key": "q1",
+        "num": 1,
+        "bloco": 1,
+        "blocoTitle": "Bloco 1 – Planejamento e Organização",
+        "title": "1. Como você avalia o planejamento das aulas de Educação Digital e Midiática desenvolvido durante o ano?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Excelente",
+            "Bom",
+            "Regular",
+            "Precisa melhorar"
+        ]
+    },
+    {
+        "key": "q2",
+        "num": 2,
+        "bloco": 1,
+        "blocoTitle": "Bloco 1 – Planejamento e Organização",
+        "title": "2. Os conteúdos e as habilidades trabalhados foram adequados à faixa etária e às necessidades dos alunos?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sempre",
+            "Na maioria das vezes",
+            "Algumas vezes",
+            "Raramente"
+        ]
+    },
+    {
+        "key": "q3",
+        "num": 3,
+        "bloco": 1,
+        "blocoTitle": "Bloco 1 – Planejamento e Organização",
+        "title": "3. O tempo destinado às aulas foi suficiente para desenvolver as propostas planejadas?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sim, foi suficiente.",
+            "Parcialmente.",
+            "Não foi suficiente."
+        ]
+    },
+    {
+        "key": "q4",
+        "num": 4,
+        "bloco": 1,
+        "blocoTitle": "Bloco 1 – Planejamento e Organização",
+        "title": "4. Quais foram as principais dificuldades encontradas na organização e no planejamento das aulas?",
+        "type": "text",
+        "required": true,
+        "options": []
+    },
+    {
+        "key": "q5",
+        "num": 5,
+        "bloco": 2,
+        "blocoTitle": "Bloco 2 – Desenvolvimento e Práticas Pedagógicas",
+        "title": "5. Como você avalia as propostas e metodologias utilizadas nas aulas?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Muito satisfatórias",
+            "Satisfatórias",
+            "Pouco satisfatórias",
+            "Insatisfatórias"
+        ]
+    },
+    {
+        "key": "q6",
+        "num": 6,
+        "bloco": 2,
+        "blocoTitle": "Bloco 2 – Desenvolvimento e Práticas Pedagógicas",
+        "title": "6. Quais estratégias despertaram maior interesse e participação dos alunos?",
+        "type": "checkbox",
+        "required": true,
+        "options": [
+            "Jogos e atividades interativas.",
+            "Atividades práticas no computador ou tablet.",
+            "Atividades impressas e de registro.",
+            "Produção de textos, imagens e conteúdos digitais.",
+            "Pesquisas e trabalhos investigativos.",
+            "Projetos e atividades coletivas."
+        ]
+    },
+    {
+        "key": "q7",
+        "num": 7,
+        "bloco": 2,
+        "blocoTitle": "Bloco 2 – Desenvolvimento e Práticas Pedagógicas",
+        "title": "7. Os recursos tecnológicos disponíveis atenderam às necessidades das aulas?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sim.",
+            "Parcialmente.",
+            "Não."
+        ]
+    },
+    {
+        "key": "q8",
+        "num": 8,
+        "bloco": 2,
+        "blocoTitle": "Bloco 2 – Desenvolvimento e Práticas Pedagógicas",
+        "title": "8. Quais atividades ou experiências você considera que tiveram maior sucesso durante o ano? Por quê?",
+        "type": "text",
+        "required": true,
+        "options": []
+    },
+    {
+        "key": "q9",
+        "num": 9,
+        "bloco": 3,
+        "blocoTitle": "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos",
+        "title": "9. De maneira geral, como você avalia o aproveitamento dos alunos nas aulas de Educação Digital e Midiática?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Excelente",
+            "Bom",
+            "Regular",
+            "Insatisfatório"
+        ]
+    },
+    {
+        "key": "q10",
+        "num": 10,
+        "bloco": 3,
+        "blocoTitle": "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos",
+        "title": "10. Você percebeu avanços dos alunos em relação às habilidades e aos conhecimentos trabalhados?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sim, avanços significativos.",
+            "Sim, avanços parciais.",
+            "Poucos avanços.",
+            "Não foi possível perceber avanços."
+        ]
+    },
+    {
+        "key": "q11",
+        "num": 11,
+        "bloco": 3,
+        "blocoTitle": "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos",
+        "title": "11. Em quais aspectos você percebeu maior desenvolvimento dos alunos?",
+        "type": "checkbox",
+        "required": true,
+        "options": [
+            "Uso consciente e responsável das tecnologias.",
+            "Segurança e proteção no ambiente digital.",
+            "Identificação de informações confiáveis e falsas.",
+            "Criatividade e produção de conteúdos digitais.",
+            "Pensamento computacional e resolução de problemas.",
+            "Autonomia no uso dos recursos tecnológicos.",
+            "Colaboração e trabalho em equipe."
+        ]
+    },
+    {
+        "key": "q12",
+        "num": 12,
+        "bloco": 3,
+        "blocoTitle": "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos",
+        "title": "12. Os alunos demonstraram interesse e envolvimento nas propostas desenvolvidas?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sempre.",
+            "Na maioria das vezes.",
+            "Algumas vezes.",
+            "Raramente."
+        ]
+    },
+    {
+        "key": "q13",
+        "num": 13,
+        "bloco": 3,
+        "blocoTitle": "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos",
+        "title": "13. Quais aprendizagens você considera mais significativas para os alunos neste ano? Há alguma habilidade que precisa ser retomada ou fortalecida?",
+        "type": "text",
+        "required": true,
+        "options": []
+    },
+    {
+        "key": "q14",
+        "num": 14,
+        "bloco": 4,
+        "blocoTitle": "Bloco 4 – Desafios e Necessidades",
+        "title": "14. Quais foram os principais desafios enfrentados durante as aulas?",
+        "type": "checkbox",
+        "required": true,
+        "options": [
+            "Falta ou insuficiência de equipamentos.",
+            "Problemas de conexão com a internet.",
+            "Tempo reduzido para as atividades.",
+            "Dificuldade dos alunos em utilizar os recursos.",
+            "Diferenças nos níveis de aprendizagem das turmas.",
+            "Dificuldade em ter apoio da Gestão Escolar."
+        ]
+    },
+    {
+        "key": "q15",
+        "num": 15,
+        "bloco": 4,
+        "blocoTitle": "Bloco 4 – Desafios e Necessidades",
+        "title": "15. Você considera que recebeu orientações e materiais suficientes para desenvolver as aulas?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sim.",
+            "Parcialmente.",
+            "Não."
+        ]
+    },
+    {
+        "key": "q16",
+        "num": 16,
+        "bloco": 4,
+        "blocoTitle": "Bloco 4 – Desafios e Necessidades",
+        "title": "16. Que recursos, materiais, formações ou orientações poderiam contribuir para melhorar seu trabalho em 2027?",
+        "type": "text",
+        "required": true,
+        "options": []
+    },
+    {
+        "key": "q17",
+        "num": 17,
+        "bloco": 5,
+        "blocoTitle": "Bloco 5 – Autoavaliação Docente",
+        "title": "17. Como você avalia seu envolvimento e comprometimento com as aulas de Educação Digital e Midiática?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Excelente.",
+            "Bom.",
+            "Regular.",
+            "Precisa melhorar."
+        ]
+    },
+    {
+        "key": "q18",
+        "num": 18,
+        "bloco": 5,
+        "blocoTitle": "Bloco 5 – Autoavaliação Docente",
+        "title": "18. Você se sentiu preparado(a) e seguro(a) para desenvolver os conteúdos propostos?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sempre.",
+            "Na maioria das vezes.",
+            "Algumas vezes.",
+            "Raramente."
+        ]
+    },
+    {
+        "key": "q19",
+        "num": 19,
+        "bloco": 5,
+        "blocoTitle": "Bloco 5 – Autoavaliação Docente",
+        "title": "19. Durante o ano, você buscou diversificar as estratégias de ensino para atender às diferentes necessidades dos alunos?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sempre.",
+            "Na maioria das vezes.",
+            "Algumas vezes.",
+            "Raramente."
+        ]
+    },
+    {
+        "key": "q20",
+        "num": 20,
+        "bloco": 5,
+        "blocoTitle": "Bloco 5 – Autoavaliação Docente",
+        "title": "20. Você conseguiu acompanhar e identificar as dificuldades e os avanços individuais e coletivos dos alunos?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sim, satisfatoriamente.",
+            "Parcialmente.",
+            "Com dificuldades."
+        ]
+    },
+    {
+        "key": "q21",
+        "num": 21,
+        "bloco": 5,
+        "blocoTitle": "Bloco 5 – Autoavaliação Docente",
+        "title": "21. Você considera que suas intervenções contribuíram para o desenvolvimento da autonomia, da criatividade e do pensamento crítico dos alunos?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sim, significativamente.",
+            "Sim, parcialmente.",
+            "Pouco.",
+            "Não consigo avaliar."
+        ]
+    },
+    {
+        "key": "q22",
+        "num": 22,
+        "bloco": 5,
+        "blocoTitle": "Bloco 5 – Autoavaliação Docente",
+        "title": "22. Olhando para sua trajetória neste ano, o que você considera que realizou bem? O que faria diferente se pudesse recomeçar?",
+        "type": "text",
+        "required": true,
+        "options": []
+    },
+    {
+        "key": "q23",
+        "num": 23,
+        "bloco": 5,
+        "blocoTitle": "Bloco 5 – Autoavaliação Docente",
+        "title": "23. Em qual aspecto da sua prática pedagógica você gostaria de investir mais para o próximo ano?",
+        "type": "text",
+        "required": true,
+        "options": []
+    },
+    {
+        "key": "q24",
+        "num": 24,
+        "bloco": 6,
+        "blocoTitle": "Bloco 6 – Perspectivas e Propostas para 2027",
+        "title": "24. Que mudanças você considera necessárias para tornar as aulas mais significativas, atrativas e eficientes?",
+        "type": "text",
+        "required": true,
+        "options": []
+    },
+    {
+        "key": "q25",
+        "num": 25,
+        "bloco": 6,
+        "blocoTitle": "Bloco 6 – Perspectivas e Propostas para 2027",
+        "title": "25. Deixe uma sugestão ou contribuição que possa colaborar com a organização e o fortalecimento do trabalho de Educação Digital e Midiática em nossa rede de ensino.",
+        "type": "text",
+        "required": true,
+        "options": []
+    },
+    {
+        "key": "q26",
+        "num": 26,
+        "bloco": 6,
+        "blocoTitle": "Bloco 6 – Perspectivas e Propostas para 2027",
+        "title": "26. Em poucas palavras, como você definiria sua experiência como professor(a) de Educação Digital e Midiática em 2026?",
+        "type": "text",
+        "required": true,
+        "options": []
+    },
+    {
+        "key": "q27",
+        "num": 27,
+        "bloco": 6,
+        "blocoTitle": "Bloco 6 – Perspectivas e Propostas para 2027",
+        "title": "27. Você pretende continuar ministrando as aulas de Educação Digital e Midiática (EDM) no próximo ano?",
+        "type": "radio",
+        "required": true,
+        "options": [
+            "Sim, com certeza.",
+            "Provavelmente sim, dependendo da atribuição/horários",
+            "Não pretendo pegar essas aulas no próximo ano.",
+            "Ainda estou em dúvida."
+        ]
+    },
+    {
+        "key": "q28",
+        "num": 28,
+        "bloco": 6,
+        "blocoTitle": "Bloco 6 – Perspectivas e Propostas para 2027",
+        "title": "28. Caso tenha marcado \"Não\" ou \"Em dúvida\" na pergunta anterior, poderia nos contar o principal motivo?",
+        "type": "conditional_text",
+        "required": false,
+        "options": []
+    }
+];
+
+        let currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
+
+        // Carregar Matriz de Questões do Firestore ou Padrão Oficial
+        window.loadQuestionsMatrix = async () => {
+            const container = document.getElementById('questoesListContainer');
+            if (container) {
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-secondary);"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 10px;">Carregando configuração de questões...</p></div>`;
+            }
+
+            try {
+                const configRef = doc(db, "configuracoes", "questoes_avaliacao");
+                const configSnap = await getDoc(configRef);
+                if (configSnap.exists() && configSnap.data().items && Array.isArray(configSnap.data().items) && configSnap.data().items.length > 0) {
+                    currentQuestionsData = configSnap.data().items;
+                } else {
+                    currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
+                }
+            } catch (err) {
+                console.warn("Aviso: Não foi possível carregar do Firestore, utilizando padrão oficial:", err);
+                currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
+            }
+
+            renderQuestionsManagementUI();
+
+            if (window.location.hash === '#questoes') {
+                switchAdminTab('questoes');
+            }
+        };
+
+        // Renderizar Interface Administrativa de Gestão de Questões
+        window.renderQuestionsManagementUI = () => {
+            const container = document.getElementById('questoesListContainer');
+            const countBadge = document.getElementById('questoesCountBadge');
+            if (!container) return;
+
+            const blockFilter = document.getElementById('filterBlockSelect')?.value || 'all';
+            const searchTerm = (document.getElementById('searchQuestionsInput')?.value || '').toLowerCase().trim();
+
+            const BLOCOS_INFO = {
+                1: "Bloco 1 – Planejamento e Organização",
+                2: "Bloco 2 – Desenvolvimento e Práticas Pedagógicas",
+                3: "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos",
+                4: "Bloco 4 – Desafios e Necessidades",
+                5: "Bloco 5 – Autoavaliação Docente",
+                6: "Bloco 6 – Perspectivas e Propostas para 2027"
+            };
+
+            if (countBadge) {
+                countBadge.textContent = `${currentQuestionsData.length} questões cadastradas`;
+            }
+
+            // Filtrar questões
+            let filtered = currentQuestionsData.filter(q => {
+                if (blockFilter !== 'all' && String(q.bloco) !== String(blockFilter)) return false;
+                if (searchTerm) {
+                    const titleMatch = (q.title || '').toLowerCase().includes(searchTerm);
+                    const keyMatch = (q.key || '').toLowerCase().includes(searchTerm);
+                    const optionsMatch = (q.options || []).some(o => o.toLowerCase().includes(searchTerm));
+                    if (!titleMatch && !keyMatch && !optionsMatch) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 48px 20px; background: var(--zebra-bg); border: 1.5px dashed var(--border-color); border-radius: 14px;">
+                        <i class="fas fa-search" style="font-size: 2.2rem; color: var(--text-secondary); opacity: 0.5; margin-bottom: 12px;"></i>
+                        <h4 style="margin: 0 0 6px 0; color: var(--text-color);">Nenhuma questão encontrada</h4>
+                        <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Tente alterar o filtro de bloco ou termo de busca acima.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Agrupar por bloco
+            const grouped = {};
+            filtered.forEach(q => {
+                const b = q.bloco || 1;
+                if (!grouped[b]) grouped[b] = [];
+                grouped[b].push(q);
+            });
+
+            let html = '';
+            for (let b = 1; b <= 6; b++) {
+                const questionsInBlock = grouped[b];
+                if (!questionsInBlock || questionsInBlock.length === 0) continue;
+
+                const blockTitle = BLOCOS_INFO[b] || `Bloco ${b}`;
+
+                html += `
+                    <div class="questoes-block-card">
+                        <div class="questoes-block-header">
+                            <h4><i class="fas fa-folder-open text-primary"></i> ${escapeHtml(blockTitle)}</h4>
+                            <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">
+                                ${questionsInBlock.length} ${questionsInBlock.length === 1 ? 'questão' : 'questões'}
+                            </span>
+                        </div>
+                        <div class="questoes-block-body">
+                `;
+
+                questionsInBlock.forEach(q => {
+                    const isRequired = q.required !== false;
+                    const qType = q.type || 'radio';
+
+                    let typeLabel = 'Escolha Única (Radio)';
+                    if (qType === 'checkbox') typeLabel = 'Múltipla Escolha (Checkbox)';
+                    else if (qType === 'text') typeLabel = 'Dissertativa (Texto Livre)';
+                    else if (qType === 'conditional_text') typeLabel = 'Condicional (Q27)';
+
+                    let optionsPreview = '';
+                    if (q.options && q.options.length > 0) {
+                        optionsPreview = `
+                            <div class="questoes-options-preview">
+                                ${q.options.map((opt, i) => `<span class="q-option-pill">${i+1}. ${escapeHtml(opt)}</span>`).join('')}
+                            </div>
+                        `;
+                    } else if (qType === 'text') {
+                        optionsPreview = `
+                            <div class="questoes-options-preview">
+                                <span class="q-option-pill" style="opacity: 0.8;"><i class="fas fa-keyboard"></i> Campo de texto dissertativo livre (máx. 250 caracteres / 4 linhas)</span>
+                            </div>
+                        `;
+                    } else if (qType === 'conditional_text') {
+                        optionsPreview = `
+                            <div class="questoes-options-preview">
+                                <span class="q-option-pill" style="color: #b45309; background: rgba(245, 158, 11, 0.1);"><i class="fas fa-code-branch"></i> Exibido apenas se Q27 for "Não" ou "Em dúvida"</span>
+                            </div>
+                        `;
+                    }
+
+                    html += `
+                        <div class="questoes-item-row" id="row-q-${escapeHtml(q.key)}">
+                            <div class="questoes-item-content">
+                                <div class="questoes-item-meta">
+                                    <span class="q-key-badge">${escapeHtml(q.key.toUpperCase())}</span>
+                                    <span class="q-type-badge ${escapeHtml(qType)}">${escapeHtml(typeLabel)}</span>
+                                    ${isRequired ? '<span class="badge-status badge-approved" style="font-size:0.7rem; padding: 2px 7px;"><i class="fas fa-asterisk" style="font-size:0.55rem;"></i> Obrigatória</span>' : '<span class="badge-status badge-pending" style="font-size:0.7rem; padding: 2px 7px;">Opcional</span>'}
+                                </div>
+                                <div class="questoes-item-title">${escapeHtml(q.title)}</div>
+                                ${optionsPreview}
+                            </div>
+                            <div class="questoes-item-actions">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="openEditQuestionModal('${escapeHtml(q.key)}')" title="Editar Questão">
+                                    <i class="fas fa-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="duplicateQuestion('${escapeHtml(q.key)}')" title="Duplicar Questão">
+                                    <i class="fas fa-clone"></i>
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="deleteQuestion('${escapeHtml(q.key)}')" title="Excluir Questão" style="color:#ef4444;">
+                                    <i class="fas fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        };
+
+        // Filtrar lista ao digitar ou mudar bloco
+        window.filterQuestionsList = () => {
+            renderQuestionsManagementUI();
+        };
+
+        // Modal: Abrir para Nova Questão
+        window.openNewQuestionModal = () => {
+            const modal = document.getElementById('modalQuestionEdit');
+            const titleEl = document.getElementById('modalQuestionEditTitle');
+            const form = document.getElementById('formQuestionEdit');
+            if (!modal || !form) return;
+
+            titleEl.innerHTML = `<i class="fas fa-plus-circle text-primary"></i> Adicionar Nova Questão`;
+            form.reset();
+
+            // Sugerir próxima key
+            const highestNum = currentQuestionsData.reduce((max, q) => {
+                const num = parseInt(q.key.replace(/\D/g, ''), 10);
+                return (!isNaN(num) && num > max) ? num : max;
+            }, 0);
+            const nextKey = `q${highestNum + 1}`;
+
+            document.getElementById('editQuestionKey').value = nextKey;
+            document.getElementById('editQuestionKey').readOnly = false;
+            document.getElementById('editQuestionBlock').value = "1";
+            document.getElementById('editQuestionType').value = "radio";
+            document.getElementById('editQuestionRequired').value = "true";
+            document.getElementById('editQuestionEnunciado').value = "";
+
+            handleQuestionTypeChange();
+
+            // 4 opções vazias por padrão
+            const list = document.getElementById('optionsInputsList');
+            if (list) list.innerHTML = '';
+            addOptionInputRow('');
+            addOptionInputRow('');
+
+            modal.style.display = 'block';
+        };
+
+        // Modal: Abrir para Edição
+        window.openEditQuestionModal = (qKey) => {
+            const q = currentQuestionsData.find(item => item.key === qKey);
+            if (!q) { alert("Questão não encontrada."); return; }
+
+            const modal = document.getElementById('modalQuestionEdit');
+            const titleEl = document.getElementById('modalQuestionEditTitle');
+            if (!modal) return;
+
+            titleEl.innerHTML = `<i class="fas fa-sliders text-primary"></i> Editar Questão (${escapeHtml(q.key.toUpperCase())})`;
+
+            document.getElementById('editQuestionKey').value = q.key;
+            document.getElementById('editQuestionKey').readOnly = true;
+            document.getElementById('editQuestionBlock').value = String(q.bloco || 1);
+            document.getElementById('editQuestionType').value = q.type || 'radio';
+            document.getElementById('editQuestionRequired').value = (q.required !== false) ? 'true' : 'false';
+            document.getElementById('editQuestionEnunciado').value = q.title || '';
+
+            handleQuestionTypeChange();
+
+            const list = document.getElementById('optionsInputsList');
+            if (list) list.innerHTML = '';
+
+            if (q.options && q.options.length > 0) {
+                q.options.forEach(opt => addOptionInputRow(opt));
+            } else {
+                addOptionInputRow('');
+                addOptionInputRow('');
+            }
+
+            modal.style.display = 'block';
+        };
+
+        // Fechar Modal
+        window.closeQuestionModal = () => {
+            const modal = document.getElementById('modalQuestionEdit');
+            if (modal) modal.style.display = 'none';
+        };
+
+        // Adicionar Linha de Opção
+        window.addOptionInputRow = (val = '') => {
+            const list = document.getElementById('optionsInputsList');
+            if (!list) return;
+
+            const row = document.createElement('div');
+            row.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+            row.innerHTML = `
+                <i class="fas fa-grip-vertical" style="color: var(--text-secondary); opacity: 0.5;"></i>
+                <input type="text" class="q-form-input q-option-value-input" value="${escapeHtml(val)}" placeholder="Texto da alternativa..." style="padding: 7px 10px; font-size: 0.86rem;" required>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="this.parentElement.remove()" title="Remover alternativa" style="color:#ef4444; padding: 6px 10px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            list.appendChild(row);
+        };
+
+        // Presets Rápidos de Alternativas
+        window.applyOptionsPreset = (presetType) => {
+            const list = document.getElementById('optionsInputsList');
+            if (!list) return;
+            list.innerHTML = '';
+
+            const PRESETS = {
+                'excelente': ['Excelente', 'Bom', 'Regular', 'Precisa melhorar'],
+                'frequencia': ['Sempre', 'Na maioria das vezes', 'Algumas vezes', 'Raramente'],
+                'sim_nao': ['Sim, com certeza', 'Parcialmente', 'Não'],
+                'autonomia': ['Significativo', 'Moderado', 'Inicial', 'Nenhum']
+            };
+
+            const opts = PRESETS[presetType] || [];
+            opts.forEach(o => addOptionInputRow(o));
+        };
+
+        // Tipo de Questão Mudou
+        window.handleQuestionTypeChange = () => {
+            const qType = document.getElementById('editQuestionType')?.value || 'radio';
+            const wrap = document.getElementById('editQuestionOptionsWrap');
+            if (!wrap) return;
+
+            if (qType === 'text' || qType === 'conditional_text') {
+                wrap.style.display = 'none';
+            } else {
+                wrap.style.display = 'block';
+            }
+        };
+
+        // Salvar Questão (Novo ou Edição)
+        window.handleSaveQuestionForm = async (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+
+            const key = document.getElementById('editQuestionKey').value.trim();
+            const bloco = parseInt(document.getElementById('editQuestionBlock').value, 10);
+            const title = document.getElementById('editQuestionEnunciado').value.trim();
+            const type = document.getElementById('editQuestionType').value;
+            const required = (document.getElementById('editQuestionRequired').value === 'true');
+
+            if (!key || !title) {
+                alert("Por favor, preencha a chave e o enunciado da questão.");
+                return;
+            }
+
+            const BLOCOS_INFO = {
+                1: "Bloco 1 – Planejamento e Organização",
+                2: "Bloco 2 – Desenvolvimento e Práticas Pedagógicas",
+                3: "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos",
+                4: "Bloco 4 – Desafios e Necessidades",
+                5: "Bloco 5 – Autoavaliação Docente",
+                6: "Bloco 6 – Perspectivas e Propostas para 2027"
+            };
+
+            let options = [];
+            if (type === 'radio' || type === 'checkbox') {
+                const inputs = document.querySelectorAll('.q-option-value-input');
+                inputs.forEach(inp => {
+                    const val = inp.value.trim();
+                    if (val) options.push(val);
+                });
+
+                if (options.length < 2) {
+                    alert("Para questões de múltipla escolha ou escolha única, informe ao menos 2 alternativas.");
+                    return;
+                }
+            }
+
+            const btn = document.getElementById('btnSubmitQuestionModal');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Salvando na nuvem...`;
+            }
+
+            const existingIdx = currentQuestionsData.findIndex(item => item.key === key);
+            const questionData = {
+                key,
+                bloco,
+                blocoTitle: BLOCOS_INFO[bloco] || `Bloco ${bloco}`,
+                title,
+                type,
+                required,
+                options
+            };
+
+            if (existingIdx !== -1) {
+                currentQuestionsData[existingIdx] = questionData;
+            } else {
+                currentQuestionsData.push(questionData);
+            }
+
+            try {
+                await saveQuestionsMatrixToFirestore();
+                closeQuestionModal();
+                renderQuestionsManagementUI();
+                alert(`Questão ${key.toUpperCase()} salva com sucesso no Firestore!`);
+            } catch (err) {
+                console.error("Erro ao salvar questão:", err);
+                alert("Erro ao salvar no Firestore: " + err.message);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-check"></i> Salvar Questão`;
+                }
+            }
+        };
+
+        // Duplicar Questão
+        window.duplicateQuestion = async (qKey) => {
+            const q = currentQuestionsData.find(item => item.key === qKey);
+            if (!q) return;
+
+            const highestNum = currentQuestionsData.reduce((max, item) => {
+                const num = parseInt(item.key.replace(/\D/g, ''), 10);
+                return (!isNaN(num) && num > max) ? num : max;
+            }, 0);
+            const newKey = `q${highestNum + 1}`;
+
+            const cloned = JSON.parse(JSON.stringify(q));
+            cloned.key = newKey;
+            cloned.title = cloned.title + " (Cópia)";
+
+            currentQuestionsData.push(cloned);
+            try {
+                await saveQuestionsMatrixToFirestore();
+                renderQuestionsManagementUI();
+                alert(`Questão duplicada com sucesso como ${newKey.toUpperCase()}!`);
+            } catch (err) {
+                alert("Erro ao duplicar: " + err.message);
+            }
+        };
+
+        // Excluir Questão
+        window.deleteQuestion = async (qKey) => {
+            if (!confirm(`Tem certeza que deseja excluir a questão ${qKey.toUpperCase()}?\n\nEsta alteração será salva na nuvem e refletida no formulário de avaliação.`)) {
+                return;
+            }
+
+            currentQuestionsData = currentQuestionsData.filter(item => item.key !== qKey);
+            try {
+                await saveQuestionsMatrixToFirestore();
+                renderQuestionsManagementUI();
+                alert(`Questão ${qKey.toUpperCase()} excluída com sucesso!`);
+            } catch (err) {
+                alert("Erro ao excluir: " + err.message);
+            }
+        };
+
+        // Salvar Matriz no Firestore
+        window.saveQuestionsMatrixToFirestore = async () => {
+            const configRef = doc(db, "configuracoes", "questoes_avaliacao");
+            await setDoc(configRef, {
+                items: currentQuestionsData,
+                updatedAt: new Date().toISOString(),
+                updatedBy: auth.currentUser?.email || 'admin'
+            });
+        };
+
+        // Restaurar Padrão Oficial Original
+        window.confirmResetQuestionsToDefault = async () => {
+            if (!confirm("Atenção:\n\nDeseja restaurar as 28 questões oficiais originais de avaliação?\n\nQuaisquer alterações manuais recentes serão substituídas pelo padrão institucional do projeto.")) {
+                return;
+            }
+
+            currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
+            try {
+                await saveQuestionsMatrixToFirestore();
+                renderQuestionsManagementUI();
+                alert("Matriz de 28 questões oficiais restaurada com sucesso!");
+            } catch (err) {
+                alert("Erro ao restaurar: " + err.message);
+            }
+        };
+
         // Alternador de Abas Administrativas
         window.switchAdminTab = (tabName) => {
             document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
@@ -1657,6 +2884,8 @@
                 renderExecutiveCharts();
             } else if (tabName === 'qualitativo') {
                 renderQualitativeAnswers();
+            } else if (tabName === 'questoes') {
+                renderQuestionsManagementUI();
             }
         };
 
@@ -2062,6 +3291,7 @@
                     userEmailSpan.innerHTML = `<i class="fas fa-shield-halved"></i> ${escapeHtml(user.email || 'Admin')}`;
                 }
                 loadAvaliacoes();
+                loadQuestionsMatrix();
             } else {
                 if (gate) gate.style.display = 'block';
                 if (panel) panel.style.display = 'none';
