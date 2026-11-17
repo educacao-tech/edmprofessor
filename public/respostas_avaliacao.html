@@ -2608,11 +2608,11 @@
         // Modal: Abrir para Nova Questão
         window.openNewQuestionModal = () => {
             const modal = document.getElementById('modalQuestionEdit');
-            const titleEl = document.getElementById('modalQuestionEditTitle');
+            const titleEl = document.getElementById('modalQuestionTitle') || document.getElementById('modalQuestionEditTitle');
             const form = document.getElementById('formQuestionEdit');
             if (!modal || !form) return;
 
-            titleEl.innerHTML = `<i class="fas fa-plus-circle text-primary"></i> Adicionar Nova Questão`;
+            if (titleEl) titleEl.innerHTML = `<i class="fas fa-plus-circle text-primary"></i> Adicionar Nova Questão`;
             form.reset();
 
             // Sugerir próxima key
@@ -2622,52 +2622,93 @@
             }, 0);
             const nextKey = `q${highestNum + 1}`;
 
-            document.getElementById('editQuestionKey').value = nextKey;
-            document.getElementById('editQuestionKey').readOnly = false;
-            document.getElementById('editQuestionBlock').value = "1";
-            document.getElementById('editQuestionType').value = "radio";
-            document.getElementById('editQuestionRequired').value = "true";
-            document.getElementById('editQuestionEnunciado').value = "";
+            const keyInput = document.getElementById('editQuestionKey');
+            if (keyInput) {
+                keyInput.value = nextKey;
+                keyInput.readOnly = false;
+            }
+            const blocoSelect = document.getElementById('editQuestionBloco') || document.getElementById('editQuestionBlock');
+            if (blocoSelect) blocoSelect.value = "1";
+
+            const typeSelect = document.getElementById('editQuestionType');
+            if (typeSelect) typeSelect.value = "radio";
+
+            const reqSelect = document.getElementById('editQuestionRequired');
+            if (reqSelect) reqSelect.value = "true";
+
+            const enunciadoInput = document.getElementById('editQuestionEnunciado');
+            if (enunciadoInput) enunciadoInput.value = "";
 
             handleQuestionTypeChange();
 
             // 4 opções vazias por padrão
             const list = document.getElementById('optionsInputsList');
-            if (list) list.innerHTML = '';
-            addOptionInputRow('');
-            addOptionInputRow('');
+            if (list) {
+                list.innerHTML = '';
+                addOptionInputRow('');
+                addOptionInputRow('');
+            }
 
             modal.style.display = 'block';
         };
 
         // Modal: Abrir para Edição
         window.openEditQuestionModal = (qKey) => {
-            const q = currentQuestionsData.find(item => item.key === qKey);
-            if (!q) { alert("Questão não encontrada."); return; }
+            const cleanKey = (qKey || '').toLowerCase().trim();
+            const q = currentQuestionsData.find(item => (item.key || '').toLowerCase().trim() === cleanKey);
+            if (!q) { 
+                alert(`Questão "${qKey}" não encontrada na matriz.`); 
+                return; 
+            }
 
             const modal = document.getElementById('modalQuestionEdit');
-            const titleEl = document.getElementById('modalQuestionEditTitle');
-            if (!modal) return;
+            const titleEl = document.getElementById('modalQuestionTitle') || document.getElementById('modalQuestionEditTitle');
+            if (!modal) {
+                console.error("Elemento modalQuestionEdit não encontrado no DOM.");
+                return;
+            }
 
-            titleEl.innerHTML = `<i class="fas fa-sliders text-primary"></i> Editar Questão (${escapeHtml(q.key.toUpperCase())})`;
+            if (titleEl) {
+                titleEl.innerHTML = `<i class="fas fa-sliders text-primary"></i> Editar Questão (${escapeHtml(q.key.toUpperCase())})`;
+            }
 
-            document.getElementById('editQuestionKey').value = q.key;
-            document.getElementById('editQuestionKey').readOnly = true;
-            document.getElementById('editQuestionBlock').value = String(q.bloco || 1);
-            document.getElementById('editQuestionType').value = q.type || 'radio';
-            document.getElementById('editQuestionRequired').value = (q.required !== false) ? 'true' : 'false';
-            document.getElementById('editQuestionEnunciado').value = q.title || '';
+            const keyInput = document.getElementById('editQuestionKey');
+            if (keyInput) {
+                keyInput.value = q.key;
+                keyInput.readOnly = true;
+            }
+
+            const blocoSelect = document.getElementById('editQuestionBloco') || document.getElementById('editQuestionBlock');
+            if (blocoSelect) {
+                blocoSelect.value = String(q.bloco || 1);
+            }
+
+            const typeSelect = document.getElementById('editQuestionType');
+            if (typeSelect) {
+                typeSelect.value = q.type || 'radio';
+            }
+
+            const reqSelect = document.getElementById('editQuestionRequired');
+            if (reqSelect) {
+                reqSelect.value = (q.required !== false) ? 'true' : 'false';
+            }
+
+            const enunciadoInput = document.getElementById('editQuestionEnunciado');
+            if (enunciadoInput) {
+                enunciadoInput.value = q.title || '';
+            }
 
             handleQuestionTypeChange();
 
             const list = document.getElementById('optionsInputsList');
-            if (list) list.innerHTML = '';
-
-            if (q.options && q.options.length > 0) {
-                q.options.forEach(opt => addOptionInputRow(opt));
-            } else {
-                addOptionInputRow('');
-                addOptionInputRow('');
+            if (list) {
+                list.innerHTML = '';
+                if (q.options && q.options.length > 0) {
+                    q.options.forEach(opt => addOptionInputRow(opt));
+                } else {
+                    addOptionInputRow('');
+                    addOptionInputRow('');
+                }
             }
 
             modal.style.display = 'block';
@@ -2678,6 +2719,14 @@
             const modal = document.getElementById('modalQuestionEdit');
             if (modal) modal.style.display = 'none';
         };
+
+        // Fechar ao clicar fora do cartão
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('modalQuestionEdit');
+            if (modal && e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
 
         // Adicionar Linha de Opção
         window.addOptionInputRow = (val = '') => {
@@ -2730,11 +2779,17 @@
         window.handleSaveQuestionForm = async (e) => {
             if (e && e.preventDefault) e.preventDefault();
 
-            const key = document.getElementById('editQuestionKey').value.trim();
-            const bloco = parseInt(document.getElementById('editQuestionBlock').value, 10);
-            const title = document.getElementById('editQuestionEnunciado').value.trim();
-            const type = document.getElementById('editQuestionType').value;
-            const required = (document.getElementById('editQuestionRequired').value === 'true');
+            const keyInput = document.getElementById('editQuestionKey');
+            const blocoSelect = document.getElementById('editQuestionBloco') || document.getElementById('editQuestionBlock');
+            const enunciadoInput = document.getElementById('editQuestionEnunciado');
+            const typeSelect = document.getElementById('editQuestionType');
+            const reqSelect = document.getElementById('editQuestionRequired');
+
+            const key = keyInput ? keyInput.value.trim() : '';
+            const bloco = blocoSelect ? parseInt(blocoSelect.value, 10) : 1;
+            const title = enunciadoInput ? enunciadoInput.value.trim() : '';
+            const type = typeSelect ? typeSelect.value : 'radio';
+            const required = reqSelect ? (reqSelect.value === 'true') : true;
 
             if (!key || !title) {
                 alert("Por favor, preencha a chave e o enunciado da questão.");
