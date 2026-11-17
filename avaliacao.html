@@ -89,17 +89,47 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
+            gap: 24px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
             border-bottom: 1.5px dashed var(--border-color);
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
         }
 
         .eval-logo-img {
-            max-height: 38px;
+            max-height: 42px;
             width: auto;
             object-fit: contain;
+            transition: transform 0.2s ease;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.04));
+        }
+
+        .eval-logo-img.logo-batatais {
+            max-height: 40px;
+        }
+
+        .eval-logo-img.logo-secretaria {
+            max-height: 52px;
+            transform: scale(1.18);
+            transform-origin: center;
+        }
+
+        .eval-logo-img.logo-edm {
+            max-height: 42px;
+        }
+
+        @media (max-width: 640px) {
+            .eval-logos-row {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 14px;
+            }
+            .eval-logo-img {
+                max-height: 34px;
+            }
+            .eval-logo-img.logo-secretaria {
+                max-height: 44px;
+            }
         }
 
         .eval-header-title {
@@ -376,13 +406,13 @@
             background-color: var(--zebra-bg);
             border: 1.5px solid rgba(16, 185, 129, 0.35);
             border-radius: 12px;
-            padding: 10px 14px;
+            padding: 12px 16px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
             transition: all 0.2s ease;
         }
 
@@ -393,16 +423,17 @@
         }
 
         .docente-avatar {
-            width: 46px;
-            height: 46px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #10b981;
+            border: 2.5px solid #10b981;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
         }
 
         .docente-avatar-fallback {
-            width: 46px;
-            height: 46px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: linear-gradient(135deg, #2563eb, #10b981);
             color: white;
@@ -412,30 +443,55 @@
             font-size: 1.15rem;
             font-weight: 800;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
         }
 
         .docente-info h4 {
-            margin: 0 0 2px 0;
-            font-size: 0.98rem;
+            margin: 0 0 3px 0;
+            font-size: 1rem;
             font-weight: 800;
+            letter-spacing: -0.01em;
         }
 
         .docente-info p {
-            margin: 0 0 5px 0;
-            font-size: 0.80rem;
+            margin: 0 0 6px 0;
+            font-size: 0.82rem;
             color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .docente-school-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 1px 8px;
+            border-radius: 6px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #2563eb;
+            font-weight: 600;
+            font-size: 0.76rem;
+            border: 1px solid rgba(37, 99, 235, 0.18);
+        }
+
+        html[data-theme="dark"] .docente-school-pill {
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border-color: rgba(96, 165, 250, 0.25);
         }
 
         .badge-presenca-link {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             background-color: rgba(16, 185, 129, 0.15);
             color: #059669;
-            font-size: 0.74rem;
+            font-size: 0.76rem;
             font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
         }
 
         html[data-theme="dark"] .badge-presenca-link {
@@ -1285,8 +1341,22 @@
         /* Opções de Escolha Única (Radio) e Múltipla (Checkbox) */
         .options-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        @media (max-width: 1024px) {
+            .options-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
         }
 
         .options-list {
@@ -1298,15 +1368,16 @@
         .option-label {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
+            gap: 10px;
+            padding: 10px 14px;
+            min-height: 48px;
             border: 1.5px solid var(--border-color);
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             background-color: var(--card-bg);
             user-select: none;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             font-weight: 600;
             position: relative;
         }
@@ -2169,9 +2240,9 @@
 
         <!-- Cabeçalho Institucional com Logos -->
         <div class="eval-logos-row">
-            <img src="batatais.png" alt="Prefeitura de Batatais" class="eval-logo-img">
-            <img src="secretaria.png" alt="Secretaria Municipal de Educação" class="eval-logo-img">
-            <img src="edm.png" alt="Educação Digital e Midiática" class="eval-logo-img">
+            <img src="batatais.png" alt="Prefeitura de Batatais" class="eval-logo-img logo-batatais">
+            <img src="secretaria.png" alt="Secretaria Municipal de Educação" class="eval-logo-img logo-secretaria">
+            <img src="edm.png" alt="Educação Digital e Midiática" class="eval-logo-img logo-edm">
         </div>
 
         <div class="eval-header-title">
@@ -2200,7 +2271,7 @@
                 <div id="docenteAvatarFallback" class="docente-avatar-fallback">P</div>
                 <div class="docente-info">
                     <h4 id="docenteNome">Docente Conectado</h4>
-                    <p><span id="docenteEmail">email@educacao.batatais.sp.gov.br</span> • <span id="docenteEscolaTag">Escola</span></p>
+                    <p><span id="docenteEmail">email@educacao.batatais.sp.gov.br</span> • <span class="docente-school-pill" id="docenteEscolaTag"><i class="fas fa-school"></i> Escola vinculada</span></p>
                     <span class="badge-presenca-link" id="presenceStatusBadge" style="background-color: rgba(245, 158, 11, 0.15); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.3);">
                         <i class="fas fa-clock"></i> Presença no Encontro: PENDENTE (Responda e envie a avaliação abaixo)
                     </span>
@@ -2217,24 +2288,24 @@
                 <div class="eval-progress-title-wrap">
                     <strong style="font-size: 0.88rem; color: var(--text-color);"><i class="fas fa-tasks text-primary"></i> Progresso do Preenchimento:</strong>
                     <span id="evalProgressBadgePct" class="eval-pct-badge">0%</span>
-                    <span id="evalProgressText" style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 2px;">0 de 28 respondidas</span>
+                    <span id="evalProgressText" style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 2px;">0 de 27 respondidas</span>
+                    <span id="evalProgressStatusBadge" class="badge-status-progresso" style="font-size: 0.74rem; font-weight: 700; padding: 3px 9px; border-radius: 8px; background-color: rgba(245, 158, 11, 0.15); color: #b45309; display: inline-flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-hourglass-half"></i> Presença só é confirmada com 100% preenchido
+                    </span>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <div class="eval-toolbar-group" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                     <button type="button" class="btn btn-secondary btn-sm" id="btnToggleFocusMode" onclick="toggleFocusMode()" title="Ativar ou desativar o Modo Foco (destaca a questão atual e atenua as demais para leitura limpa) [Atalho: Alt + F]" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
                         <i class="fas fa-bullseye" style="color: var(--text-secondary); opacity: 0.6;"></i> <span>Modo Foco: <strong id="focusModeStatusText">Desativado</strong></span>
                     </button>
                     <button type="button" class="btn btn-secondary btn-sm" id="btnToggleAutoScroll" onclick="toggleAutoScroll()" title="Ativar ou desativar rolagem suave automática para a próxima questão ao selecionar alternativas" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
                         <i class="fas fa-bolt" style="color: #2563eb;"></i> <span>Auto-Scroll: <strong>Ativado</strong></span>
                     </button>
-                    <button type="button" class="btn btn-secondary btn-sm" id="btnToggleMap" onclick="toggleQuestionsMap()" title="Ver o mapa completo de todas as 28 questões" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnToggleMap" onclick="toggleQuestionsMap()" title="Ver o mapa completo das questões" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px; font-weight: 700;">
                         <i class="fas fa-th"></i> Mapa das Questões
                     </button>
                     <button type="button" class="btn btn-secondary btn-sm" id="btnNextUnanswered" onclick="goToNextUnanswered()" title="Rola diretamente para a próxima questão ainda não respondida" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 8px;">
                         <i class="fas fa-arrow-down"></i> Próxima Pendente
                     </button>
-                    <span id="evalProgressStatusBadge" class="badge-status-progresso" style="font-size: 0.76rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; background-color: rgba(245, 158, 11, 0.15); color: #b45309;">
-                        <i class="fas fa-hourglass-half"></i> Presença requer 100%
-                    </span>
                 </div>
             </div>
             <div class="eval-progress-track">
@@ -2355,7 +2426,7 @@
                         <label for="eval-professor">
                             <span><i class="fas fa-user text-primary"></i> Professor(a) <span class="required-star">*</span></span>
                         </label>
-                        <input type="text" id="eval-professor" placeholder="NOME COMPLETO DO(A) DOCENTE" required list="professoresDatalist" style="text-transform: uppercase;" autocomplete="name">
+                        <input type="text" id="eval-professor" name="eval-professor" placeholder="NOME COMPLETO DO(A) DOCENTE" required list="professoresDatalist" style="text-transform: uppercase;" autocomplete="name">
                         <datalist id="professoresDatalist"></datalist>
                     </div>
 
@@ -2365,7 +2436,7 @@
                             <span><i class="fas fa-envelope text-primary"></i> E-mail Institucional <span class="required-star">*</span></span>
                             <span class="badge-auto-tag" id="badgeEmailLock" style="display: none;"><i class="fas fa-lock"></i> Google</span>
                         </label>
-                        <input type="email" id="eval-email" placeholder="seuemail@gmail.com" required title="E-mail do professor(a)">
+                        <input type="email" id="eval-email" name="eval-email" placeholder="seuemail@gmail.com" required title="E-mail do professor(a)">
                     </div>
 
                     <!-- Escola -->
@@ -2373,7 +2444,7 @@
                         <label for="eval-escola">
                             <span><i class="fas fa-school text-primary"></i> Escola de Atuação <span class="required-star">*</span></span>
                         </label>
-                        <select id="eval-escola" required>
+                        <select id="eval-escola" name="eval-escola" required>
                             <option value="">Selecione a Escola...</option>
                             <option value="ALZIRA">ALZIRA</option>
                             <option value="ANNA">ANNA</option>
@@ -3031,7 +3102,7 @@
         </div>
     </div>
 
-    <!-- Modal / Gaveta do Mapa de Questões (1 a 28) -->
+    <!-- Modal / Gaveta do Mapa de Questões -->
     <div id="questionsMapModal" class="modal" style="display: none;" onclick="if(event.target===this) toggleQuestionsMap(false)">
         <div class="modal-content questions-map-content">
             <div class="modal-header" style="margin-bottom: 16px; padding-bottom: 12px;">
@@ -3040,7 +3111,7 @@
                         <i class="fas fa-th"></i>
                     </div>
                     <div>
-                        <h2 style="font-size: 1.2rem; margin: 0; font-weight: 800;">Mapa das 28 Questões</h2>
+                        <h2 style="font-size: 1.2rem; margin: 0; font-weight: 800;">Mapa das Questões</h2>
                         <p class="modal-subtitle" style="margin-top: 2px;">Clique no número para ir direto à questão</p>
                     </div>
                 </div>
@@ -3063,7 +3134,7 @@
 
             <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 14px;">
                 <span id="mapSummaryCount" style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">
-                    0 de 28 respondidas
+                    0 de 27 respondidas
                 </span>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="toggleQuestionsMap(false)">
                     Fechar Mapa
@@ -3124,7 +3195,7 @@
     <button type="button" id="floatingMapBtn" class="floating-map-btn" onclick="toggleQuestionsMap()" title="Ver Mapa de Questões">
         <i class="fas fa-th"></i>
         <span>Mapa</span>
-        <span class="floating-map-count" id="floatingMapCount" style="background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 9999px; font-size: 0.74rem;">0/28</span>
+        <span class="floating-map-count" id="floatingMapCount" style="background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 9999px; font-size: 0.74rem;">0/27</span>
     </button>
 
     <!-- Modal de Identificação Obrigatória / Chamada Oficial -->
@@ -3707,7 +3778,10 @@
             if (docenteCard) docenteCard.style.display = 'flex';
             if (docenteNome) docenteNome.textContent = profile.nome;
             if (docenteEmail) docenteEmail.textContent = profile.email;
-            if (docenteEscolaTag) docenteEscolaTag.textContent = profile.escola ? `Escola ${profile.escola}` : 'Escola vinculada';
+            if (docenteEscolaTag) {
+                const schoolName = profile.escola ? `Escola ${profile.escola}` : 'Escola vinculada';
+                docenteEscolaTag.innerHTML = `<i class="fas fa-school"></i> ${schoolName}`;
+            }
 
             if (profile.photoURL && docenteAvatarImg) {
                 docenteAvatarImg.src = profile.photoURL;
@@ -3722,6 +3796,8 @@
 
             // Fecha modal de identificação
             window.closeAuthGateModal();
+            updateProgressUI();
+            updateStepperUI();
 
             // Verifica se o docente já enviou a avaliação anteriormente (limite de 1 resposta por professor)
             checkExistingSubmission(profile.email, profile.nome).then(existing => {
@@ -4047,10 +4123,15 @@
             { key: 'q28', type: 'conditional_text', label: 'Questão 28 (Motivo da Dúvida/Não)' }
         ];
 
+        function getTotalApplicableQuestions() {
+            const q27Val = document.querySelector('input[name="q27"]:checked')?.value || '';
+            return (q27Val.includes('Não') || q27Val.includes('dúvida')) ? 28 : 27;
+        }
+
         // Atualiza a Barra de Progresso Visual
         function updateProgressUI() {
+            const totalQuestions = getTotalApplicableQuestions();
             let answeredCount = 0;
-            let totalQuestions = 0;
 
             ALL_QUESTION_KEYS.forEach(q => {
                 const isAnswered = isQuestionAnswered(q.key);
@@ -4061,24 +4142,22 @@
                 }
 
                 if (q.key === 'q28') {
-                    const q27Val = document.querySelector('input[name="q27"]:checked')?.value || '';
-                    if (q27Val.includes('Não') || q27Val.includes('dúvida')) {
-                        totalQuestions++;
-                        const text = document.querySelector('[name="q28"]')?.value.trim();
-                        if (text) answeredCount++;
+                    if (totalQuestions === 28 && isAnswered) {
+                        answeredCount++;
                     }
                     return;
                 }
 
-                totalQuestions++;
                 if (isAnswered) answeredCount++;
             });
 
-            const pct = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
+            const pct = totalQuestions > 0 ? Math.min(100, Math.round((answeredCount / totalQuestions) * 100)) : 0;
             const bar = document.getElementById('evalProgressBar');
             const txt = document.getElementById('evalProgressText');
             const badge = document.getElementById('evalProgressStatusBadge');
             const badgePct = document.getElementById('evalProgressBadgePct');
+            const floatCount = document.getElementById('floatingMapCount');
+            const mapSumTxt = document.getElementById('mapSummaryCount');
 
             if (bar) {
                 bar.style.width = pct + '%';
@@ -4098,6 +4177,8 @@
                 }
             }
             if (txt) txt.textContent = `${answeredCount} de ${totalQuestions} respondidas`;
+            if (floatCount) floatCount.textContent = `${answeredCount}/${totalQuestions}`;
+            if (mapSumTxt) mapSumTxt.textContent = `${answeredCount} de ${totalQuestions} respondidas`;
 
             if (badge) {
                 badge.classList.toggle('celebrate', pct >= 100);
@@ -4160,12 +4241,12 @@
 
         function isStepComplete(stepIdx) {
             if (stepIdx === 0) {
-                const prof = document.getElementById('eval-professor')?.value.trim();
-                const email = document.getElementById('eval-email')?.value.trim();
-                const escola = document.getElementById('eval-escola')?.value;
-                const ano = document.getElementById('eval-ano')?.value;
-                const turma = document.getElementById('eval-turma')?.value;
-                const periodo = document.getElementById('eval-periodo')?.value;
+                const prof = document.getElementById('eval-professor')?.value.trim() || currentDocente?.nome;
+                const email = document.getElementById('eval-email')?.value.trim() || currentDocente?.email;
+                const escola = document.getElementById('eval-escola')?.value || currentDocente?.escola;
+                const ano = document.getElementById('eval-ano')?.value || currentDocente?.ano;
+                const turma = document.getElementById('eval-turma')?.value || currentDocente?.turma;
+                const periodo = document.getElementById('eval-periodo')?.value || currentDocente?.turno || currentDocente?.periodo;
                 return !!(prof && email && escola && ano && turma && periodo);
             }
 
@@ -4319,6 +4400,10 @@
             const container = document.getElementById('mapBlocksContainer');
             if (!container) return;
 
+            const totalQuestions = getTotalApplicableQuestions();
+            const q27Val = document.querySelector('input[name="q27"]:checked')?.value || '';
+            const q28Applicable = (q27Val.includes('Não') || q27Val.includes('dúvida'));
+
             let html = '';
             // Identificação
             const identComplete = isStepComplete(0);
@@ -4355,8 +4440,18 @@
                         <div class="map-pills-grid">
                             ${stepDef.questions.map(qKey => {
                                 const num = qKey.replace('q', '');
+                                const isCurrent = (i === currentStep);
+                                const isQ28 = (qKey === 'q28');
+
+                                if (isQ28 && !q28Applicable) {
+                                    return `
+                                        <button type="button" class="q-map-pill answered" onclick="jumpToQuestion('${qKey}', ${i})" title="Questão 28 (Opcional - dispensada pela sua resposta na Q27)" style="opacity: 0.7; border-style: dashed;">
+                                            Q28 <span style="font-size: 0.65rem; opacity: 0.8;">(Disp.)</span>
+                                        </button>
+                                    `;
+                                }
+
                                 const answered = isQuestionAnswered(qKey);
-                                const isCurrent = i === currentStep;
                                 return `
                                     <button type="button" class="q-map-pill ${answered ? 'answered' : 'pending'} ${isCurrent ? 'current-step' : ''}" onclick="jumpToQuestion('${qKey}', ${i})" title="Questão ${num}">
                                         Q${num}
@@ -4370,14 +4465,21 @@
 
             container.innerHTML = html;
 
+            let answeredCount = 0;
+            ALL_QUESTION_KEYS.forEach(q => {
+                if (q.key === 'q28') {
+                    if (totalQuestions === 28 && isQuestionAnswered('q28')) answeredCount++;
+                    return;
+                }
+                if (isQuestionAnswered(q.key)) answeredCount++;
+            });
+
             const countTxt = document.getElementById('mapSummaryCount');
-            const badgeTxt = document.getElementById('evalProgressText')?.textContent || '';
-            if (countTxt) countTxt.textContent = badgeTxt;
+            if (countTxt) countTxt.textContent = `${answeredCount} de ${totalQuestions} respondidas`;
 
             const floatCount = document.getElementById('floatingMapCount');
             if (floatCount) {
-                const answered = ALL_QUESTION_KEYS.filter(q => isQuestionAnswered(q.key)).length;
-                floatCount.textContent = `${answered}/28`;
+                floatCount.textContent = `${answeredCount}/${totalQuestions}`;
             }
         };
 
@@ -5111,6 +5213,21 @@
                     data[k] = v;
                 }
             }
+            // Garante campos de identificação essenciais no rascunho
+            const profVal = document.getElementById('eval-professor')?.value.trim() || currentDocente?.nome || '';
+            const emailVal = document.getElementById('eval-email')?.value.trim() || currentDocente?.email || '';
+            const escolaVal = document.getElementById('eval-escola')?.value || currentDocente?.escola || '';
+            const anoVal = document.getElementById('eval-ano')?.value || currentDocente?.ano || '';
+            const turmaVal = document.getElementById('eval-turma')?.value || currentDocente?.turma || '';
+            const periodoVal = document.getElementById('eval-periodo')?.value || currentDocente?.turno || currentDocente?.periodo || '';
+
+            if (profVal) data['eval-professor'] = profVal;
+            if (emailVal) data['eval-email'] = emailVal;
+            if (escolaVal) data['eval-escola'] = escolaVal;
+            if (anoVal) data['eval-ano'] = anoVal;
+            if (turmaVal) data['eval-turma'] = turmaVal;
+            if (periodoVal) data['eval-periodo'] = periodoVal;
+
             data['eval-data'] = getSystemDateISO();
             data._currentStep = currentStep;
             data._savedAt = new Date().toISOString();
@@ -5361,9 +5478,9 @@
             });
         });
 
-        // Salvar e atualizar progresso ao digitar em textareas / inputs
+        // Salvar e atualizar progresso ao digitar em textareas / inputs / selects
         document.querySelectorAll('#evaluationForm input, #evaluationForm textarea, #evaluationForm select').forEach(el => {
-            el.addEventListener('input', () => {
+            const handleFormChange = () => {
                 el.closest('.question-item')?.classList.remove('unanswered-highlight');
                 if (draftStatus) {
                     draftStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
@@ -5371,7 +5488,10 @@
                 }
                 saveDraft();
                 updateProgressUI();
-            });
+                updateStepperUI();
+            };
+            el.addEventListener('input', handleFormChange);
+            el.addEventListener('change', handleFormChange);
         });
 
         // Envio do Formulário: Salva Avaliação 2026 E Registra Presença SOMENTE se 100% preenchido
