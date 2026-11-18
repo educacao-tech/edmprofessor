@@ -2402,10 +2402,17 @@ html[data-theme="dark"] .badge-extra {
     white-space: nowrap;
 }
 
-.col-acoes {
-    min-width: 100px;
+.col-acoes, .col-actions {
+    min-width: 94px;
+    width: 94px;
     text-align: center;
     white-space: nowrap;
+}
+
+.col-acoes .dropdown-content,
+.col-actions .dropdown-content {
+    left: 0;
+    right: auto;
 }
 
 .text-center {

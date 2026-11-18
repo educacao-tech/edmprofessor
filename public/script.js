@@ -562,6 +562,30 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // Funções para controle do seletor de ações (Dropdown)
+window.copyDocenteEvalLink = (nome, email, escola) => {
+    let url = 'https://educacao-tech.github.io/edmprofessor/avaliacao.html';
+    const params = [];
+    if (email) params.push(`email=${encodeURIComponent(email)}`);
+    if (nome) params.push(`prof=${encodeURIComponent(nome)}`);
+    if (escola) params.push(`escola=${encodeURIComponent(escola)}`);
+    if (params.length > 0) {
+        url += '?' + params.join('&');
+    }
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+            window.showNotification(`Link da avaliação de ${nome} copiado!`);
+        }).catch(() => {
+            prompt("Copie o link da avaliação abaixo:", url);
+        });
+    } else {
+        prompt("Copie o link da avaliação abaixo:", url);
+    }
+    if (typeof window.closeAllDropdowns === 'function') {
+        window.closeAllDropdowns();
+    }
+};
+
 window.closeAllDropdowns = () => {
     document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
 };
@@ -1881,7 +1905,11 @@ function renderTable() {
                 professoresListDiv.innerHTML = cardsHTML;
             } else {
                 professoresListDiv.className = 'table-responsive';
-                const headers = [
+                const headers = [];
+                if (auth.currentUser) {
+                    headers.push({ label: 'Ações', key: 'actions' });
+                }
+                headers.push(
                     { label: 'Nome', key: 'nome' },
                     { label: 'Escola', key: 'escola' },
                     { label: 'Disciplina', key: 'disciplina' },
@@ -1890,7 +1918,7 @@ function renderTable() {
                     { label: 'Turno', key: 'turno' },
                     { label: 'Telefone', key: 'telefone' },
                     { label: 'E-mail', key: 'email' }
-                ];
+                );
                 const activeEncontrosList = getActiveEncontrosList();
                 if (auth.currentUser && activeEncontrosList.length > 0) {
                     activeEncontrosList.forEach(enc => {
@@ -1899,9 +1927,6 @@ function renderTable() {
                 }
                 if (auth.currentUser) {
                     headers.push({ label: 'Avaliação 2026', key: 'avaliacao_status' });
-                }
-                if (auth.currentUser) {
-                    headers.push({ label: 'Ações', key: 'actions' });
                 }
 
                 let tableHTML = '<table>';
@@ -1933,6 +1958,24 @@ function renderTable() {
                         : '<span class="text-muted">-</span>';
 
                     tableHTML += '<tr>';
+                    if (auth.currentUser) {
+                        tableHTML += `<td class="col-acoes col-actions admin-only text-center">
+                            <div class="action-btns">
+                                <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                                <div class="dropdown">
+                                    <button class="action-btn" onclick="toggleActions('${professor.id}', event)" title="Ações">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div id="dropdown-${professor.id}" class="dropdown-content">
+                                        <button onclick="openProfessorModal('${professor.id}')"><i class="fas fa-edit"></i> Editar</button>
+                                        <button onclick="window.copyDocenteEvalLink('${escapeHTML(professor.nome)}', '${escapeHTML(professor.email || '')}', '${escapeHTML(professor.escola || '')}')"><i class="fas fa-clipboard-check"></i> Copiar Link Avaliação</button>
+                                        <button class="delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')"><i class="fas fa-trash"></i> Excluir</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>`;
+                    }
                     tableHTML += `<td class="col-nome"><strong>${escapeHTML(professor.nome)}</strong></td>`;
                     tableHTML += `<td class="col-escola">${escapeHTML(professor.escola)}</td>`;
                     tableHTML += `<td class="col-disciplina">${escapeHTML(professor.disciplina)}</td>`;
@@ -1966,23 +2009,6 @@ function renderTable() {
                         }
                     }
 
-                    if (auth.currentUser) {
-                        tableHTML += `<td class="col-acoes admin-only text-center">
-                            <div class="action-btns">
-                                <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
-                                <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
-                                <div class="dropdown">
-                                    <button class="action-btn" onclick="toggleActions('${professor.id}', event)" title="Ações">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <div id="dropdown-${professor.id}" class="dropdown-content">
-                                        <button onclick="openProfessorModal('${professor.id}')"><i class="fas fa-edit"></i> Editar</button>
-                                        <button class="delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')"><i class="fas fa-trash"></i> Excluir</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>`;
-                    }
                     tableHTML += '</tr>';
                 });
                 tableHTML += '</tbody></table>';
