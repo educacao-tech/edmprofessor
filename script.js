@@ -533,7 +533,7 @@ function updateAvaliacoesCounterUI() {
 
     const total = jsonData.professores.length;
     const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-    pill.style.display = 'inline-flex';
+    pill.style.display = 'none';
     pill.innerHTML = `<i class="fas fa-clipboard-check" style="color: #10b981;"></i> Avaliações: <strong>${completed} de ${total}</strong> (${pct}%)`;
 }
 
@@ -1760,6 +1760,9 @@ function renderTable() {
         const matchesDiscipline = selectedDisciplina === '' || professor.disciplina === selectedDisciplina;
         const matchesYear = selectedYears.length === 0 || selectedYears.includes(professor.ano);
 
+        const selectedTurno = document.getElementById('turno-filter')?.value || '';
+        const matchesTurno = selectedTurno === '' || (professor.turno || '').toUpperCase().trim() === selectedTurno;
+
         let matchesAval = true;
         const filterAval = document.getElementById('filter-avaliacao')?.value || '';
         if (auth.currentUser && filterAval) {
@@ -1770,19 +1773,61 @@ function renderTable() {
             if (filterAval === 'pendente' && hasAval) matchesAval = false;
         }
 
-        return matchesSearch && matchesSchool && matchesDiscipline && matchesYear && matchesAval;
-    });
+        let matchesPresenca = true;
+        const filterPres = document.getElementById('presenca-filter')?.value || '';
+        if (auth.currentUser && filterPres && presencaKey) {
+            const isPres = Boolean(professor[presencaKey]);
+            if (filterPres === 'presente' && !isPres) matchesPresenca = false;
+            if (filterPres === 'ausente' && isPres) matchesPresenca = false;
+        }
 
-    // Cálculo do indicador de presença visual
+        let matchesCadastro = true;
+        const filterCad = document.getElementById('cadastro-filter')?.value || '';
+        if (auth.currentUser && filterCad) {
+            const missingEmail = !(professor.email && professor.email.trim());
+            const cleanTel = (professor.telefone || '').replace(/\D/g, '');
+            const missingTel = cleanTel.length < 10 || /^0+$/.test(cleanTel);
+            if (filterCad === 'incompleto' && !missingEmail && !missingTel) matchesCadastro = false;
+            if (filterCad === 'sem_email' && !missingEmail) matchesCadastro = false;
+            if (filterCad === 'sem_telefone' && !missingTel) matchesCadastro = false;
+        }
+
+        return matchesSearch && matchesSchool && matchesDiscipline && matchesYear && matchesTurno && matchesAval && matchesPresenca && matchesCadastro;
+    });
+    window._lastFilteredProfessores = filteredProfessores;
+
+    // Cálculo do indicador de presença visual e KPIs rápidos
     let totalWithPresenca = 0;
     let totalPresentes = 0;
+    let totalAvalConcluidas = 0;
+    let totalAvalPendentes = 0;
     filteredProfessores.forEach(p => {
         if (presencaKey && p[presencaKey] !== undefined) {
             totalWithPresenca++;
             if (p[presencaKey]) totalPresentes++;
         }
+        const pNorm = normalizeString(p.nome || '');
+        const pEmail = (p.email || '').toLowerCase().trim();
+        const hasAval = avaliacoesMap.has(pNorm) || (pEmail && avaliacoesMap.has(pEmail));
+        if (hasAval) totalAvalConcluidas++;
+        else totalAvalPendentes++;
     });
     const presencePct = totalWithPresenca > 0 ? Math.round((totalPresentes / totalWithPresenca) * 100) : 0;
+
+    // Atualiza os cards de KPI rápido
+    const kpiTotalEl = document.getElementById('kpi-total-profs');
+    const kpiPresentesEl = document.getElementById('kpi-presentes');
+    const kpiConclEl = document.getElementById('kpi-aval-concluidas');
+    const kpiPendEl = document.getElementById('kpi-aval-pendentes');
+    if (kpiTotalEl) kpiTotalEl.textContent = filteredProfessores.length;
+    if (kpiPresentesEl) kpiPresentesEl.textContent = totalWithPresenca > 0 ? `${totalPresentes} (${presencePct}%)` : `${totalPresentes}`;
+    if (kpiConclEl) kpiConclEl.textContent = totalAvalConcluidas;
+    if (kpiPendEl) kpiPendEl.textContent = totalAvalPendentes;
+
+    const currentAvalFilter = document.getElementById('filter-avaliacao')?.value || '';
+    document.getElementById('kpi-card-total')?.classList.toggle('kpi-active', !currentAvalFilter);
+    document.getElementById('kpi-card-concluidas')?.classList.toggle('kpi-active', currentAvalFilter === 'concluida');
+    document.getElementById('kpi-card-pendentes')?.classList.toggle('kpi-active', currentAvalFilter === 'pendente');
 
     if (resultsCountSpan) {
         let presenceBarHTML = '';
@@ -1792,7 +1837,7 @@ function renderTable() {
                 <div class="presence-bar-bg"><div class="presence-bar-fill" style="width: ${presencePct}%"></div></div>
             </div>`;
         }
-        resultsCountSpan.style.display = 'inline-flex';
+        resultsCountSpan.style.display = 'none';
         resultsCountSpan.style.alignItems = 'center';
         resultsCountSpan.innerHTML = `<span>Mostrando ${filteredProfessores.length} professor(es)</span> ${presenceBarHTML}`;
     }
@@ -1827,14 +1872,17 @@ function renderTable() {
                     const initials = getInitials(professor.nome);
                     const telFormatted = professor.telefone ? escapeHTML(professor.telefone) : 'N/A';
                     const telClean = professor.telefone ? professor.telefone.replace(/\D/g, '') : '';
+                    const isRealPhone = telClean.length >= 10 && !/^0+$/.test(telClean);
+                    const waMsg = encodeURIComponent(`Olá Prof. ${professor.nome || ''}! Lembrando da Avaliação Anual de EDM 2026.`);
                     const telLink = telClean 
-                        ? (telClean.length >= 10 
-                            ? `<a href="https://wa.me/55${telClean}" target="_blank" class="phone-link" title="WhatsApp"><i class="fab fa-whatsapp"></i> ${telFormatted}</a>` 
-                            : `<a href="tel:${telClean}" class="phone-link"><i class="fas fa-phone-alt"></i> ${telFormatted}</a>`) 
+                        ? (isRealPhone 
+                            ? `<a href="https://wa.me/55${telClean}?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="phone-link" title="Enviar mensagem no WhatsApp"><i class="fab fa-whatsapp"></i> ${telFormatted}</a>` 
+                            : `<span class="phone-link" style="opacity:0.7;"><i class="fas fa-phone-alt"></i> ${telFormatted}</span>`) 
                         : 'N/A';
 
+                    const safeEmailJS = (professor.email || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                     const emailLink = professor.email 
-                        ? `<a href="mailto:${escapeHTML(professor.email)}" class="phone-link" title="E-mail"><i class="fas fa-envelope"></i> ${escapeHTML(professor.email)}</a>` 
+                        ? `<span class="email-cell-wrap"><a href="mailto:${escapeHTML(professor.email)}" class="phone-link" title="E-mail"><i class="fas fa-envelope"></i> ${escapeHTML(professor.email)}</a><button type="button" class="btn-inline-copy" onclick="copyTextQuick('${safeEmailJS}', 'E-mail copiado!')" title="Copiar e-mail"><i class="far fa-copy"></i></button></span>` 
                         : 'N/A';
 
                     let presencaBadgeHTML = '';
@@ -1863,6 +1911,7 @@ function renderTable() {
                     if (auth.currentUser) {
                         adminActionsHTML = `
                             <div class="card-actions admin-only">
+                                <button class="action-btn" onclick="copyTeacherEvalLink('${professor.id}')" title="Copiar link direto da Avaliação 2026"><i class="fas fa-link"></i></button>
                                 <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
                                 <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
                             </div>
@@ -1947,20 +1996,24 @@ function renderTable() {
 
                 paginatedItems.forEach(professor => {
                     const telClean = (professor.telefone || '').replace(/\D/g, '');
+                    const isRealPhone = telClean.length >= 10 && !/^0+$/.test(telClean);
+                    const waMsg = encodeURIComponent(`Olá Prof. ${professor.nome || ''}! Lembrando da Avaliação Anual de EDM 2026.`);
                     const telDisplay = professor.telefone 
-                        ? (telClean.length >= 10 
-                            ? `<a href="https://wa.me/55${telClean}" target="_blank" class="table-phone-link" title="Abrir no WhatsApp"><i class="fab fa-whatsapp"></i> ${escapeHTML(professor.telefone)}</a>` 
-                            : `<span class="table-phone"><i class="fas fa-phone-alt"></i> ${escapeHTML(professor.telefone)}</span>`)
+                        ? (isRealPhone 
+                            ? `<a href="https://wa.me/55${telClean}?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="table-phone-link" title="Abrir no WhatsApp"><i class="fab fa-whatsapp"></i> ${escapeHTML(professor.telefone)}</a>` 
+                            : `<span class="table-phone" style="opacity:0.7;"><i class="fas fa-phone-alt"></i> ${escapeHTML(professor.telefone)}</span>`)
                         : '<span class="text-muted">-</span>';
 
+                    const safeEmailJS = (professor.email || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                     const emailCell = professor.email 
-                        ? `<a href="mailto:${escapeHTML(professor.email)}" class="email-table-link" title="Enviar e-mail para ${escapeHTML(professor.nome)}"><i class="fas fa-envelope"></i> ${escapeHTML(professor.email)}</a>` 
+                        ? `<span class="email-cell-wrap"><a href="mailto:${escapeHTML(professor.email)}" class="email-table-link" title="Enviar e-mail para ${escapeHTML(professor.nome)}"><i class="fas fa-envelope"></i> ${escapeHTML(professor.email)}</a><button type="button" class="btn-inline-copy" onclick="copyTextQuick('${safeEmailJS}', 'E-mail copiado!')" title="Copiar e-mail"><i class="far fa-copy"></i></button></span>` 
                         : '<span class="text-muted">-</span>';
 
                     tableHTML += '<tr>';
                     if (auth.currentUser) {
                         tableHTML += `<td class="col-acoes col-actions admin-only text-center">
                             <div class="action-btns">
+                                <button class="action-btn" onclick="copyTeacherEvalLink('${professor.id}')" title="Copiar link direto da Avaliação 2026"><i class="fas fa-link"></i></button>
                                 <button class="action-btn" onclick="openProfessorModal('${professor.id}')" title="Editar"><i class="fas fa-edit"></i></button>
                                 <button class="action-btn delete" onclick="deleteProfessor('${professor.id}', '${escapeHTML(professor.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>
                                 <div class="dropdown">
@@ -2322,3 +2375,189 @@ if (document.readyState === 'loading') {
     window.updateDensityUI();
     window.updateExpandUI();
 }
+
+
+// ==========================================================================
+// MELHORIAS DE UI/UX — DROPDOWN ADMIN, COPIAR RÁPIDO, KPI FILTRO & ESC
+// ==========================================================================
+
+window.toggleAdminDropdown = (event) => {
+    if (event) event.stopPropagation();
+    const menu = document.getElementById('admin-dropdown-menu');
+    const btn = document.getElementById('btn-admin-dropdown');
+    if (!menu) return;
+    const isOpen = menu.classList.toggle('open');
+    if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+};
+
+window.closeAdminDropdown = () => {
+    const menu = document.getElementById('admin-dropdown-menu');
+    const btn = document.getElementById('btn-admin-dropdown');
+    if (menu) menu.classList.remove('open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+};
+
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('admin-manage-dropdown');
+    if (dropdown && !dropdown.contains(e.target)) {
+        window.closeAdminDropdown();
+    }
+});
+
+window.copyTextQuick = async (text, successMsg = 'Copiado!') => {
+    if (!text) return;
+    try {
+        await navigator.clipboard.writeText(text);
+        if (typeof showNotification === 'function') showNotification(successMsg, 'success');
+    } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (typeof showNotification === 'function') showNotification(successMsg, 'success');
+    }
+};
+
+window.applyKpiQuickFilter = (mode) => {
+    const avalSelect = document.getElementById('filter-avaliacao');
+    if (!avalSelect) return;
+    if (mode === 'all') {
+        avalSelect.value = '';
+    } else if (mode === 'concluida' || mode === 'pendente') {
+        avalSelect.value = (avalSelect.value === mode) ? '' : mode;
+    }
+    currentPage = 1;
+    renderTable();
+};
+
+// Fecha qualquer modal ou dropdown aberto ao pressionar Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    window.closeAdminDropdown();
+    if (typeof closeProfessorModal === 'function') {
+        const m = document.getElementById('professorModal');
+        if (m && m.style.display === 'block') closeProfessorModal();
+    }
+    if (typeof closeLoginModal === 'function') {
+        const m = document.getElementById('loginModal');
+        if (m && m.style.display === 'block') closeLoginModal();
+    }
+    if (typeof closeMetadataModal === 'function') {
+        const m = document.getElementById('metadataModal');
+        if (m && m.style.display === 'block') closeMetadataModal();
+    }
+    if (typeof closeEncontrosModal === 'function') {
+        const m = document.getElementById('encontrosModal');
+        if (m && m.style.display === 'block') closeEncontrosModal();
+    }
+});
+
+
+// ==========================================================================
+// BLOCO 1 — PRODUTIVIDADE: E-MAILS FILTRADOS, CSV, LOTE & LINK PRÉ-IDENTIFICADO
+// ==========================================================================
+
+window.copyFilteredEmails = () => {
+    const list = window._lastFilteredProfessores || jsonData.professores || [];
+    const emails = Array.from(new Set(
+        list.map(p => (p.email || '').trim().toLowerCase()).filter(e => e && e.includes('@'))
+    ));
+    if (emails.length === 0) {
+        if (typeof showNotification === 'function') showNotification('Nenhum e-mail encontrado nos professores filtrados.', 'warning');
+        return;
+    }
+    window.copyTextQuick(emails.join('; '), `${emails.length} e-mail(s) copiados para a área de transferência!`);
+};
+
+window.exportTeachersToCSV = () => {
+    const list = window._lastFilteredProfessores || jsonData.professores || [];
+    if (list.length === 0) {
+        if (typeof showNotification === 'function') showNotification('Nenhum professor para exportar.', 'warning');
+        return;
+    }
+    const headers = ['Nome', 'Escola', 'Disciplina', 'Ano', 'Turma', 'Turno', 'Telefone', 'E-mail'];
+    if (auth.currentUser) {
+        headers.push('Presença (Encontro Ativo)', 'Avaliação 2026');
+    }
+    const csvEscape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const rows = [headers.map(csvEscape).join(';')];
+    list.forEach(p => {
+        const cols = [p.nome || '', p.escola || '', p.disciplina || '', p.ano || '', p.turma || '', p.turno || '', p.telefone || '', p.email || ''];
+        if (auth.currentUser) {
+            const pres = presencaKey ? (p[presencaKey] ? 'Presente' : 'Ausente') : '-';
+            const pNorm = normalizeString(p.nome || '');
+            const pEmail = (p.email || '').toLowerCase().trim();
+            const aval = (avaliacoesMap.has(pNorm) || (pEmail && avaliacoesMap.has(pEmail))) ? 'Concluída' : 'Pendente';
+            cols.push(pres, aval);
+        }
+        rows.push(cols.map(csvEscape).join(';'));
+    });
+
+    const blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `professores_edm_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    if (typeof showNotification === 'function') showNotification(`CSV exportado com ${list.length} docente(s)!`, 'success');
+};
+
+window.bulkMarkPresenceFiltered = async (status = true) => {
+    if (!auth.currentUser) return;
+    if (!presencaKey) {
+        if (typeof showNotification === 'function') showNotification('Selecione um encontro formativo ativo primeiro.', 'warning');
+        return;
+    }
+    const list = (window._lastFilteredProfessores || []).filter(p => p.id && Boolean(p[presencaKey]) !== status);
+    if (list.length === 0) {
+        if (typeof showNotification === 'function') showNotification('Todos os professores filtrados já estão com este status.', 'info');
+        return;
+    }
+    const ok = confirm(`Deseja marcar ${list.length} professor(es) filtrado(s) como ${status ? 'PRESENTES' : 'AUSENTES'} no encontro ativo?`);
+    if (!ok) return;
+
+    let updated = 0;
+    for (const p of list) {
+        try {
+            await updateDoc(doc(db, 'professores', p.id), { [presencaKey]: status });
+            updated++;
+        } catch (err) {
+            console.warn('Erro ao atualizar presença em lote:', p.nome, err);
+        }
+    }
+    if (typeof showNotification === 'function') showNotification(`${updated} presença(s) atualizada(s) em lote!`, 'success');
+};
+
+window.copyTeacherEvalLink = (profId) => {
+    const prof = (jsonData.professores || []).find(p => p.id === profId);
+    if (!prof) return;
+    const base = new URL('avaliacao.html', window.location.href);
+    if (prof.email) base.searchParams.set('email', prof.email.trim().toLowerCase());
+    if (prof.nome) base.searchParams.set('nome', prof.nome.trim());
+    window.copyTextQuick(base.toString(), `Link personalizado de ${prof.nome} copiado!`);
+};
+
+// Vincula novos filtros (Turno, Presença, Cadastro) e limpeza
+['turno-filter', 'presenca-filter', 'cadastro-filter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('change', () => {
+            currentPage = 1;
+            renderTable();
+        });
+    }
+});
+
+document.getElementById('btn-clear-filters')?.addEventListener('click', () => {
+    ['turno-filter', 'presenca-filter', 'cadastro-filter'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+});

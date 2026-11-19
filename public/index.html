@@ -28,30 +28,53 @@
                 <span class="header-subtitle-inline">Gestão e Frequência Acadêmica</span>
             </div>
             <div class="header-actions">
-                <a href="avaliacao.html?v=20261112d" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm"
+                <a href="avaliacao.html?v=20261118" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm"
                     title="Preencher Avaliação Anual EDM 2026 (Abre em nova guia)" style="text-decoration:none;"><i
                         class="fas fa-clipboard-check"></i> Avaliação 2026</a>
                 <a href="respostas_avaliacao.html" target="_blank" rel="noopener noreferrer"
                     class="btn btn-secondary btn-sm admin-only"
                     title="Ver Respostas da Avaliação 2026 (Exclusivo Administrador)" style="text-decoration:none;"><i
-                        class="fas fa-clipboard-list"></i> Respostas</a>
-                <a href="respostas_avaliacao.html#questoes" target="_blank" rel="noopener noreferrer"
-                    class="btn btn-secondary btn-sm admin-only"
-                    title="Gerenciar e Editar Questões da Avaliação (Exclusivo Administrador)" style="text-decoration:none;"><i
-                        class="fas fa-sliders"></i> Questões</a>
+                        class="fas fa-chart-pie"></i> Respostas</a>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="exportToPDF()"
                     title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="exportTeachersToCSV()"
+                    title="Exportar lista filtrada para Excel / CSV"><i class="fas fa-file-excel"></i> CSV</button>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="copyShareLink()"
                     title="Copiar link desta visualização"><i class="fas fa-share-nodes"></i> Compartilhar</button>
-                <button type="button" class="btn btn-secondary btn-sm admin-only" id="btn-sync-emails"
-                    onclick="syncEmailsFromPresenca()" title="Buscar e-mails da lista de presença oficial"><i
-                        class="fas fa-envelope-circle-check"></i> Sincronizar</button>
-                <button type="button" class="btn btn-secondary btn-sm admin-only" onclick="openEncontrosModal()"
-                    title="Gestão de Encontros e Datas de Presença"><i class="fas fa-calendar-check"></i> Encontros</button>
-                <button type="button" class="btn btn-secondary btn-sm admin-only" onclick="openMetadataModal('escolas')"
-                    title="Cadastro e Gestão de Escolas"><i class="fas fa-school"></i> Escolas</button>
-                <button type="button" class="btn btn-secondary btn-sm admin-only" onclick="openMetadataModal('disciplinas')"
-                    title="Cadastro e Gestão de Disciplinas"><i class="fas fa-book-open"></i> Disciplinas</button>
+                <div class="header-dropdown admin-only" id="admin-manage-dropdown">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-admin-dropdown"
+                        onclick="toggleAdminDropdown(event)" aria-haspopup="true" aria-expanded="false"
+                        title="Opções administrativas de gestão">
+                        <i class="fas fa-sliders"></i> Gerenciar <i class="fas fa-chevron-down" style="font-size:0.7rem; margin-left:2px;"></i>
+                    </button>
+                    <div class="header-dropdown-menu" id="admin-dropdown-menu">
+                        <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); copyFilteredEmails()">
+                            <i class="fas fa-copy"></i> Copiar E-mails Filtrados
+                        </button>
+                        <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); bulkMarkPresenceFiltered(true)">
+                            <i class="fas fa-check-double"></i> Marcar Presentes (Filtrados)
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); openEncontrosModal()">
+                            <i class="fas fa-calendar-check"></i> Encontros e Datas
+                        </button>
+                        <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); openMetadataModal('escolas')">
+                            <i class="fas fa-school"></i> Gestão de Escolas
+                        </button>
+                        <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); openMetadataModal('disciplinas')">
+                            <i class="fas fa-book-open"></i> Gestão de Disciplinas
+                        </button>
+                        <a href="respostas_avaliacao.html#questoes" target="_blank" rel="noopener noreferrer"
+                            class="dropdown-item" onclick="closeAdminDropdown()">
+                            <i class="fas fa-list-check"></i> Editor de Questões
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button type="button" class="dropdown-item" id="btn-sync-emails"
+                            onclick="closeAdminDropdown(); syncEmailsFromPresenca()">
+                            <i class="fas fa-envelope-circle-check"></i> Sincronizar E-mails
+                        </button>
+                    </div>
+                </div>
                 <button type="button" class="btn btn-primary btn-sm admin-only" onclick="openProfessorModal()"><i
                         class="fas fa-plus"></i> Novo</button>
                 <div class="header-auth-group">
@@ -107,6 +130,18 @@
                         title="Adicionar Ano"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
+            <div class="filter-item">
+                <label for="turno-filter">Turno</label>
+                <div class="input-with-action">
+                    <select id="turno-filter">
+                        <option value="">Todos os Turnos</option>
+                        <option value="MANHÃ">MANHÃ</option>
+                        <option value="TARDE">TARDE</option>
+                        <option value="INTEGRAL">INTEGRAL</option>
+                        <option value="NOITE">NOITE</option>
+                    </select>
+                </div>
+            </div>
             <div class="filter-item admin-only">
                 <label for="filter-avaliacao">Avaliação 2026</label>
                 <div class="input-with-action">
@@ -114,6 +149,27 @@
                         <option value="">Todas as Situações</option>
                         <option value="concluida">🟢 Concluída</option>
                         <option value="pendente">🟡 Pendente</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-item admin-only">
+                <label for="presenca-filter">Presença</label>
+                <div class="input-with-action">
+                    <select id="presenca-filter">
+                        <option value="">Todas</option>
+                        <option value="presente">🟢 Presentes</option>
+                        <option value="ausente">🔴 Ausentes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-item admin-only">
+                <label for="cadastro-filter">Cadastro</label>
+                <div class="input-with-action">
+                    <select id="cadastro-filter">
+                        <option value="">Todos</option>
+                        <option value="incompleto">⚠ Incompletos</option>
+                        <option value="sem_email">Sem E-mail</option>
+                        <option value="sem_telefone">Sem Telefone</option>
                     </select>
                 </div>
             </div>
@@ -134,13 +190,41 @@
             </div>
         </div>
 
-        <!-- Linha de Estatísticas e Controles de Visualização -->
+        <!-- Linha Única de KPIs Compactos e Controles de Visualização -->
         <div class="results-info">
-            <div class="results-count-wrap" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <span id="results-count">Carregando dados...</span>
-                <span id="kpi-avaliacoes-pill" class="admin-only" style="display: none; align-items: center; gap: 6px; background: rgba(37,99,235,0.1); color: var(--primary-color); padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700;">
-                    <i class="fas fa-clipboard-check"></i> Avaliações: 0 de 0 (0%)
-                </span>
+            <div class="results-count-wrap" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span id="results-count" style="display: none;">Carregando dados...</span>
+                <span id="kpi-avaliacoes-pill" style="display: none;"></span>
+                <div class="kpi-quick-strip" id="kpi-quick-strip">
+                    <button type="button" class="kpi-mini-card" id="kpi-card-total" onclick="applyKpiQuickFilter('all')" title="Mostrar todos os professores">
+                        <span class="kpi-mini-icon kpi-blue"><i class="fas fa-users"></i></span>
+                        <span class="kpi-mini-body">
+                            <span class="kpi-mini-label">Docentes</span>
+                            <strong class="kpi-mini-value" id="kpi-total-profs">--</strong>
+                        </span>
+                    </button>
+                    <button type="button" class="kpi-mini-card admin-only" id="kpi-card-presenca" onclick="applyKpiQuickFilter('all')" title="Presença no encontro ativo">
+                        <span class="kpi-mini-icon kpi-emerald"><i class="fas fa-user-check"></i></span>
+                        <span class="kpi-mini-body">
+                            <span class="kpi-mini-label">Presentes</span>
+                            <strong class="kpi-mini-value" id="kpi-presentes">--</strong>
+                        </span>
+                    </button>
+                    <button type="button" class="kpi-mini-card admin-only" id="kpi-card-concluidas" onclick="applyKpiQuickFilter('concluida')" title="Filtrar quem já concluiu a Avaliação 2026">
+                        <span class="kpi-mini-icon kpi-indigo"><i class="fas fa-clipboard-check"></i></span>
+                        <span class="kpi-mini-body">
+                            <span class="kpi-mini-label">Concluídas</span>
+                            <strong class="kpi-mini-value" id="kpi-aval-concluidas">--</strong>
+                        </span>
+                    </button>
+                    <button type="button" class="kpi-mini-card admin-only" id="kpi-card-pendentes" onclick="applyKpiQuickFilter('pendente')" title="Filtrar quem ainda não respondeu a Avaliação 2026">
+                        <span class="kpi-mini-icon kpi-amber"><i class="fas fa-clock"></i></span>
+                        <span class="kpi-mini-body">
+                            <span class="kpi-mini-label">Pendentes</span>
+                            <strong class="kpi-mini-value" id="kpi-aval-pendentes">--</strong>
+                        </span>
+                    </button>
+                </div>
             </div>
             <div class="controls-toolbar">
                 <div class="density-toggle" title="Densidade das Linhas">
@@ -170,7 +254,13 @@
             </div>
         </div>
         <div id="professores-list" class="table-responsive">
-            <!-- A lista de professores será carregada aqui pelo JavaScript -->
+            <div class="skeleton-table" aria-busy="true" aria-label="Carregando lista de professores">
+                <div class="skeleton-row"><span class="skeleton-bar w-25"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span class="skeleton-bar w-20"></span><span class="skeleton-bar w-20"></span></div>
+                <div class="skeleton-row"><span class="skeleton-bar w-30"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-20"></span></div>
+                <div class="skeleton-row"><span class="skeleton-bar w-25"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span class="skeleton-bar w-20"></span><span class="skeleton-bar w-15"></span></div>
+                <div class="skeleton-row"><span class="skeleton-bar w-30"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-20"></span></div>
+                <div class="skeleton-row"><span class="skeleton-bar w-20"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span class="skeleton-bar w-25"></span><span class="skeleton-bar w-20"></span></div>
+            </div>
         </div>
         <div id="pagination" class="pagination"></div>
 
@@ -180,9 +270,9 @@
                 <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>11/11/2026 às
                         17:24</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>785f58c</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>b248d9a</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>feat(ui): mover coluna/botoes de acoes para a frente do nome na tabela administrativa</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>chore: atualizar hash do rodape para 785f58c</em></span>
             </div>
         </footer>
     </div>

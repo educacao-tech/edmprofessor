@@ -3503,3 +3503,244 @@ html[data-theme="dark"] .table-phone-link:hover {
     background: var(--primary-gradient) !important;
     box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
 }
+
+
+/* ==========================================================================
+   MELHORIAS DE UI/UX — DROPDOWN ADMIN, KPIS RÁPIDOS, SKELETON, STICKY & COPY
+   ========================================================================== */
+
+/* Dropdown Administrativo no Cabeçalho */
+.header-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.header-dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    min-width: 215px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16);
+    z-index: 1200;
+    animation: dropdownFadeIn 0.15s ease;
+}
+
+html[data-theme="dark"] .header-dropdown-menu {
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.header-dropdown-menu.open {
+    display: block;
+}
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.dropdown-item i {
+    width: 16px;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+.dropdown-item:hover {
+    background: var(--hover-bg, rgba(37, 99, 235, 0.08));
+    color: var(--primary-color);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 5px 4px;
+}
+
+/* Pills de Resumo Rápido (KPIs Compactos na mesma linha da toolbar) */
+.kpi-quick-strip {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0;
+}
+
+.kpi-mini-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 5px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text-color);
+    flex: 0 0 auto;
+    width: auto;
+    transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.kpi-mini-card:hover {
+    transform: translateY(-1px);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
+}
+
+.kpi-mini-card.kpi-active {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.06);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.14);
+}
+
+.kpi-mini-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+}
+
+.kpi-blue { background: rgba(37, 99, 235, 0.12); color: #2563eb; }
+.kpi-emerald { background: rgba(16, 185, 129, 0.14); color: #059669; }
+.kpi-indigo { background: rgba(99, 102, 241, 0.14); color: #4f46e5; }
+.kpi-amber { background: rgba(245, 158, 11, 0.14); color: #d97706; }
+
+html[data-theme="dark"] .kpi-blue { color: #60a5fa; }
+html[data-theme="dark"] .kpi-emerald { color: #34d399; }
+html[data-theme="dark"] .kpi-indigo { color: #818cf8; }
+html[data-theme="dark"] .kpi-amber { color: #fbbf24; }
+
+.kpi-mini-body {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+}
+
+.kpi-mini-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.kpi-mini-value {
+    font-size: 0.86rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+/* Botão Inline de Copiar E-mail */
+.email-cell-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+}
+
+.btn-inline-copy {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 3px 5px;
+    border-radius: 5px;
+    font-size: 0.78rem;
+    transition: background-color 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+.btn-inline-copy:hover {
+    background: rgba(37, 99, 235, 0.12);
+    color: var(--primary-color);
+}
+
+/* Skeleton Loader da Tabela */
+.skeleton-table {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.skeleton-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--zebra-bg, rgba(148, 163, 184, 0.08));
+}
+
+.skeleton-bar {
+    height: 14px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(148, 163, 184, 0.18) 25%, rgba(148, 163, 184, 0.32) 50%, rgba(148, 163, 184, 0.18) 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.4s infinite linear;
+}
+
+.skeleton-bar.w-10 { width: 10%; }
+.skeleton-bar.w-15 { width: 15%; }
+.skeleton-bar.w-20 { width: 20%; }
+.skeleton-bar.w-25 { width: 25%; }
+.skeleton-bar.w-30 { width: 30%; }
+
+@keyframes skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Coluna Nome Fixa (Sticky) ao rolar horizontalmente no Mobile */
+@media (max-width: 768px) {
+    table th.col-nome,
+    table td.col-nome {
+        position: sticky;
+        left: 0;
+        z-index: 3;
+        background-color: var(--card-bg);
+        box-shadow: 4px 0 8px -4px rgba(15, 23, 42, 0.15);
+    }
+
+    table th.col-nome {
+        z-index: 5;
+        background-color: var(--primary-color);
+    }
+
+    table tbody tr:nth-child(even) td.col-nome {
+        background-color: var(--zebra-bg);
+    }
+}

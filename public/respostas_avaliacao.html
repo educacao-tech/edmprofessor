@@ -1295,6 +1295,121 @@
                 max-width: 100% !important;
             }
         }
+        /* ==========================================================================
+           MELHORIAS DE UI/UX — ADESÃO POR ESCOLA, HIGHLIGHT QUALITATIVO & NAV MODAL
+           ========================================================================== */
+        .adherence-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-top: 20px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+        }
+
+        .adherence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .adherence-row {
+            background: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .adherence-row:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+        }
+
+        .adherence-split-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 14px;
+        }
+
+        .adherence-col-box {
+            background: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .adherence-person-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: 6px;
+            font-size: 0.82rem;
+        }
+
+        .adherence-row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        .adherence-bar-bg {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.22);
+            overflow: hidden;
+        }
+
+        .adherence-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+
+        mark.search-highlight {
+            background: rgba(250, 204, 21, 0.42);
+            color: inherit;
+            padding: 0 3px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        html[data-theme="dark"] mark.search-highlight {
+            background: rgba(250, 204, 21, 0.3);
+            color: #fef08a;
+        }
+
+        .modal-nav-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2px 4px;
+        }
+
+        .modal-nav-counter {
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            padding: 0 6px;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -1312,8 +1427,14 @@
                     <button type="button" class="btn btn-secondary btn-sm" onclick="printBlankEvaluationForm()" title="Imprimir formulário de avaliação oficial em branco para preenchimento manual em papel">
                         <i class="fas fa-print"></i> Imprimir em Branco
                     </button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="generateConsolidatedExecutivePDF()" title="Gerar Relatório Executivo Consolidado em PDF">
+                        <i class="fas fa-file-pdf"></i> Relatório PDF
+                    </button>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="exportToCSV()" title="Baixar todas as respostas em formato Excel / CSV">
                         <i class="fas fa-file-excel"></i> Exportar CSV
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="downloadFullSystemBackup()" title="Baixar backup completo do sistema em JSON (Professores, Avaliações e Configurações)">
+                        <i class="fas fa-download"></i> Backup JSON
                     </button>
                     <a href="https://console.firebase.google.com/project/edmprofessor-1542b/firestore/databases/-default-/data/~2Favaliacoes_2026" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration: none;" title="Ver banco de dados Firestore no Console Google">
                         <i class="fas fa-database"></i> Firestore
@@ -1529,12 +1650,28 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Comparativo de Adesão por Escola -->
+                <div class="adherence-card" id="schoolAdherenceCard">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h3 style="margin: 0 0 4px 0; font-size: 1.05rem; font-weight: 800;">
+                                <i class="fas fa-school text-primary"></i> Comparativo de Adesão por Escola
+                            </h3>
+                            <p style="margin: 0; font-size: 0.80rem; color: var(--text-secondary);">
+                                Proporção de professores que concluíram a Avaliação 2026 em relação ao total cadastrado em cada unidade.
+                            </p>
+                        </div>
+                        <span id="schoolAdherenceSummary" class="chart-meta-pill">Calculando...</span>
+                    </div>
+                    <div id="schoolAdherenceGrid" class="adherence-grid"></div>
+                </div>
             </div>
 
             <!-- ABA 2: DESTAQUES QUALITATIVOS (DISSERTATIVAS) -->
             <div id="pane-qualitativo" class="admin-tab-pane">
                 <div class="qualitative-controls">
-                    <div style="flex: 1; min-width: 260px;">
+                    <div style="flex: 1.3; min-width: 240px;">
                         <label for="selectQualitativeQ" style="display: block; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; color: var(--text-secondary);">Selecione a Questão Dissertativa:</label>
                         <select id="selectQualitativeQ" class="school-filter-select" style="width: 100%;" onchange="renderQualitativeAnswers()">
                             <option value="q4">4. Dificuldades na organização e no planejamento das aulas</option>
@@ -1549,7 +1686,21 @@
                             <option value="q28">28. Motivo da dúvida ou desistência de pegar aulas em 2027</option>
                         </select>
                     </div>
-                    <div style="flex: 1; min-width: 240px;">
+                    <div style="min-width: 170px;">
+                        <label for="filterQualitativeSchool" style="display: block; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; color: var(--text-secondary);">Filtrar por Escola:</label>
+                        <select id="filterQualitativeSchool" class="school-filter-select" style="width: 100%;" onchange="renderQualitativeAnswers()">
+                            <option value="">Todas as Escolas</option>
+                            <option value="ALZIRA">ALZIRA</option>
+                            <option value="ANNA">ANNA</option>
+                            <option value="BRAGA">BRAGA</option>
+                            <option value="CAIC">CAIC</option>
+                            <option value="CÉLIA">CÉLIA</option>
+                            <option value="ESTHER">ESTHER</option>
+                            <option value="PADRE">PADRE</option>
+                            <option value="OUTRA">OUTRA</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 220px;">
                         <label for="searchQualitativeText" style="display: block; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; color: var(--text-secondary);">Buscar termos nas respostas:</label>
                         <div class="search-box">
                             <i class="fas fa-search"></i>
@@ -1697,7 +1848,16 @@
                         </div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <div class="modal-nav-group" title="Navegar entre avaliações (Use também as setas ← e → do teclado)">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnModalPrev" onclick="navigateDetailsModal(-1)" title="Avaliação Anterior (←)" style="padding: 5px 9px;">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="modal-nav-counter" id="modalNavCounter">1 / 1</span>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnModalNext" onclick="navigateDetailsModal(1)" title="Próxima Avaliação (→)" style="padding: 5px 9px;">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="printEvaluationModal()" title="Imprimir este espelho de respostas">
                         <i class="fas fa-print"></i> Imprimir
                     </button>
@@ -3619,6 +3779,121 @@
             body { padding: 15px; }
             .no-print { display: none; }
         }
+        /* ==========================================================================
+           MELHORIAS DE UI/UX — ADESÃO POR ESCOLA, HIGHLIGHT QUALITATIVO & NAV MODAL
+           ========================================================================== */
+        .adherence-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-top: 20px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+        }
+
+        .adherence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .adherence-row {
+            background: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .adherence-row:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+        }
+
+        .adherence-split-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 14px;
+        }
+
+        .adherence-col-box {
+            background: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .adherence-person-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: 6px;
+            font-size: 0.82rem;
+        }
+
+        .adherence-row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        .adherence-bar-bg {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.22);
+            overflow: hidden;
+        }
+
+        .adherence-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+
+        mark.search-highlight {
+            background: rgba(250, 204, 21, 0.42);
+            color: inherit;
+            padding: 0 3px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        html[data-theme="dark"] mark.search-highlight {
+            background: rgba(250, 204, 21, 0.3);
+            color: #fef08a;
+        }
+
+        .modal-nav-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--zebra-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2px 4px;
+        }
+
+        .modal-nav-counter {
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            padding: 0 6px;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -3745,20 +4020,33 @@
             renderQualitativeAnswers();
         };
 
-        // Renderização de Respostas Dissertativas (Qualitativas) com Nuvem de Tags
+        // Renderização de Respostas Dissertativas (Qualitativas) com Nuvem de Tags, Filtro por Escola e Highlight
         window.renderQualitativeAnswers = () => {
             const qKey = document.getElementById('selectQualitativeQ')?.value || 'q8';
+            const schoolFilterVal = (document.getElementById('filterQualitativeSchool')?.value || '').toUpperCase().trim();
             const searchInput = document.getElementById('searchQualitativeText');
             const searchText = (searchInput?.value || '').toLowerCase().trim();
             const container = document.getElementById('qualitativeAnswersContainer');
             const keywordsWrap = document.getElementById('qualitativeKeywordsWrap');
             if (!container) return;
 
+            const highlightText = (rawText, term) => {
+                const safe = escapeHtml(rawText);
+                if (!term) return safe;
+                const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                try {
+                    return safe.replace(new RegExp(`(${escapedTerm})`, 'gi'), '<mark class="search-highlight">$1</mark>');
+                } catch (e) {
+                    return safe;
+                }
+            };
+
             const allAnswersForQ = [];
             const list = [];
             const wordFrequency = {};
 
             allAvaliacoes.forEach(item => {
+                if (schoolFilterVal && (item.escola || '').toUpperCase().trim() !== schoolFilterVal) return;
                 const resp = item.respostas || {};
                 let answer = resp[qKey];
                 if (resp[`${qKey}_outros`]) answer = (answer ? answer + " | Outros: " : "Outros: ") + resp[`${qKey}_outros`];
@@ -3826,9 +4114,9 @@
                     <div class="qualitative-card">
                         <div class="qualitative-card-meta">
                             <div>
-                                <strong style="color: var(--text-color); font-size: 0.95rem;">${escapeHtml(item.professor)}</strong>
+                                <strong style="color: var(--text-color); font-size: 0.95rem;">${highlightText(item.professor, searchText)}</strong>
                                 <span style="margin: 0 6px;">•</span>
-                                <span style="color: var(--primary-color); font-weight: 600;">${escapeHtml(item.escola)}</span>
+                                <span style="color: var(--primary-color); font-weight: 600;">${highlightText(item.escola, searchText)}</span>
                                 ${item.turmas ? `<span style="margin: 0 6px;">•</span><span>${escapeHtml(item.turmas)}</span>` : ''}
                             </div>
                             <div>
@@ -3836,7 +4124,7 @@
                                 <span style="margin-left: 8px;"><i class="far fa-clock"></i> ${escapeHtml(item.data)}</span>
                             </div>
                         </div>
-                        <div class="qualitative-card-text">${escapeHtml(item.texto)}</div>
+                        <div class="qualitative-card-text">${highlightText(item.texto, searchText)}</div>
                     </div>
                 `).join('')}
             `;
@@ -3989,7 +4277,457 @@
                 }
             }
         });
+
+        // ==========================================================================
+        // MELHORIAS DE UI/UX — ADESÃO POR ESCOLA, NAV NO MODAL & RELATÓRIO PDF
+        // ==========================================================================
+
+        let _cachedRegisteredProfessores = null;
+
+        async function loadRegisteredProfessoresForAdherence() {
+            if (_cachedRegisteredProfessores && _cachedRegisteredProfessores.length > 0) {
+                return _cachedRegisteredProfessores;
+            }
+            try {
+                const snap = await getDocs(collection(db, "professores"));
+                if (!snap.empty) {
+                    const list = [];
+                    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                    _cachedRegisteredProfessores = list;
+                    return list;
+                }
+            } catch (e) {
+                console.warn("Aviso ao carregar professores do Firestore para adesão:", e);
+            }
+            try {
+                const resp = await fetch('backup_professores_2026-05-18.json');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    _cachedRegisteredProfessores = data.professores || [];
+                    return _cachedRegisteredProfessores;
+                }
+            } catch (e) {}
+            return [];
+        }
+
+        window.renderSchoolAdherence = async () => {
+            const grid = document.getElementById('schoolAdherenceGrid');
+            const summaryBadge = document.getElementById('schoolAdherenceSummary');
+            if (!grid) return;
+
+            const registered = await loadRegisteredProfessoresForAdherence();
+            const schoolTotals = {};
+            registered.forEach(p => {
+                const esc = (p.escola || 'OUTRA').toUpperCase().trim();
+                if (!schoolTotals[esc]) schoolTotals[esc] = { total: 0, responded: 0 };
+                schoolTotals[esc].total++;
+            });
+
+            allAvaliacoes.forEach(a => {
+                const esc = (a.escola || 'OUTRA').toUpperCase().trim();
+                if (!schoolTotals[esc]) schoolTotals[esc] = { total: 0, responded: 0 };
+                schoolTotals[esc].responded++;
+            });
+
+            const entries = Object.entries(schoolTotals).sort((a, b) => {
+                const pctA = a[1].total > 0 ? a[1].responded / a[1].total : 1;
+                const pctB = b[1].total > 0 ? b[1].responded / b[1].total : 1;
+                return pctB - pctA;
+            });
+
+            if (entries.length === 0) {
+                grid.innerHTML = '<div style="color:var(--text-secondary); font-size:0.85rem;">Sem dados de escolas disponíveis.</div>';
+                if (summaryBadge) summaryBadge.textContent = '0 escolas';
+                return;
+            }
+
+            const totalReg = registered.length || allAvaliacoes.length;
+            const globalPct = totalReg > 0 ? Math.min(100, Math.round((allAvaliacoes.length / totalReg) * 100)) : 0;
+            if (summaryBadge) {
+                summaryBadge.textContent = `Adesão Geral: ${allAvaliacoes.length}/${totalReg} (${globalPct}%)`;
+            }
+
+            grid.innerHTML = entries.map(([esc, stats]) => {
+                const denom = Math.max(stats.total, stats.responded, 1);
+                const pct = Math.min(100, Math.round((stats.responded / denom) * 100));
+                const barColor = pct >= 80 ? '#10b981' : (pct >= 50 ? '#3b82f6' : '#f59e0b');
+                const safeEscJS = esc.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                return `
+                    <div class="adherence-row" onclick="openSchoolAdherenceModal('${safeEscJS}')" title="Clique para ver docentes concluídos e pendentes desta escola">
+                        <div class="adherence-row-top">
+                            <span><i class="fas fa-school" style="color:${barColor}; margin-right:5px;"></i>${escapeHtml(esc)}</span>
+                            <span style="color:${barColor};">${stats.responded}/${denom} (${pct}%)</span>
+                        </div>
+                        <div class="adherence-bar-bg">
+                            <div class="adherence-bar-fill" style="width:${pct}%; background:${barColor};"></div>
+                        </div>
+                        <div style="font-size: 0.70rem; color: var(--text-secondary); margin-top: 6px; display: flex; justify-content: space-between;">
+                            <span>${Math.max(0, denom - stats.responded)} pendente(s)</span>
+                            <span style="color: var(--primary-color); font-weight: 600;">Ver lista <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        // Envolve renderExecutiveCharts para atualizar Adesão por Escola automaticamente
+        if (typeof renderExecutiveCharts === 'function') {
+            const _origRenderCharts = renderExecutiveCharts;
+            renderExecutiveCharts = function () {
+                _origRenderCharts.apply(this, arguments);
+                window.renderSchoolAdherence();
+            };
+        }
+
+        // Navegação Anterior / Próximo no Modal de Detalhes
+        function updateModalNavCounter() {
+            const counter = document.getElementById('modalNavCounter');
+            const btnPrev = document.getElementById('btnModalPrev');
+            const btnNext = document.getElementById('btnModalNext');
+            if (!Array.isArray(allAvaliacoes) || allAvaliacoes.length === 0) return;
+            const idx = allAvaliacoes.findIndex((a, i) => (a.id === window._currentOpenDocId || String(i) === String(window._currentOpenDocId)));
+            if (idx < 0) return;
+            if (counter) counter.textContent = `${idx + 1} / ${allAvaliacoes.length}`;
+            if (btnPrev) btnPrev.disabled = (idx <= 0);
+            if (btnNext) btnNext.disabled = (idx >= allAvaliacoes.length - 1);
+        }
+
+        if (typeof window.openDetailsModal === 'function') {
+            const _origOpenDetails = window.openDetailsModal;
+            window.openDetailsModal = function (docId) {
+                _origOpenDetails(docId);
+                updateModalNavCounter();
+            };
+        }
+
+        window.navigateDetailsModal = (delta) => {
+            if (!Array.isArray(allAvaliacoes) || allAvaliacoes.length === 0) return;
+            const idx = allAvaliacoes.findIndex((a, i) => (a.id === window._currentOpenDocId || String(i) === String(window._currentOpenDocId)));
+            if (idx < 0) return;
+            const nextIdx = idx + delta;
+            if (nextIdx < 0 || nextIdx >= allAvaliacoes.length) return;
+            const nextItem = allAvaliacoes[nextIdx];
+            window.openDetailsModal(nextItem.id || nextIdx);
+        };
+
+        // Atalhos de Teclado: Escape fecha modais; Setas ← e → navegam no Espelho
+        document.addEventListener('keydown', (e) => {
+            const detailsModal = document.getElementById('modalDetails');
+            const isDetailsOpen = detailsModal && detailsModal.style.display === 'block';
+            if (e.key === 'Escape') {
+                if (isDetailsOpen) window.closeDetailsModal();
+                const qModal = document.getElementById('modalQuestionEditor');
+                if (qModal && qModal.style.display === 'block' && typeof window.closeQuestionEditorModal === 'function') {
+                    window.closeQuestionEditorModal();
+                }
+            } else if (isDetailsOpen && e.key === 'ArrowLeft') {
+                window.navigateDetailsModal(-1);
+            } else if (isDetailsOpen && e.key === 'ArrowRight') {
+                window.navigateDetailsModal(1);
+            }
+        });
+
+        // Relatório Executivo Consolidado em PDF (Impressão Limpa A4)
+        window.generateConsolidatedExecutivePDF = async () => {
+            if (!allAvaliacoes || allAvaliacoes.length === 0) {
+                alert('Ainda não há avaliações carregadas para gerar o relatório.');
+                return;
+            }
+            const registered = await loadRegisteredProfessoresForAdherence();
+            const schoolStats = {};
+            registered.forEach(p => {
+                const esc = (p.escola || 'OUTRA').toUpperCase().trim();
+                if (!schoolStats[esc]) schoolStats[esc] = { total: 0, responded: 0 };
+                schoolStats[esc].total++;
+            });
+            allAvaliacoes.forEach(a => {
+                const esc = (a.escola || 'OUTRA').toUpperCase().trim();
+                if (!schoolStats[esc]) schoolStats[esc] = { total: 0, responded: 0 };
+                schoolStats[esc].responded++;
+            });
+
+            const totalReg = Math.max(registered.length, allAvaliacoes.length);
+            const pctGeral = totalReg > 0 ? Math.min(100, Math.round((allAvaliacoes.length / totalReg) * 100)) : 0;
+            const nowStr = new Date().toLocaleString('pt-BR');
+
+            const schoolRowsHtml = Object.entries(schoolStats)
+                .sort((a, b) => b[1].responded - a[1].responded)
+                .map(([esc, s]) => {
+                    const denom = Math.max(s.total, s.responded, 1);
+                    const pct = Math.min(100, Math.round((s.responded / denom) * 100));
+                    return `<tr><td><strong>${escapeHtml(esc)}</strong></td><td>${s.responded}</td><td>${denom}</td><td><strong>${pct}%</strong></td></tr>`;
+                }).join('');
+
+            const highlightsQ8 = allAvaliacoes
+                .filter(a => a.respostas?.q8 && String(a.respostas.q8).trim())
+                .slice(0, 12)
+                .map(a => `<div class="quote-box"><div class="quote-meta"><strong>${escapeHtml(a.professor || 'Docente')}</strong> • ${escapeHtml(a.escola || '-')}</div><div class="quote-text">${escapeHtml(String(a.respostas.q8).trim())}</div></div>`)
+                .join('') || '<p>Sem registros qualitativos para Q8.</p>';
+
+            const highlightsQ25 = allAvaliacoes
+                .filter(a => a.respostas?.q25 && String(a.respostas.q25).trim())
+                .slice(0, 12)
+                .map(a => `<div class="quote-box"><div class="quote-meta"><strong>${escapeHtml(a.professor || 'Docente')}</strong> • ${escapeHtml(a.escola || '-')}</div><div class="quote-text">${escapeHtml(String(a.respostas.q25).trim())}</div></div>`)
+                .join('') || '<p>Sem sugestões registradas para Q25.</p>';
+
+            const win = window.open('', '_blank', 'width=960,height=800');
+            if (!win) {
+                alert('Por favor, permita pop-ups para gerar o Relatório Executivo em PDF.');
+                return;
+            }
+            const htmlDoc = [
+                '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">',
+                '<title>Relatório Executivo Consolidado • EDM 2026</title>',
+                '<style>',
+                'body { font-family: "Segoe UI", Arial, sans-serif; color: #0f172a; margin: 28px; line-height: 1.5; }',
+                'h1 { font-size: 20px; margin: 0 0 4px 0; color: #1e3a8a; }',
+                '.sub { font-size: 12px; color: #64748b; margin-bottom: 18px; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }',
+                '.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }',
+                '.kpi { border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; background: #f8fafc; }',
+                '.kpi span { display: block; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; }',
+                '.kpi strong { font-size: 20px; color: #1e3a8a; }',
+                'h2 { font-size: 15px; color: #1e3a8a; margin: 22px 0 10px 0; border-left: 4px solid #2563eb; padding-left: 8px; }',
+                'table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }',
+                'th, td { border: 1px solid #cbd5e1; padding: 7px 10px; text-align: left; }',
+                'th { background: #eff6ff; color: #1e3a8a; text-transform: uppercase; font-size: 11px; }',
+                '.quote-box { border: 1px solid #e2e8f0; border-left: 3px solid #2563eb; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; page-break-inside: avoid; }',
+                '.quote-meta { font-size: 11px; color: #475569; margin-bottom: 3px; }',
+                '.quote-text { font-size: 12px; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; }',
+                '@media print { .no-print { display: none; } body { margin: 12mm; } }',
+                '</style></head><body>',
+                '<div class="no-print" style="text-align:right; margin-bottom:14px;"><button onclick="window.print()" style="background:#2563eb; color:#fff; border:none; padding:9px 18px; border-radius:8px; font-weight:700; cursor:pointer;">Salvar PDF / Imprimir</button></div>',
+                '<h1>Relatório Executivo Consolidado — Avaliação Anual EDM 2026</h1>',
+                `<div class="sub">Educação Digital e Midiática • Gerado em ${escapeHtml(nowStr)}</div>`,
+                '<div class="kpis">',
+                `<div class="kpi"><span>Avaliações Recebidas</span><strong>${allAvaliacoes.length}</strong></div>`,
+                `<div class="kpi"><span>Adesão Geral da Rede</span><strong>${pctGeral}% (${allAvaliacoes.length}/${totalReg})</strong></div>`,
+                `<div class="kpi"><span>Escolas Participantes</span><strong>${Object.values(schoolStats).filter(s => s.responded > 0).length}</strong></div>`,
+                '</div>',
+                '<h2>Adesão por Unidade Escolar</h2>',
+                '<table><thead><tr><th>Escola</th><th>Respondidas</th><th>Cadastrados</th><th>Adesão</th></tr></thead><tbody>',
+                schoolRowsHtml,
+                '</tbody></table>',
+                '<h2>Destaques de Práticas de Sucesso (Questão 8)</h2>',
+                highlightsQ8,
+                '<h2>Sugestões para Fortalecer a EDM em 2027 (Questão 25)</h2>',
+                highlightsQ25,
+                '</body></html>'
+            ].join('');
+            win.document.open();
+            win.document.write(htmlDoc);
+            win.document.close();
+            setTimeout(() => { try { win.focus(); win.print(); } catch (e) {} }, 400);
+        };
+
+        // ==========================================================================
+        // BLOCO 3 — MODAL DE DETALHAMENTO POR ESCOLA & BACKUP JSON COMPLETO
+        // ==========================================================================
+
+        function normTeacherKey(str) {
+            return (str || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim().replace(/\s+/g, ' ');
+        }
+
+        window.copyDirectEvalLinkFromAdmin = async (email, nome) => {
+            const url = new URL('avaliacao.html', window.location.href);
+            if (email) url.searchParams.set('email', email.toLowerCase().trim());
+            if (nome) url.searchParams.set('nome', nome.trim());
+            try {
+                await navigator.clipboard.writeText(url.toString());
+                alert(`Link personalizado de ${nome || email} copiado!`);
+            } catch (e) {
+                prompt('Copie o link direto abaixo:', url.toString());
+            }
+        };
+
+        window.openSchoolAdherenceModal = async (escolaName) => {
+            const modal = document.getElementById('modalSchoolAdherence');
+            const titleEl = document.getElementById('schoolAdherenceModalTitle');
+            const bodyEl = document.getElementById('schoolAdherenceModalBody');
+            if (!modal || !bodyEl) return;
+
+            const targetEsc = (escolaName || '').toUpperCase().trim();
+            if (titleEl) titleEl.textContent = `Adesão — Escola ${targetEsc}`;
+
+            const registered = await loadRegisteredProfessoresForAdherence();
+            const schoolRegistered = registered.filter(p => (p.escola || 'OUTRA').toUpperCase().trim() === targetEsc);
+            const schoolResponded = allAvaliacoes.filter(a => (a.escola || 'OUTRA').toUpperCase().trim() === targetEsc);
+
+            const respondedEmails = new Set(schoolResponded.map(a => (a.email || '').toLowerCase().trim()).filter(Boolean));
+            const respondedNames = new Set(schoolResponded.map(a => normTeacherKey(a.professor)));
+
+            const pendingList = schoolRegistered.filter(p => {
+                const em = (p.email || '').toLowerCase().trim();
+                const nm = normTeacherKey(p.nome);
+                return !((em && respondedEmails.has(em)) || (nm && respondedNames.has(nm)));
+            });
+
+            window._currentSchoolPendingEmails = pendingList
+                .map(p => (p.email || '').toLowerCase().trim())
+                .filter(e => e && e.includes('@'));
+
+            const respondedHTML = schoolResponded.length === 0
+                ? '<p style="font-size:0.82rem; color:var(--text-secondary);">Nenhuma avaliação recebida desta escola ainda.</p>'
+                : schoolResponded.map((a, idx) => {
+                    const docKey = a.id || idx;
+                    const safeDocJS = String(docKey).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                    return `
+                        <div class="adherence-person-item">
+                            <div style="min-width:0;">
+                                <strong style="display:block;">${escapeHtml(a.professor || 'Docente')}</strong>
+                                <span style="font-size:0.74rem; color:var(--text-secondary);">${escapeHtml(a.email || '-')} • ${escapeHtml(a.protocolo || '')}</span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSchoolAdherenceModal(); openDetailsModal('${safeDocJS}')" title="Abrir Espelho" style="padding:4px 8px; font-size:0.74rem;">
+                                <i class="fas fa-eye"></i> Ver
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+            const pendingHTML = pendingList.length === 0
+                ? '<p style="font-size:0.82rem; color:#059669; font-weight:700;"><i class="fas fa-check-circle"></i> 100% dos docentes cadastrados já responderam!</p>'
+                : pendingList.map(p => {
+                    const safeEmail = (p.email || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                    const safeNome = (p.nome || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                    const telClean = (p.telefone || '').replace(/\D/g, '');
+                    const isRealPhone = telClean.length >= 10 && !/^0+$/.test(telClean);
+                    const directUrl = new URL('avaliacao.html', window.location.href);
+                    if (p.email) directUrl.searchParams.set('email', p.email.trim().toLowerCase());
+                    if (p.nome) directUrl.searchParams.set('nome', p.nome.trim());
+                    const waLink = isRealPhone
+                        ? `https://wa.me/55${telClean}?text=${encodeURIComponent(`Olá Prof. ${p.nome}! Segue seu link direto para a Avaliação Anual EDM 2026: ${directUrl.toString()}`)}`
+                        : '';
+                    return `
+                        <div class="adherence-person-item">
+                            <div style="min-width:0;">
+                                <strong style="display:block;">${escapeHtml(p.nome || 'Docente')}</strong>
+                                <span style="font-size:0.74rem; color:var(--text-secondary);">${escapeHtml(p.email || 'Sem e-mail cadastrado')}</span>
+                            </div>
+                            <div style="display:flex; gap:4px; flex-shrink:0;">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="copyDirectEvalLinkFromAdmin('${safeEmail}', '${safeNome}')" title="Copiar link direto pré-identificado" style="padding:4px 8px; font-size:0.74rem;">
+                                    <i class="fas fa-link"></i>
+                                </button>
+                                ${waLink ? `<a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" title="Enviar lembrete com link no WhatsApp" style="padding:4px 8px; font-size:0.74rem; color:#059669; text-decoration:none;"><i class="fab fa-whatsapp"></i></a>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            bodyEl.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                    <span style="font-size:0.84rem; color:var(--text-secondary);">
+                        <strong>${schoolResponded.length}</strong> concluída(s) • <strong>${pendingList.length}</strong> pendente(s)
+                    </span>
+                    ${window._currentSchoolPendingEmails.length > 0 ? `
+                        <button type="button" class="btn btn-primary btn-sm" onclick="copyPendingSchoolEmails()">
+                            <i class="fas fa-copy"></i> Copiar E-mails dos Pendentes (${window._currentSchoolPendingEmails.length})
+                        </button>
+                    ` : ''}
+                </div>
+                <div class="adherence-split-grid">
+                    <div class="adherence-col-box">
+                        <h4 style="margin:0 0 10px 0; font-size:0.88rem; color:#059669;">
+                            <i class="fas fa-check-circle"></i> Concluíram (${schoolResponded.length})
+                        </h4>
+                        ${respondedHTML}
+                    </div>
+                    <div class="adherence-col-box">
+                        <h4 style="margin:0 0 10px 0; font-size:0.88rem; color:#d97706;">
+                            <i class="fas fa-clock"></i> Pendentes (${pendingList.length})
+                        </h4>
+                        ${pendingHTML}
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+        };
+
+        window.closeSchoolAdherenceModal = () => {
+            const modal = document.getElementById('modalSchoolAdherence');
+            if (modal) modal.style.display = 'none';
+        };
+
+        window.copyPendingSchoolEmails = async () => {
+            const emails = window._currentSchoolPendingEmails || [];
+            if (emails.length === 0) return;
+            try {
+                await navigator.clipboard.writeText(emails.join('; '));
+                alert(`${emails.length} e-mail(s) de docentes pendentes copiado(s)!`);
+            } catch (e) {
+                prompt('Copie os e-mails abaixo:', emails.join('; '));
+            }
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') window.closeSchoolAdherenceModal();
+        });
+
+        // Backup Completo do Sistema em JSON (Professores + Avaliações + Configurações)
+        window.downloadFullSystemBackup = async () => {
+            try {
+                const profs = await loadRegisteredProfessoresForAdherence();
+                let configGeral = null;
+                let configQuestoes = null;
+                try {
+                    const snapGeral = await getDoc(doc(db, 'configuracoes', 'geral'));
+                    if (snapGeral.exists()) configGeral = snapGeral.data();
+                } catch (e) {}
+                try {
+                    const snapQ = await getDoc(doc(db, 'configuracoes', 'questoes_avaliacao_2026'));
+                    if (snapQ.exists()) configQuestoes = snapQ.data();
+                } catch (e) {}
+
+                const snapshot = {
+                    exportedAt: new Date().toISOString(),
+                    sistema: 'EDM - Educação Digital e Midiática',
+                    totais: {
+                        professores: profs.length,
+                        avaliacoes_2026: allAvaliacoes.length
+                    },
+                    professores: profs,
+                    avaliacoes_2026: allAvaliacoes,
+                    configuracoes: {
+                        geral: configGeral,
+                        questoes_avaliacao_2026: configQuestoes
+                    }
+                };
+
+                const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_edm_completo_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('Erro ao gerar backup completo:', err);
+                alert('Erro ao gerar backup JSON: ' + (err.message || err));
+            }
+        };
     </script>
+
+    <!-- Modal de Detalhamento de Adesão por Escola -->
+    <div id="modalSchoolAdherence" class="modal-details">
+        <div class="modal-details-card">
+            <div class="modal-details-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <div>
+                        <h2 id="schoolAdherenceModalTitle" style="margin: 0; font-size: 1.2rem; font-weight: 800;">Adesão por Escola</h2>
+                        <span style="font-size: 0.78rem; color: var(--text-secondary);">Concluíram vs. Pendentes na unidade selecionada</span>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeSchoolAdherenceModal()" title="Fechar" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="schoolAdherenceModalBody"></div>
+        </div>
+    </div>
 </body>
 </html>
 
