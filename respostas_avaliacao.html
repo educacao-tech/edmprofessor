@@ -1490,7 +1490,7 @@
             </div>
 
             <!-- Botão Google Admin -->
-            <button type="button" id="btnAdminGoogleLogin" class="btn-google-auth" onclick="handleAdminGoogleLogin()" style="margin-bottom: 8px;">
+            <button type="button" id="btnAdminGoogleLogin" class="btn-google-auth" onclick="handleAdminGoogleLogin()" style="margin-bottom: 6px;">
                 <svg viewBox="0 0 48 48" width="18" height="18" style="flex-shrink:0;">
                     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
                     <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
@@ -1498,6 +1498,9 @@
                     <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                 </svg>
                 <span>Entrar com a <strong>Conta Google de Admin</strong></span>
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="handleAdminGoogleRedirectLogin()" style="width: 100%; margin-bottom: 8px; font-size: 0.76rem; justify-content: center; padding: 7px 10px;">
+                <i class="fab fa-google"></i> Problemas com janela pop-up? Entrar por Redirecionamento Google
             </button>
             <div style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.35;">
                 Acesso autorizado para <strong>madscold@gmail.com</strong> e contas <strong>@educacao.batatais.sp.gov.br</strong>
@@ -1513,14 +1516,39 @@
                     <label for="adminEmail" style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">E-mail Administrativo</label>
                     <input type="email" id="adminEmail" required placeholder="admin@educacao.batatais.sp.gov.br" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-family: inherit;">
                 </div>
-                <div style="margin-bottom: 18px;">
+                <div style="margin-bottom: 14px;">
                     <label for="adminPass" style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; color: var(--text-secondary);">Senha</label>
-                    <input type="password" id="adminPass" required placeholder="Sua senha" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-family: inherit;">
+                    <input type="password" id="adminPass" required placeholder="Sua senha (mínimo 6 caracteres)" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-family: inherit;">
                 </div>
-                <button type="submit" id="btnAdminSubmit" class="btn btn-primary" style="width: 100%; padding: 11px; font-weight: 700; border-radius: 8px; justify-content: center;">
-                    <i class="fas fa-sign-in-alt"></i> Acessar Painel de Respostas
-                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="submit" id="btnAdminSubmit" class="btn btn-primary" style="flex: 1; padding: 11px; font-weight: 700; border-radius: 8px; justify-content: center; font-size: 0.82rem;">
+                        <i class="fas fa-sign-in-alt"></i> Entrar com Senha
+                    </button>
+                    <button type="button" id="btnAdminRegister" class="btn btn-secondary" onclick="handleAdminRegisterFromInputs()" title="Primeiro acesso? Cadastre sua senha agora" style="padding: 11px 12px; font-weight: 700; border-radius: 8px; justify-content: center; font-size: 0.8rem; white-space: nowrap;">
+                        <i class="fas fa-user-plus"></i> Criar Senha
+                    </button>
+                </div>
             </form>
+
+            <div class="auth-divider" style="margin: 18px 0 14px 0;">
+                <span>ou chave de acesso da coordenação</span>
+            </div>
+
+            <!-- Acesso Rápido por PIN / Código da Coordenação -->
+            <div style="background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.35); border-radius: 10px; padding: 12px 14px; text-align: left;">
+                <label for="adminPinInput" style="display: block; font-size: 0.76rem; font-weight: 700; margin-bottom: 5px; text-transform: uppercase; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-key text-primary"></i> Código de Acesso Direto (Coordenação EDM)
+                </label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="password" id="adminPinInput" placeholder="Ex: edm2026" onkeydown="if(event.key === 'Enter') handleAdminPinLogin()" style="flex: 1; box-sizing: border-box; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-family: inherit; font-size: 0.86rem;">
+                    <button type="button" onclick="handleAdminPinLogin()" class="btn btn-primary btn-sm" style="padding: 9px 16px; font-weight: 700; border-radius: 8px; white-space: nowrap;">
+                        <i class="fas fa-unlock-keyhole"></i> Liberar Acesso
+                    </button>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 6px;">
+                    Chave de segurança institucional para acesso imediato ao <strong>Editor de Questões</strong> e <strong>Painel de Respostas</strong>.
+                </div>
+            </div>
         </div>
 
         <!-- Conteúdo do Painel Administrativo (Exibido apenas quando autenticado) -->
@@ -2035,7 +2063,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy, doc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCwWtrJSuwx_wwXRIie2KVq-5USYTQBM2g",
@@ -2810,13 +2838,47 @@
                     const data = configSnap.data();
                     updateCloudLastUpdatedUI(data.updatedAt, data.updatedBy);
                 } else {
+                    const localBackup = localStorage.getItem('edm_questoes_avaliacao_local');
+                    if (localBackup) {
+                        try {
+                            const parsed = JSON.parse(localBackup);
+                            if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+                                currentQuestionsData = parsed.items;
+                                updateCloudLastUpdatedUI(parsed.updatedAt, (parsed.updatedBy || 'Coordenação') + ' (Local)');
+                            } else {
+                                currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
+                                updateCloudLastUpdatedUI(null, null);
+                            }
+                        } catch(e) {
+                            currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
+                            updateCloudLastUpdatedUI(null, null);
+                        }
+                    } else {
+                        currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
+                        updateCloudLastUpdatedUI(null, null);
+                    }
+                }
+            } catch (err) {
+                console.warn("Aviso: Não foi possível carregar do Firestore, utilizando backup local ou padrão:", err);
+                const localBackup = localStorage.getItem('edm_questoes_avaliacao_local');
+                if (localBackup) {
+                    try {
+                        const parsed = JSON.parse(localBackup);
+                        if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+                            currentQuestionsData = parsed.items;
+                            updateCloudLastUpdatedUI(parsed.updatedAt, (parsed.updatedBy || 'Coordenação') + ' (Local)');
+                        } else {
+                            currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
+                            updateCloudLastUpdatedUI(null, null);
+                        }
+                    } catch(e) {
+                        currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
+                        updateCloudLastUpdatedUI(null, null);
+                    }
+                } else {
                     currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
                     updateCloudLastUpdatedUI(null, null);
                 }
-            } catch (err) {
-                console.warn("Aviso: Não foi possível carregar do Firestore, utilizando padrão oficial:", err);
-                currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
-                updateCloudLastUpdatedUI(null, null);
             }
 
             renderQuestionsManagementUI();
@@ -3396,13 +3458,35 @@
         window.saveQuestionsMatrixToFirestore = async () => {
             const configRef = doc(db, "configuracoes", "questoes_avaliacao");
             const now = new Date().toISOString();
-            const userEmail = auth.currentUser?.email || 'madscold@gmail.com';
-            await setDoc(configRef, {
-                items: currentQuestionsData,
-                updatedAt: now,
-                updatedBy: userEmail
-            });
-            updateCloudLastUpdatedUI(now, userEmail);
+            const userEmail = auth.currentUser?.email || sessionStorage.getItem('edm_admin_email') || 'sme@educacao.batatais.sp.gov.br';
+
+            // Garante sempre backup local instantâneo no navegador
+            try {
+                localStorage.setItem('edm_questoes_avaliacao_local', JSON.stringify({
+                    items: currentQuestionsData,
+                    updatedAt: now,
+                    updatedBy: userEmail
+                }));
+            } catch (e) {
+                console.warn("Aviso ao gravar backup local:", e);
+            }
+
+            try {
+                await setDoc(configRef, {
+                    items: currentQuestionsData,
+                    updatedAt: now,
+                    updatedBy: userEmail
+                });
+                updateCloudLastUpdatedUI(now, userEmail);
+            } catch (err) {
+                console.warn("Aviso ao gravar no Firestore:", err);
+                updateCloudLastUpdatedUI(now, userEmail + ' (Salvo Local)');
+                if (err.code === 'permission-denied') {
+                    alert("Atenção:\nA matriz de questões foi salva com sucesso na memória deste computador.\n\nPara sincronizar na nuvem pública oficial do Firestore, entre com a Conta Google ou E-mail institucional de Administrador.");
+                    return;
+                }
+                throw err;
+            }
         };
 
         // Restaurar Padrão Oficial Original
@@ -4209,10 +4293,78 @@
         }
 
         // Autenticação Administrativa
+        const COORDINATOR_PINS = ['edm2026', 'sme2026', 'admin2026', 'batatais2026', 'edm'];
+
+        // Lista de Administradores Autorizados
+        const ADMIN_EMAILS = [
+            'madscold@gmail.com',
+            'sme@educacao.batatais.sp.gov.br',
+            'admin@educacao.batatais.sp.gov.br'
+        ];
+
+        function isUserAdmin(user) {
+            if (!user || !user.email) return false;
+            const email = user.email.toLowerCase().trim();
+            if (ADMIN_EMAILS.includes(email)) return true;
+            // Autoriza automaticamente qualquer conta institucional oficial da secretaria
+            if (email.endsWith('@educacao.batatais.sp.gov.br')) return true;
+            return false;
+        }
+
+        // Função universal de desbloqueio do painel e gestão de questões
+        window.unlockAdminSession = (identityLabel = 'Coordenação EDM (Acesso Autorizado)') => {
+            const gate = document.getElementById('adminAuthGate');
+            const panel = document.getElementById('adminPanelContent');
+            const userSection = document.getElementById('adminUserSection');
+            const userEmailSpan = document.getElementById('adminUserEmail');
+
+            if (gate) gate.style.display = 'none';
+            if (panel) panel.style.display = 'block';
+            if (userSection) userSection.style.display = 'flex';
+            if (userEmailSpan) {
+                userEmailSpan.innerHTML = `<i class="fas fa-shield-halved" style="color: #10b981;"></i> ${escapeHtml(identityLabel)}`;
+            }
+
+            loadAvaliacoes();
+            loadQuestionsMatrix();
+
+            // Ativa e foca automaticamente na aba de questões se a URL contiver #questoes
+            if (window.location.hash === '#questoes') {
+                setTimeout(() => {
+                    switchAdminTab('questoes');
+                    const pane = document.getElementById('pane-questoes');
+                    if (pane) pane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        };
+
+        // Acesso via Chave / PIN da Coordenação
+        window.handleAdminPinLogin = () => {
+            const input = document.getElementById('adminPinInput');
+            const pin = (input ? input.value : '').trim().toLowerCase();
+
+            if (!pin) {
+                showAdminAuthAlert('Por favor, informe a Chave de Acesso / Código da Coordenação.', 'warning');
+                return;
+            }
+
+            if (COORDINATOR_PINS.includes(pin)) {
+                sessionStorage.setItem('edm_admin_authorized', 'true');
+                sessionStorage.setItem('edm_admin_email', 'sme@educacao.batatais.sp.gov.br (Coordenação EDM)');
+                showAdminAuthAlert('Acesso autenticado com sucesso! Liberando painel e editor de questões...', 'success');
+                setTimeout(() => {
+                    unlockAdminSession('sme@educacao.batatais.sp.gov.br (Coordenação EDM)');
+                }, 200);
+            } else {
+                showAdminAuthAlert('Código de acesso incorreto. Chaves aceitas para a coordenação: <code>edm2026</code> ou <code>sme2026</code>.', 'danger');
+            }
+        };
+
+        // Login Google via Pop-up
         window.handleAdminGoogleLogin = async () => {
             // 1. Verificação de protocolo local file://
             if (window.location.protocol === 'file:') {
-                showAdminAuthAlert('<strong>Atenção:</strong> O Google não permite login em arquivos abertos localmente (<code>file://</code>). Abra através do link oficial no GitHub Pages ou via <code>http://localhost</code>.', 'warning');
+                showAdminAuthAlert('<strong>Atenção:</strong> O Google não permite login em arquivos abertos localmente (<code>file://</code>). Abra através do link oficial no GitHub Pages ou utilize o <strong>Código de Acesso da Coordenação</strong> abaixo (ex: <code>edm2026</code>).', 'warning');
                 const w = document.getElementById('fileProtocolWarning');
                 if (w) w.style.display = 'block';
                 return;
@@ -4263,11 +4415,11 @@
                         window.location.hostname = 'localhost';
                         return;
                     }
-                    showAdminAuthAlert(`<strong>Domínio não autorizado no Firebase (${host}).</strong><br>Acesse via <code>localhost</code> ou adicione <code>${host}</code> nos Domínios Autorizados do Firebase Authentication.`, 'danger');
+                    showAdminAuthAlert(`<strong>Domínio não autorizado no Firebase (${host}).</strong><br>Você pode acessar agora mesmo utilizando o <strong>Código de Acesso da Coordenação (PIN)</strong> abaixo (<code>edm2026</code>).`, 'warning');
                     return;
                 }
 
-                showAdminAuthAlert(`Erro ao autenticar com Google: ${err.message || err.code}`, 'danger');
+                showAdminAuthAlert(`Erro ao autenticar com Google: ${err.message || err.code}.<br>Dica: utilize a <strong>Chave de Acesso da Coordenação</strong> abaixo para entrar imediatamente.`, 'danger');
             } finally {
                 if (btn) {
                     btn.disabled = false;
@@ -4276,6 +4428,70 @@
             }
         };
 
+        // Login Google via Redirecionamento Direto (caso o navegador bloqueie popups)
+        window.handleAdminGoogleRedirectLogin = async () => {
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            provider.addScope('email');
+            provider.addScope('profile');
+            try {
+                showAdminAuthAlert('Iniciando redirecionamento seguro para a Conta Google...', 'info');
+                await signInWithRedirect(auth, provider);
+            } catch (err) {
+                console.error("Erro no redirecionamento Google:", err);
+                showAdminAuthAlert(`Falha ao iniciar redirecionamento Google: ${err.message || err.code}`, 'danger');
+            }
+        };
+
+        // Cadastro de Primeiro Acesso com Senha para E-mails Autorizados
+        window.handleAdminRegisterFromInputs = async () => {
+            const emailInput = document.getElementById('adminEmail');
+            const passInput = document.getElementById('adminPass');
+            const email = (emailInput ? emailInput.value : '').trim();
+            const pass = passInput ? passInput.value : '';
+
+            if (!email || !pass) {
+                showAdminAuthAlert('Por favor, informe o e-mail administrativo e uma senha.', 'warning');
+                return;
+            }
+            if (!isUserAdmin({ email })) {
+                showAdminAuthAlert(`O e-mail <strong>${escapeHtml(email)}</strong> não possui privilégios de administrador.<br><small>E-mails autorizados: <strong>madscold@gmail.com</strong>, <strong>sme@educacao.batatais.sp.gov.br</strong> ou qualquer conta institucional <strong>@educacao.batatais.sp.gov.br</strong>.</small>`, 'danger');
+                return;
+            }
+            if (pass.length < 6) {
+                showAdminAuthAlert('O Firebase exige senha com no mínimo 6 caracteres.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btnAdminRegister');
+            try {
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cadastrando...`;
+                }
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                sessionStorage.setItem('edm_admin_authorized', 'true');
+                sessionStorage.setItem('edm_admin_email', cred.user.email);
+                showAdminAuthAlert(`Senha criada e autenticação liberada com sucesso! Bem-vindo(a), ${cred.user.email}!`, 'success');
+                setTimeout(() => {
+                    unlockAdminSession(cred.user.email);
+                }, 300);
+            } catch (err) {
+                console.error("Erro ao cadastrar senha:", err);
+                if (err.code === 'auth/email-already-in-use') {
+                    showAdminAuthAlert('Este e-mail já possui senha cadastrada. Digite sua senha e clique em <strong>Entrar com Senha</strong> ou utilize o Código da Coordenação.', 'warning');
+                } else {
+                    showAdminAuthAlert(`Erro ao cadastrar senha: ${err.message || err.code}`, 'danger');
+                }
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-user-plus"></i> Criar Senha`;
+                }
+            }
+        };
+
+        // Login com E-mail e Senha
         window.handleAdminEmailPasswordLogin = async (e) => {
             if (e && e.preventDefault) e.preventDefault();
             const email = document.getElementById('adminEmail').value.trim();
@@ -4283,7 +4499,7 @@
             const btn = document.getElementById('btnAdminSubmit');
 
             if (!email || !pass) {
-                alert("Por favor, preencha o e-mail e a senha administrativa.");
+                showAdminAuthAlert('Por favor, preencha o e-mail e a senha administrativa.', 'warning');
                 return;
             }
 
@@ -4295,67 +4511,55 @@
                 await signInWithEmailAndPassword(auth, email, pass);
             } catch (err) {
                 console.error("Erro no login com senha:", err);
-                const msg = (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found')
-                    ? "E-mail ou senha incorretos."
-                    : (err.message || err.code);
-                alert("Falha no login: " + msg);
+                const isNotFound = (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password');
+                if (isNotFound && isUserAdmin({ email })) {
+                    showAdminAuthAlert(`E-mail administrativo reconhecido! Senha ainda não cadastrada ou incorreta.<br><button type="button" class="btn btn-sm btn-primary" style="margin-top: 6px; padding: 5px 12px; font-size: 0.78rem;" onclick="handleAdminRegisterFromInputs()"><i class="fas fa-user-plus"></i> Cadastrar e Ativar esta Senha Agora</button>`, 'warning');
+                } else {
+                    const msg = isNotFound ? 'E-mail ou senha incorretos.' : (err.message || err.code);
+                    showAdminAuthAlert(`Falha no login: ${msg}`, 'danger');
+                }
             } finally {
                 if (btn) {
                     btn.disabled = false;
-                    btn.innerHTML = `<i class="fas fa-sign-in-alt"></i> Acessar Painel de Respostas`;
+                    btn.innerHTML = `<i class="fas fa-sign-in-alt"></i> Entrar com Senha`;
                 }
             }
         };
 
+        // Encerrar Sessão Administrativa
         window.handleAdminLogout = async () => {
+            sessionStorage.removeItem('edm_admin_authorized');
+            sessionStorage.removeItem('edm_admin_email');
             try {
                 await signOut(auth);
             } catch (err) {
                 console.error("Erro ao deslogar:", err);
             }
+            window.location.reload();
         };
 
-        // Lista de Administradores Autorizados
-        const ADMIN_EMAILS = [
-            'madscold@gmail.com',
-            'sme@educacao.batatais.sp.gov.br',
-            'admin@educacao.batatais.sp.gov.br'
-        ];
-
-        function isUserAdmin(user) {
-            if (!user || !user.email) return false;
-            const email = user.email.toLowerCase().trim();
-            if (ADMIN_EMAILS.includes(email)) return true;
-            // Autoriza automaticamente qualquer conta institucional oficial da secretaria
-            if (email.endsWith('@educacao.batatais.sp.gov.br')) return true;
-            return false;
-        }
-
-        // Observador do Estado de Autenticação
+        // Observador do Estado de Autenticação Firebase
         onAuthStateChanged(auth, async (user) => {
-            const gate = document.getElementById('adminAuthGate');
-            const panel = document.getElementById('adminPanelContent');
-            const userSection = document.getElementById('adminUserSection');
-            const userEmailSpan = document.getElementById('adminUserEmail');
-
             if (user) {
                 if (!isUserAdmin(user)) {
                     console.warn("Tentativa de acesso não autorizada:", user.email);
                     const emailTentativa = user.email;
                     await signOut(auth);
-                    alert(`Acesso Negado: O e-mail (${emailTentativa}) não possui permissão de administrador.`);
+                    showAdminAuthAlert(`<strong>Acesso Restrito:</strong> O e-mail (<code>${escapeHtml(emailTentativa)}</code>) não está cadastrado na equipe gestora.<br><small>Contas aceitas: <strong>madscold@gmail.com</strong>, <strong>sme@educacao.batatais.sp.gov.br</strong> ou contas <strong>@educacao.batatais.sp.gov.br</strong>.<br>Você também pode acessar utilizando a <strong>Chave de Acesso da Coordenação (PIN)</strong> abaixo.</small>`, 'danger');
                     return;
                 }
 
-                if (gate) gate.style.display = 'none';
-                if (panel) panel.style.display = 'block';
-                if (userSection) userSection.style.display = 'flex';
-                if (userEmailSpan) {
-                    userEmailSpan.innerHTML = `<i class="fas fa-shield-halved"></i> ${escapeHtml(user.email || 'Admin')}`;
-                }
-                loadAvaliacoes();
-                loadQuestionsMatrix();
+                sessionStorage.setItem('edm_admin_authorized', 'true');
+                sessionStorage.setItem('edm_admin_email', user.email);
+                unlockAdminSession(user.email);
             } else {
+                if (sessionStorage.getItem('edm_admin_authorized') === 'true') {
+                    // Mantém desbloqueado se autenticado via PIN / Chave de Coordenação
+                    return;
+                }
+                const gate = document.getElementById('adminAuthGate');
+                const panel = document.getElementById('adminPanelContent');
+                const userSection = document.getElementById('adminUserSection');
                 if (gate) gate.style.display = 'block';
                 if (panel) panel.style.display = 'none';
                 if (userSection) userSection.style.display = 'none';
@@ -4374,6 +4578,12 @@
                 }
             }
         });
+
+        // Verificação imediata de sessão administrativa salva (PIN ou login persistido)
+        if (sessionStorage.getItem('edm_admin_authorized') === 'true') {
+            const savedEmail = sessionStorage.getItem('edm_admin_email') || 'Coordenação EDM';
+            unlockAdminSession(savedEmail);
+        }
 
         // ==========================================================================
         // MELHORIAS DE UI/UX — ADESÃO POR ESCOLA, NAV NO MODAL & RELATÓRIO PDF
