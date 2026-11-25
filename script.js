@@ -558,9 +558,21 @@ onAuthStateChanged(auth, async (user) => {
 
         document.body.classList.add('is-admin');
         if (authBtn) authBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Sair';
+        try {
+            localStorage.setItem('edm_admin_authorized', 'true');
+            localStorage.setItem('edm_admin_email', user.email || 'Admin EDM');
+            sessionStorage.setItem('edm_admin_authorized', 'true');
+            sessionStorage.setItem('edm_admin_email', user.email || 'Admin EDM');
+        } catch(e) {}
     } else {
         document.body.classList.remove('is-admin');
         if (authBtn) authBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        try {
+            localStorage.removeItem('edm_admin_authorized');
+            localStorage.removeItem('edm_admin_email');
+            sessionStorage.removeItem('edm_admin_authorized');
+            sessionStorage.removeItem('edm_admin_email');
+        } catch(e) {}
     }
     subscribeAvaliacoes();
     renderTable();

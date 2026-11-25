@@ -1449,6 +1449,102 @@
             </div>
         </div>
 
+        <!-- Verificação síncrona imediata de autorização administrativa -->
+        <script>
+            (function() {
+                try {
+                    var isAuth = localStorage.getItem('edm_admin_authorized') === 'true' || 
+                                 sessionStorage.getItem('edm_admin_authorized') === 'true';
+                    if (isAuth) {
+                        document.write('<style>#adminAuthGate { display: none !important; } #adminPanelContent { display: block !important; } #adminUserSection { display: flex !important; }</style>');
+                    }
+                } catch(e) {}
+            })();
+
+            // Handlers síncronos universais disponíveis imediatamente
+            window._pendingAdminPinUnlock = false;
+            window.handleAdminPinLogin = function() {
+                var input = document.getElementById('adminPinInput');
+                var pin = (input ? input.value : '').trim().toLowerCase();
+                var pins = ['edm2026', 'sme2026', 'admin2026', 'batatais2026', 'edm'];
+                if (!pin) {
+                    alert('Por favor, informe a Chave de Acesso / Código da Coordenação.');
+                    return;
+                }
+                if (pins.indexOf(pin) !== -1) {
+                    try {
+                        localStorage.setItem('edm_admin_authorized', 'true');
+                        localStorage.setItem('edm_admin_email', 'sme@educacao.batatais.sp.gov.br (Coordenação EDM)');
+                        sessionStorage.setItem('edm_admin_authorized', 'true');
+                        sessionStorage.setItem('edm_admin_email', 'sme@educacao.batatais.sp.gov.br (Coordenação EDM)');
+                    } catch(e) {}
+                    var gate = document.getElementById('adminAuthGate');
+                    var panel = document.getElementById('adminPanelContent');
+                    var userSec = document.getElementById('adminUserSection');
+                    var emailSpan = document.getElementById('adminUserEmail');
+                    if (gate) gate.style.display = 'none';
+                    if (panel) panel.style.display = 'block';
+                    if (userSec) userSec.style.display = 'flex';
+                    if (emailSpan) emailSpan.innerHTML = '<i class="fas fa-shield-halved" style="color: #10b981;"></i> Coordenação EDM (Chave de Acesso)';
+                    
+                    if (typeof window.unlockAdminSession === 'function') {
+                        window.unlockAdminSession('sme@educacao.batatais.sp.gov.br (Coordenação EDM)');
+                    } else {
+                        window._pendingAdminPinUnlock = true;
+                    }
+                    if (window.location.hash === '#questoes' && typeof window.switchAdminTab === 'function') {
+                        window.switchAdminTab('questoes');
+                    }
+                } else {
+                    alert('Código de acesso incorreto. Chaves aceitas para a coordenação: edm2026 ou sme2026.');
+                }
+            };
+
+            window.handleAdminGoogleLogin = function() {
+                if (typeof window._realHandleAdminGoogleLogin === 'function') {
+                    return window._realHandleAdminGoogleLogin();
+                }
+                var btn = document.getElementById('btnAdminGoogleLogin');
+                if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando à Conta Google...';
+                setTimeout(function() {
+                    if (typeof window._realHandleAdminGoogleLogin === 'function') {
+                        window._realHandleAdminGoogleLogin();
+                    } else {
+                        alert('Aguardando inicialização segura do serviço Google. Você também pode acessar instantaneamente digitando o código "edm2026" no campo da Coordenação abaixo.');
+                        if (btn) btn.innerHTML = '<span>Entrar com a <strong>Conta Google de Admin</strong></span>';
+                    }
+                }, 800);
+            };
+
+            window.handleAdminGoogleRedirectLogin = function() {
+                if (typeof window._realHandleAdminGoogleRedirectLogin === 'function') {
+                    return window._realHandleAdminGoogleRedirectLogin();
+                }
+                alert('Iniciando redirecionamento seguro com o Google...');
+                setTimeout(function() {
+                    if (typeof window._realHandleAdminGoogleRedirectLogin === 'function') {
+                        window._realHandleAdminGoogleRedirectLogin();
+                    }
+                }, 800);
+            };
+
+            window.handleAdminEmailPasswordLogin = function(e) {
+                if (e && e.preventDefault) e.preventDefault();
+                if (typeof window._realHandleAdminEmailPasswordLogin === 'function') {
+                    return window._realHandleAdminEmailPasswordLogin(e);
+                }
+                alert('Aguardando inicialização do sistema. Você também pode digitar "edm2026" no campo da Coordenação abaixo para entrar instantaneamente.');
+                return false;
+            };
+
+            window.handleAdminRegisterFromInputs = function() {
+                if (typeof window._realHandleAdminRegisterFromInputs === 'function') {
+                    return window._realHandleAdminRegisterFromInputs();
+                }
+                alert('Aguardando inicialização do sistema de cadastro.');
+            };
+        </script>
+
         <!-- Tela de Bloqueio para Usuários Não Autenticados como Administrador -->
         <div id="adminAuthGate" class="admin-auth-card">
             <div class="admin-lock-icon">
@@ -4313,6 +4409,13 @@
 
         // Função universal de desbloqueio do painel e gestão de questões
         window.unlockAdminSession = (identityLabel = 'Coordenação EDM (Acesso Autorizado)') => {
+            try {
+                localStorage.setItem('edm_admin_authorized', 'true');
+                localStorage.setItem('edm_admin_email', identityLabel);
+                sessionStorage.setItem('edm_admin_authorized', 'true');
+                sessionStorage.setItem('edm_admin_email', identityLabel);
+            } catch(e) {}
+
             const gate = document.getElementById('adminAuthGate');
             const panel = document.getElementById('adminPanelContent');
             const userSection = document.getElementById('adminUserSection');
@@ -4339,7 +4442,7 @@
         };
 
         // Acesso via Chave / PIN da Coordenação
-        window.handleAdminPinLogin = () => {
+        window._realHandleAdminPinLogin = () => {
             const input = document.getElementById('adminPinInput');
             const pin = (input ? input.value : '').trim().toLowerCase();
 
@@ -4349,19 +4452,24 @@
             }
 
             if (COORDINATOR_PINS.includes(pin)) {
-                sessionStorage.setItem('edm_admin_authorized', 'true');
-                sessionStorage.setItem('edm_admin_email', 'sme@educacao.batatais.sp.gov.br (Coordenação EDM)');
+                try {
+                    localStorage.setItem('edm_admin_authorized', 'true');
+                    localStorage.setItem('edm_admin_email', 'sme@educacao.batatais.sp.gov.br (Coordenação EDM)');
+                    sessionStorage.setItem('edm_admin_authorized', 'true');
+                    sessionStorage.setItem('edm_admin_email', 'sme@educacao.batatais.sp.gov.br (Coordenação EDM)');
+                } catch(e) {}
                 showAdminAuthAlert('Acesso autenticado com sucesso! Liberando painel e editor de questões...', 'success');
                 setTimeout(() => {
                     unlockAdminSession('sme@educacao.batatais.sp.gov.br (Coordenação EDM)');
-                }, 200);
+                }, 150);
             } else {
                 showAdminAuthAlert('Código de acesso incorreto. Chaves aceitas para a coordenação: <code>edm2026</code> ou <code>sme2026</code>.', 'danger');
             }
         };
+        window.handleAdminPinLogin = window._realHandleAdminPinLogin;
 
         // Login Google via Pop-up
-        window.handleAdminGoogleLogin = async () => {
+        window._realHandleAdminGoogleLogin = async () => {
             // 1. Verificação de protocolo local file://
             if (window.location.protocol === 'file:') {
                 showAdminAuthAlert('<strong>Atenção:</strong> O Google não permite login em arquivos abertos localmente (<code>file://</code>). Abra através do link oficial no GitHub Pages ou utilize o <strong>Código de Acesso da Coordenação</strong> abaixo (ex: <code>edm2026</code>).', 'warning');
@@ -4427,9 +4535,10 @@
                 }
             }
         };
+        window.handleAdminGoogleLogin = window._realHandleAdminGoogleLogin;
 
         // Login Google via Redirecionamento Direto (caso o navegador bloqueie popups)
-        window.handleAdminGoogleRedirectLogin = async () => {
+        window._realHandleAdminGoogleRedirectLogin = async () => {
             const provider = new GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
             provider.addScope('email');
@@ -4442,9 +4551,10 @@
                 showAdminAuthAlert(`Falha ao iniciar redirecionamento Google: ${err.message || err.code}`, 'danger');
             }
         };
+        window.handleAdminGoogleRedirectLogin = window._realHandleAdminGoogleRedirectLogin;
 
         // Cadastro de Primeiro Acesso com Senha para E-mails Autorizados
-        window.handleAdminRegisterFromInputs = async () => {
+        window._realHandleAdminRegisterFromInputs = async () => {
             const emailInput = document.getElementById('adminEmail');
             const passInput = document.getElementById('adminPass');
             const email = (emailInput ? emailInput.value : '').trim();
@@ -4470,8 +4580,12 @@
                     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cadastrando...`;
                 }
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                sessionStorage.setItem('edm_admin_authorized', 'true');
-                sessionStorage.setItem('edm_admin_email', cred.user.email);
+                try {
+                    localStorage.setItem('edm_admin_authorized', 'true');
+                    localStorage.setItem('edm_admin_email', cred.user.email);
+                    sessionStorage.setItem('edm_admin_authorized', 'true');
+                    sessionStorage.setItem('edm_admin_email', cred.user.email);
+                } catch(e) {}
                 showAdminAuthAlert(`Senha criada e autenticação liberada com sucesso! Bem-vindo(a), ${cred.user.email}!`, 'success');
                 setTimeout(() => {
                     unlockAdminSession(cred.user.email);
@@ -4490,9 +4604,10 @@
                 }
             }
         };
+        window.handleAdminRegisterFromInputs = window._realHandleAdminRegisterFromInputs;
 
         // Login com E-mail e Senha
-        window.handleAdminEmailPasswordLogin = async (e) => {
+        window._realHandleAdminEmailPasswordLogin = async (e) => {
             if (e && e.preventDefault) e.preventDefault();
             const email = document.getElementById('adminEmail').value.trim();
             const pass = document.getElementById('adminPass').value;
@@ -4525,11 +4640,16 @@
                 }
             }
         };
+        window.handleAdminEmailPasswordLogin = window._realHandleAdminEmailPasswordLogin;
 
         // Encerrar Sessão Administrativa
         window.handleAdminLogout = async () => {
-            sessionStorage.removeItem('edm_admin_authorized');
-            sessionStorage.removeItem('edm_admin_email');
+            try {
+                localStorage.removeItem('edm_admin_authorized');
+                localStorage.removeItem('edm_admin_email');
+                sessionStorage.removeItem('edm_admin_authorized');
+                sessionStorage.removeItem('edm_admin_email');
+            } catch(e) {}
             try {
                 await signOut(auth);
             } catch (err) {
@@ -4549,12 +4669,16 @@
                     return;
                 }
 
-                sessionStorage.setItem('edm_admin_authorized', 'true');
-                sessionStorage.setItem('edm_admin_email', user.email);
                 unlockAdminSession(user.email);
             } else {
-                if (sessionStorage.getItem('edm_admin_authorized') === 'true') {
-                    // Mantém desbloqueado se autenticado via PIN / Chave de Coordenação
+                var isAuth = false;
+                try {
+                    isAuth = localStorage.getItem('edm_admin_authorized') === 'true' || 
+                             sessionStorage.getItem('edm_admin_authorized') === 'true';
+                } catch(e) {}
+
+                if (isAuth) {
+                    // Mantém desbloqueado se autenticado via PIN ou sincronizado do index.html
                     return;
                 }
                 const gate = document.getElementById('adminAuthGate');
@@ -4579,11 +4703,15 @@
             }
         });
 
-        // Verificação imediata de sessão administrativa salva (PIN ou login persistido)
-        if (sessionStorage.getItem('edm_admin_authorized') === 'true') {
-            const savedEmail = sessionStorage.getItem('edm_admin_email') || 'Coordenação EDM';
-            unlockAdminSession(savedEmail);
-        }
+        // Verificação imediata de sessão administrativa salva (PIN, sincronizado de index.html ou login persistido)
+        try {
+            if (window._pendingAdminPinUnlock || 
+                localStorage.getItem('edm_admin_authorized') === 'true' || 
+                sessionStorage.getItem('edm_admin_authorized') === 'true') {
+                const savedEmail = localStorage.getItem('edm_admin_email') || sessionStorage.getItem('edm_admin_email') || 'Coordenação EDM';
+                unlockAdminSession(savedEmail);
+            }
+        } catch(e) {}
 
         // ==========================================================================
         // MELHORIAS DE UI/UX — ADESÃO POR ESCOLA, NAV NO MODAL & RELATÓRIO PDF
