@@ -1459,16 +1459,22 @@
                 O espelho das respostas da Avaliação Anual contém dados pedagógicos individuais e é de <strong>acesso exclusivo da Coordenação de EDM e Secretaria Municipal de Educação</strong>.
             </p>
 
-            <!-- Botão Google Admin -->
-            <button type="button" id="btnAdminGoogleLogin" class="btn-google-auth" onclick="handleAdminGoogleLogin()" style="margin-bottom: 14px;">
-                <svg viewBox="0 0 48 48" width="18" height="18" style="flex-shrink:0;">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
-                <span>Entrar com a <strong>Conta Google de Admin</strong></span>
-            </button>
+            <!-- Alerta embutido para mensagens de erro/orientação -->
+            <div id="adminLoginAlert" style="display:none; margin: 0 0 14px 0; padding: 10px 14px; border-radius: 10px; font-size: 0.82rem; text-align: left; line-height: 1.45;"></div>
+
+            <!-- Aviso dinâmico se acessado via arquivo local file:// -->
+            <div id="fileProtocolWarning" style="display:none; margin: 0 0 16px 0; padding: 12px 14px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); text-align: left; font-size: 0.82rem; line-height: 1.45; color: var(--text-color);">
+                <div style="font-weight: 700; color: #dc2626; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-circle-exclamation"></i> Arquivo Aberto Localmente (file://)
+                </div>
+                O Google não permite login quando o arquivo é aberto diretamente do computador (sem servidor web).<br>
+                <strong>Solução:</strong> Acesse pelo link oficial no GitHub Pages:
+                <div style="margin-top: 8px;">
+                    <a href="https://educacao-tech.github.io/edmprofessor/respostas_avaliacao.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #2563eb; color: #ffffff !important; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.82rem; box-shadow: 0 2px 6px rgba(37,99,235,0.25);">
+                        <i class="fas fa-globe"></i> Abrir no GitHub Pages Oficial
+                    </a>
+                </div>
+            </div>
 
             <!-- Aviso dinâmico se acessado via 127.0.0.1 -->
             <div id="localServerWarning" style="display:none; margin: 0 0 16px 0; padding: 12px 14px; border-radius: 12px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); text-align: left; font-size: 0.82rem; line-height: 1.45; color: var(--text-color);">
@@ -1481,6 +1487,20 @@
                         <i class="fas fa-arrow-up-right-from-square"></i> Mudar para localhost agora
                     </a>
                 </div>
+            </div>
+
+            <!-- Botão Google Admin -->
+            <button type="button" id="btnAdminGoogleLogin" class="btn-google-auth" onclick="handleAdminGoogleLogin()" style="margin-bottom: 8px;">
+                <svg viewBox="0 0 48 48" width="18" height="18" style="flex-shrink:0;">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                <span>Entrar com a <strong>Conta Google de Admin</strong></span>
+            </button>
+            <div style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.35;">
+                Acesso autorizado para <strong>madscold@gmail.com</strong> e contas <strong>@educacao.batatais.sp.gov.br</strong>
             </div>
 
             <div class="auth-divider">
@@ -2015,7 +2035,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy, doc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCwWtrJSuwx_wwXRIie2KVq-5USYTQBM2g",
@@ -2030,6 +2050,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+
+        // Captura retorno de redirect caso o navegador tenha bloqueado popup
+        getRedirectResult(auth).catch(err => {
+            console.warn("Aviso retorno de redirect:", err);
+        });
 
         let allAvaliacoes = [];
 
@@ -4153,22 +4178,82 @@
             }
         }
 
+        // Helper para exibir alertas na tela de login
+        function showAdminAuthAlert(message, type = 'danger') {
+            const el = document.getElementById('adminLoginAlert');
+            if (!el) {
+                alert(message.replace(/<[^>]*>/g, ''));
+                return;
+            }
+            el.style.display = 'block';
+            if (type === 'danger') {
+                el.style.background = 'rgba(239, 68, 68, 0.12)';
+                el.style.border = '1px solid rgba(239, 68, 68, 0.35)';
+                el.style.color = '#dc2626';
+            } else if (type === 'warning') {
+                el.style.background = 'rgba(245, 158, 11, 0.12)';
+                el.style.border = '1px solid rgba(245, 158, 11, 0.35)';
+                el.style.color = '#d97706';
+            } else {
+                el.style.background = 'rgba(16, 185, 129, 0.12)';
+                el.style.border = '1px solid rgba(16, 185, 129, 0.35)';
+                el.style.color = '#059669';
+            }
+            el.innerHTML = message;
+        }
+
+        // Detecta protocolo local file:// na inicialização
+        if (window.location.protocol === 'file:') {
+            const w = document.getElementById('fileProtocolWarning');
+            if (w) w.style.display = 'block';
+        }
+
         // Autenticação Administrativa
         window.handleAdminGoogleLogin = async () => {
-            // Se ainda estiver em 127.0.0.1, redireciona transparentemente para localhost
+            // 1. Verificação de protocolo local file://
+            if (window.location.protocol === 'file:') {
+                showAdminAuthAlert('<strong>Atenção:</strong> O Google não permite login em arquivos abertos localmente (<code>file://</code>). Abra através do link oficial no GitHub Pages ou via <code>http://localhost</code>.', 'warning');
+                const w = document.getElementById('fileProtocolWarning');
+                if (w) w.style.display = 'block';
+                return;
+            }
+
+            // 2. Se estiver em 127.0.0.1, redireciona transparentemente para localhost
             if (window.location.hostname === '127.0.0.1') {
                 window.location.hostname = 'localhost';
                 return;
             }
 
+            const btn = document.getElementById('btnAdminGoogleLogin');
+            const originalBtnHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> <span>Conectando à Conta Google...</span>`;
+            }
+
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            provider.addScope('email');
+            provider.addScope('profile');
+
             try {
-                const provider = new GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account' });
                 await signInWithPopup(auth, provider);
             } catch (err) {
                 console.error("Erro no login Google:", err);
-                if (err.code === 'auth/popup-closed-by-user') return;
-                
+
+                // Fallback automático para redirecionamento se o popup foi bloqueado pelo navegador
+                if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
+                    console.warn("Popup bloqueado, utilizando redirecionamento seguro...");
+                    showAdminAuthAlert('Pop-up bloqueado pelo navegador. Redirecionando para login seguro...', 'warning');
+                    await signInWithRedirect(auth, provider);
+                    return;
+                }
+
+                if (err.code === 'auth/popup-closed-by-user') {
+                    showAdminAuthAlert('Login cancelado: a janela de autenticação foi fechada antes de concluir.', 'warning');
+                    return;
+                }
+
                 const isUnauthorized = err.code === 'auth/unauthorized-domain' || 
                     (err.message && err.message.toLowerCase().includes('unauthorized-domain'));
 
@@ -4178,10 +4263,16 @@
                         window.location.hostname = 'localhost';
                         return;
                     }
-                    alert(`Domínio não autorizado no Firebase (${host}).\n\nSolução:\n1. Acesse via 'localhost' em vez de '${host}'; OU\n2. Adicione '${host}' no Firebase Console > Authentication > Settings > Authorized domains.`);
+                    showAdminAuthAlert(`<strong>Domínio não autorizado no Firebase (${host}).</strong><br>Acesse via <code>localhost</code> ou adicione <code>${host}</code> nos Domínios Autorizados do Firebase Authentication.`, 'danger');
                     return;
                 }
-                alert("Erro ao autenticar com Google: " + (err.message || err.code));
+
+                showAdminAuthAlert(`Erro ao autenticar com Google: ${err.message || err.code}`, 'danger');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnHtml;
+                }
             }
         };
 
@@ -4226,12 +4317,18 @@
 
         // Lista de Administradores Autorizados
         const ADMIN_EMAILS = [
-            'madscold@gmail.com'
+            'madscold@gmail.com',
+            'sme@educacao.batatais.sp.gov.br',
+            'admin@educacao.batatais.sp.gov.br'
         ];
 
         function isUserAdmin(user) {
             if (!user || !user.email) return false;
-            return ADMIN_EMAILS.includes(user.email.toLowerCase().trim());
+            const email = user.email.toLowerCase().trim();
+            if (ADMIN_EMAILS.includes(email)) return true;
+            // Autoriza automaticamente qualquer conta institucional oficial da secretaria
+            if (email.endsWith('@educacao.batatais.sp.gov.br')) return true;
+            return false;
         }
 
         // Observador do Estado de Autenticação

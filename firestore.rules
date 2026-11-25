@@ -4,7 +4,10 @@ service cloud.firestore {
     // Apenas administradores autorizados têm privilégios de gravação/gerenciamento
     function isAdmin() {
       return request.auth != null && (
-        request.auth.token.email.lower() == 'madscold@gmail.com'
+        request.auth.token.email.lower() == 'madscold@gmail.com' ||
+        request.auth.token.email.lower() == 'sme@educacao.batatais.sp.gov.br' ||
+        request.auth.token.email.lower() == 'admin@educacao.batatais.sp.gov.br' ||
+        request.auth.token.email.lower().matches('.*@educacao\\.batatais\\.sp\\.gov\\.br$')
       );
     }
 

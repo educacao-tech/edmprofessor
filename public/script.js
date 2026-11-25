@@ -20,12 +20,17 @@ const auth = getAuth(app);
 
 // Lista de Administradores Autorizados
 export const ADMIN_EMAILS = [
-    'madscold@gmail.com'
+    'madscold@gmail.com',
+    'sme@educacao.batatais.sp.gov.br',
+    'admin@educacao.batatais.sp.gov.br'
 ];
 
 export function isUserAdmin(user) {
     if (!user || !user.email) return false;
-    return ADMIN_EMAILS.includes(user.email.toLowerCase().trim());
+    const email = user.email.toLowerCase().trim();
+    if (ADMIN_EMAILS.includes(email)) return true;
+    if (email.endsWith('@educacao.batatais.sp.gov.br')) return true;
+    return false;
 }
 
 // Helper para mensagens amigáveis de autenticação
