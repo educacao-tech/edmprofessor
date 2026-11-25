@@ -4111,7 +4111,7 @@
                                 const pTitle = qItem.querySelector('.question-title');
                                 if (pTitle && q.title) {
                                     const reqBadge = q.required !== false ? ' <span style="color:#e11d48">*</span>' : '';
-                                    const cleanText = q.title.replace(/^\d+\.\s*/, '');
+                                    const cleanText = (q.title || '').replace(/^(\(?q?\d+[\.\)\-:]?\s*)+/i, '').trim();
                                     pTitle.innerHTML = `<span class="q-num">${num}.</span> ${cleanText}${reqBadge}`;
                                 }
                             }

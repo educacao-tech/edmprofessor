@@ -1928,6 +1928,9 @@
                         <button type="button" class="btn btn-primary btn-sm" onclick="openNewQuestionModal()">
                             <i class="fas fa-plus"></i> Nova Questão
                         </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="handleManualRenumberQuestions()" title="Renumerar sequencialmente todas as questões de 1 a N respeitando os blocos">
+                            <i class="fas fa-arrow-down-1-9"></i> Renumerar (1 a N)
+                        </button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="exportQuestionsJson()" title="Exportar matriz completa de questões em arquivo JSON (Backup)">
                             <i class="fas fa-download"></i> Exportar JSON
                         </button>
@@ -3136,6 +3139,70 @@
             renderQuestionsManagementUI();
         };
 
+        // =========================================================================
+        // RENUMERAÇÃO UNIVERSAL AUTOMÁTICA DA MATRIZ DE QUESTÕES (1 A N)
+        // =========================================================================
+        window.renumberQuestionsMatrix = (autoSortByBlock = true) => {
+            if (!Array.isArray(currentQuestionsData) || currentQuestionsData.length === 0) return;
+
+            const BLOCOS_INFO = {
+                1: "Bloco 1 – Planejamento e Organização",
+                2: "Bloco 2 – Desenvolvimento e Práticas Pedagógicas",
+                3: "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos",
+                4: "Bloco 4 – Desafios e Necessidades",
+                5: "Bloco 5 – Autoavaliação Docente",
+                6: "Bloco 6 – Perspectivas e Propostas para 2027"
+            };
+
+            if (autoSortByBlock) {
+                // Ordenação estável primariamente por bloco pedagógico (1 a 6)
+                currentQuestionsData.sort((a, b) => {
+                    const bA = parseInt(a.bloco, 10) || 1;
+                    const bB = parseInt(b.bloco, 10) || 1;
+                    return bA - bB;
+                });
+            }
+
+            // Renumera de 1 a N sequencialmente, atualizando num, key, blocoTitle e title
+            currentQuestionsData.forEach((q, index) => {
+                const newNum = index + 1;
+                q.num = newNum;
+                q.key = `q${newNum}`;
+                const b = parseInt(q.bloco, 10) || 1;
+                q.bloco = b;
+                q.blocoTitle = BLOCOS_INFO[b] || `Bloco ${b}`;
+
+                if (q.title && typeof q.title === 'string') {
+                    // Remove prefixos numéricos existentes (ex: "1. ", "q1 - ", "28)", "(3) ")
+                    const cleanTitle = q.title.replace(/^(\(?q?\d+[\.\)\-:]?\s*)+/i, '').trim();
+                    q.title = `${newNum}. ${cleanTitle}`;
+                }
+            });
+        };
+
+        // Ação Manual: Renumerar toda a matriz sequencialmente de 1 a N
+        window.handleManualRenumberQuestions = async () => {
+            if (!Array.isArray(currentQuestionsData) || currentQuestionsData.length === 0) {
+                alert("Nenhuma questão carregada na matriz para renumerar.");
+                return;
+            }
+
+            if (!confirm(`Deseja renumerar sequencialmente todas as ${currentQuestionsData.length} questões (1 a ${currentQuestionsData.length}) respeitando os blocos pedagógicos?\n\nTodos os códigos (q1, q2...) e os enunciados serão padronizados e salvos na nuvem.`)) {
+                return;
+            }
+
+            renumberQuestionsMatrix(true);
+
+            try {
+                await saveQuestionsMatrixToFirestore();
+                renderQuestionsManagementUI();
+                alert(`Sucesso! Todas as ${currentQuestionsData.length} questões foram renumeradas de 1 a ${currentQuestionsData.length}.`);
+            } catch (err) {
+                console.error("Erro ao renumerar:", err);
+                alert("Erro ao salvar renumeração no Firestore: " + err.message);
+            }
+        };
+
         // Modal: Abrir para Nova Questão
         window.openNewQuestionModal = () => {
             const modal = document.getElementById('modalQuestionEdit');
@@ -3146,17 +3213,18 @@
             if (titleEl) titleEl.innerHTML = `<i class="fas fa-plus-circle text-primary"></i> Adicionar Nova Questão`;
             form.reset();
 
-            // Sugerir próxima key
-            const highestNum = currentQuestionsData.reduce((max, q) => {
-                const num = parseInt(q.key.replace(/\D/g, ''), 10);
-                return (!isNaN(num) && num > max) ? num : max;
-            }, 0);
-            const nextKey = `q${highestNum + 1}`;
+            const origKeyInput = document.getElementById('editQuestionOriginalKey');
+            if (origKeyInput) origKeyInput.value = '';
+
+            // Sugerir próxima key sequencial
+            const nextNum = currentQuestionsData.length + 1;
+            const nextKey = `q${nextNum}`;
 
             const keyInput = document.getElementById('editQuestionKey');
             if (keyInput) {
                 keyInput.value = nextKey;
-                keyInput.readOnly = false;
+                keyInput.readOnly = true;
+                keyInput.title = "O código será ajustado automaticamente na renumeração";
             }
             const blocoSelect = document.getElementById('editQuestionBloco') || document.getElementById('editQuestionBlock');
             if (blocoSelect) blocoSelect.value = "1";
@@ -3202,6 +3270,9 @@
             if (titleEl) {
                 titleEl.innerHTML = `<i class="fas fa-sliders text-primary"></i> Editar Questão (${escapeHtml(q.key.toUpperCase())})`;
             }
+
+            const origKeyInput = document.getElementById('editQuestionOriginalKey');
+            if (origKeyInput) origKeyInput.value = q.key;
 
             const keyInput = document.getElementById('editQuestionKey');
             if (keyInput) {
@@ -3306,9 +3377,12 @@
             }
         };
 
-        // Salvar Questão (Novo ou Edição)
+        // Salvar Questão (Novo ou Edição) com Renumeração Automática
         window.handleSaveQuestionForm = async (e) => {
             if (e && e.preventDefault) e.preventDefault();
+
+            const origKeyInput = document.getElementById('editQuestionOriginalKey');
+            const origKey = origKeyInput ? origKeyInput.value.trim() : '';
 
             const keyInput = document.getElementById('editQuestionKey');
             const blocoSelect = document.getElementById('editQuestionBloco') || document.getElementById('editQuestionBlock');
@@ -3322,8 +3396,8 @@
             const type = typeSelect ? typeSelect.value : 'radio';
             const required = reqSelect ? (reqSelect.value === 'true') : true;
 
-            if (!key || !title) {
-                alert("Por favor, preencha a chave e o enunciado da questão.");
+            if (!title) {
+                alert("Por favor, preencha o enunciado da questão.");
                 return;
             }
 
@@ -3356,9 +3430,13 @@
                 btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Salvando na nuvem...`;
             }
 
-            const existingIdx = currentQuestionsData.findIndex(item => item.key === key);
+            const existingIdx = origKey 
+                ? currentQuestionsData.findIndex(item => (item.key || '').toLowerCase().trim() === origKey.toLowerCase())
+                : currentQuestionsData.findIndex(item => (item.key || '').toLowerCase().trim() === key.toLowerCase());
+
             const questionData = {
-                key,
+                key: key || `q${currentQuestionsData.length + 1}`,
+                num: existingIdx !== -1 ? (currentQuestionsData[existingIdx].num || (existingIdx + 1)) : (currentQuestionsData.length + 1),
                 bloco,
                 blocoTitle: BLOCOS_INFO[bloco] || `Bloco ${bloco}`,
                 title,
@@ -3368,16 +3446,32 @@
             };
 
             if (existingIdx !== -1) {
+                // Atualização de questão existente
                 currentQuestionsData[existingIdx] = questionData;
             } else {
-                currentQuestionsData.push(questionData);
+                // Inclusão de nova questão: posicionar no final do bloco escolhido
+                let insertIdx = -1;
+                for (let i = currentQuestionsData.length - 1; i >= 0; i--) {
+                    if ((currentQuestionsData[i].bloco || 1) === bloco) {
+                        insertIdx = i + 1;
+                        break;
+                    }
+                }
+                if (insertIdx === -1) {
+                    insertIdx = currentQuestionsData.findIndex(item => (item.bloco || 1) > bloco);
+                    if (insertIdx === -1) insertIdx = currentQuestionsData.length;
+                }
+                currentQuestionsData.splice(insertIdx, 0, questionData);
             }
+
+            // Renumera automaticamente toda a matriz sequencialmente (1 a N)
+            renumberQuestionsMatrix(true);
 
             try {
                 await saveQuestionsMatrixToFirestore();
                 closeQuestionModal();
                 renderQuestionsManagementUI();
-                alert(`Questão ${key.toUpperCase()} salva com sucesso no Firestore!`);
+                alert(`Questão salva com sucesso! Matriz automaticamente renumerada (1 a ${currentQuestionsData.length}).`);
             } catch (err) {
                 console.error("Erro ao salvar questão:", err);
                 alert("Erro ao salvar no Firestore: " + err.message);
@@ -3389,42 +3483,53 @@
             }
         };
 
-        // Duplicar Questão
+        // Duplicar Questão com Renumeração Automática
         window.duplicateQuestion = async (qKey) => {
-            const q = currentQuestionsData.find(item => item.key === qKey);
-            if (!q) return;
+            const cleanKey = (qKey || '').toLowerCase().trim();
+            const qIdx = currentQuestionsData.findIndex(item => (item.key || '').toLowerCase().trim() === cleanKey);
+            if (qIdx === -1) return;
 
-            const highestNum = currentQuestionsData.reduce((max, item) => {
-                const num = parseInt(item.key.replace(/\D/g, ''), 10);
-                return (!isNaN(num) && num > max) ? num : max;
-            }, 0);
-            const newKey = `q${highestNum + 1}`;
-
+            const q = currentQuestionsData[qIdx];
             const cloned = JSON.parse(JSON.stringify(q));
-            cloned.key = newKey;
-            cloned.title = cloned.title + " (Cópia)";
+            
+            // Limpa prefixo numérico do título da cópia
+            const cleanTitle = (cloned.title || '').replace(/^(\(?q?\d+[\.\)\-:]?\s*)+/i, '').trim();
+            cloned.title = cleanTitle + " (Cópia)";
 
-            currentQuestionsData.push(cloned);
+            // Insere imediatamente após a questão original
+            currentQuestionsData.splice(qIdx + 1, 0, cloned);
+
+            // Renumera automaticamente toda a matriz
+            renumberQuestionsMatrix(false);
+
             try {
                 await saveQuestionsMatrixToFirestore();
                 renderQuestionsManagementUI();
-                alert(`Questão duplicada com sucesso como ${newKey.toUpperCase()}!`);
+                alert(`Questão duplicada com sucesso! A matriz foi renumerada automaticamente (1 a ${currentQuestionsData.length}).`);
             } catch (err) {
                 alert("Erro ao duplicar: " + err.message);
             }
         };
 
-        // Excluir Questão
+        // Excluir Questão com Renumeração Automática
         window.deleteQuestion = async (qKey) => {
-            if (!confirm(`Tem certeza que deseja excluir a questão ${qKey.toUpperCase()}?\n\nEsta alteração será salva na nuvem e refletida no formulário de avaliação.`)) {
+            const cleanKey = (qKey || '').toLowerCase().trim();
+            const targetQ = currentQuestionsData.find(item => (item.key || '').toLowerCase().trim() === cleanKey);
+            const label = targetQ ? `${targetQ.key.toUpperCase()} ("${(targetQ.title || '').slice(0, 35)}...")` : qKey.toUpperCase();
+
+            if (!confirm(`Tem certeza que deseja excluir a questão ${label}?\n\nTodas as questões restantes serão renumeradas automaticamente de 1 a ${currentQuestionsData.length - 1} e salvas na nuvem.`)) {
                 return;
             }
 
-            currentQuestionsData = currentQuestionsData.filter(item => item.key !== qKey);
+            currentQuestionsData = currentQuestionsData.filter(item => (item.key || '').toLowerCase().trim() !== cleanKey);
+
+            // Renumera automaticamente 1..N preservando a ordem dos blocos
+            renumberQuestionsMatrix(false);
+
             try {
                 await saveQuestionsMatrixToFirestore();
                 renderQuestionsManagementUI();
-                alert(`Questão ${qKey.toUpperCase()} excluída com sucesso!`);
+                alert(`Questão excluída com sucesso! A matriz foi renumerada automaticamente (1 a ${currentQuestionsData.length}).`);
             } catch (err) {
                 alert("Erro ao excluir: " + err.message);
             }
@@ -3446,7 +3551,7 @@
             }
         }
 
-        // Reordenação Rápida de Questões (Subir / Descer)
+        // Reordenação Rápida de Questões (Subir / Descer) com Renumeração Automática
         window.moveQuestion = async (qKey, direction) => {
             const cleanKey = (qKey || '').toLowerCase().trim();
             const qIdx = currentQuestionsData.findIndex(item => (item.key || '').toLowerCase().trim() === cleanKey);
@@ -3467,6 +3572,9 @@
             // Troca de posição
             currentQuestionsData[qIdx] = swapTarget;
             currentQuestionsData[swapTargetGlobalIdx] = q;
+
+            // Renumera automaticamente para refletir a nova ordem visual
+            renumberQuestionsMatrix(false);
 
             try {
                 await saveQuestionsMatrixToFirestore();
@@ -3542,9 +3650,10 @@
                     }
 
                     currentQuestionsData = items;
+                    renumberQuestionsMatrix(true);
                     await saveQuestionsMatrixToFirestore();
                     renderQuestionsManagementUI();
-                    alert(`Matriz importada com sucesso (${items.length} questões)!`);
+                    alert(`Matriz importada com sucesso (${items.length} questões) e automaticamente renumerada!`);
                 } catch (err) {
                     console.error("Erro na importação JSON:", err);
                     alert("Falha ao importar JSON: " + err.message);
@@ -3595,6 +3704,7 @@
             }
 
             currentQuestionsData = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS_DATA));
+            renumberQuestionsMatrix(true);
             try {
                 await saveQuestionsMatrixToFirestore();
                 renderQuestionsManagementUI();
