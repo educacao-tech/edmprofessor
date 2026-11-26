@@ -69,8 +69,17 @@ def main():
     print(f"  - Mensagem: {commit_msg}")
 
     root_dir = Path(__file__).parent
-    update_html_footer(root_dir / 'index.html', commit_hash, commit_date, commit_msg)
-    update_html_footer(root_dir / 'public' / 'index.html', commit_hash, commit_date, commit_msg)
+    files_to_update = [
+        root_dir / 'index.html',
+        root_dir / 'public' / 'index.html',
+        root_dir / 'respostas_avaliacao.html',
+        root_dir / 'public' / 'respostas_avaliacao.html',
+        root_dir / 'avaliacao.html',
+        root_dir / 'public' / 'avaliacao.html'
+    ]
+    for f in files_to_update:
+        if f.exists():
+            update_html_footer(f, commit_hash, commit_date, commit_msg)
 
 if __name__ == '__main__':
     main()

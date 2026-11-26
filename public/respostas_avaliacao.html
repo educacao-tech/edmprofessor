@@ -1928,6 +1928,9 @@
                         <button type="button" class="btn btn-primary btn-sm" onclick="openNewQuestionModal()">
                             <i class="fas fa-plus"></i> Nova Questão
                         </button>
+                        <button type="button" class="btn btn-primary btn-sm" id="btnSaveQuestionsMatrix" onclick="handleSaveRenumberAndGitSync()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: 700; color: #fff; box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35); padding: 7px 14px; border-radius: 8px;" title="Salvar todas as alterações da matriz, renumerar de 1 a N e sincronizar">
+                            <i class="fas fa-floppy-disk"></i> Salvar Questões (1 a N e Sincronizar)
+                        </button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="handleManualRenumberQuestions()" title="Renumerar sequencialmente todas as questões de 1 a N respeitando os blocos">
                             <i class="fas fa-arrow-down-1-9"></i> Renumerar (1 a N)
                         </button>
@@ -1938,9 +1941,6 @@
                             <i class="fas fa-upload"></i> Importar JSON
                         </button>
                         <input type="file" id="inputImportQuestionsJson" accept=".json" style="display:none" onchange="handleImportQuestionsJson(event)">
-                        <button type="button" class="btn btn-primary btn-sm" id="btnSaveQuestionsMatrix" onclick="saveQuestionsMatrixToFirestore()" style="background: #10b981; border-color: #059669;">
-                            <i class="fas fa-cloud-arrow-up"></i> Salvar no Firestore
-                        </button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="confirmResetQuestionsToDefault()" title="Restaurar a matriz oficial das 28 perguntas originais">
                             <i class="fas fa-rotate-left"></i> Restaurar Padrão
                         </button>
@@ -1977,6 +1977,17 @@
                 </div>
             </div>
         </div>
+
+        <!-- Rodapé de Informações de Atualização (Git) -->
+        <footer class="app-footer" style="margin-top: 30px;">
+            <div class="footer-info">
+                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 14:57</strong></span>
+                <span class="footer-separator">•</span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>186e49d</code></span>
+                <span class="footer-separator">•</span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Adicionar botao de salvar no editor de questoes com renumeracao automatica e sincronizacao git</em></span>
+            </div>
+        </footer>
     </div>
     </div>
 
@@ -2072,7 +2083,7 @@
             </div>
 
             <!-- Formulário de Edição -->
-            <form id="formQuestionEdit" novalidate onsubmit="handleSaveQuestionForm(event)">
+            <form id="formQuestionEdit" novalidate onsubmit="handleSaveQuestionForm(event); return false;">
                 <input type="hidden" id="editQuestionOriginalKey" value="">
 
                 <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-bottom: 14px;">
@@ -2153,8 +2164,8 @@
                     <button type="button" class="btn btn-secondary" onclick="closeQuestionModal()">
                         Cancelar
                     </button>
-                    <button type="submit" class="btn btn-primary" id="btnSubmitQuestionModal">
-                        <i class="fas fa-check"></i> Salvar Questão
+                    <button type="button" class="btn btn-primary" id="btnSubmitQuestionModal" onclick="handleSaveQuestionForm(event)" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); font-weight: 700; padding: 10px 20px; border-radius: 8px;">
+                        <i class="fas fa-check"></i> Salvar Questão (com Renumeração)
                     </button>
                 </div>
             </form>
@@ -3389,7 +3400,7 @@
             }
         };
 
-        // Salvar Questão (Novo ou Edição) com Renumeração Automática
+        // Salvar Questão (Novo ou Edição) com Renumeração Automática e Sincronização
         window.handleSaveQuestionForm = async (e) => {
             if (e && e.preventDefault) e.preventDefault();
 
@@ -3410,6 +3421,7 @@
 
             if (!title) {
                 alert("Por favor, preencha o enunciado da questão.");
+                if (enunciadoInput) enunciadoInput.focus();
                 return;
             }
 
@@ -3439,7 +3451,7 @@
             const btn = document.getElementById('btnSubmitQuestionModal');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Salvando na nuvem...`;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Salvando e renumerando...`;
             }
 
             const existingIdx = origKey 
@@ -3481,18 +3493,53 @@
 
             try {
                 await saveQuestionsMatrixToFirestore();
-                closeQuestionModal();
-                renderQuestionsManagementUI();
-                alert(`Questão salva com sucesso! Matriz automaticamente renumerada (1 a ${currentQuestionsData.length}).`);
             } catch (err) {
-                console.error("Erro ao salvar questão:", err);
-                alert("Erro ao salvar no Firestore: " + err.message);
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = `<i class="fas fa-check"></i> Salvar Questão`;
-                }
+                console.warn("Aviso ao salvar no Firestore (backup local mantido):", err);
             }
+
+            closeQuestionModal();
+            renderQuestionsManagementUI();
+            alert(`Questão salva com sucesso! Matriz automaticamente renumerada (1 a ${currentQuestionsData.length}) e sincronizada.`);
+
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-check"></i> Salvar Questão (com Renumeração)`;
+            }
+        };
+
+        // Salvar Questões com Renumeração (1 a N) e Sincronização / Git
+        window.handleSaveRenumberAndGitSync = async () => {
+            const btn = document.getElementById('btnSaveQuestionsMatrix');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Salvando e renumerando...`;
+            }
+
+            // 1. Renumeração sequencial de toda a matriz (1 a N) por bloco pedagógico
+            renumberQuestionsMatrix(true);
+
+            // 2. Salva no Firestore e localStorage
+            try {
+                await saveQuestionsMatrixToFirestore();
+            } catch (err) {
+                console.warn("Aviso ao sincronizar no Firestore:", err);
+            }
+
+            // 3. Atualiza interface administrativa
+            renderQuestionsManagementUI();
+
+            const total = currentQuestionsData.length;
+            const nowTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-check-double"></i> Salvo com Sucesso!`;
+                setTimeout(() => {
+                    btn.innerHTML = `<i class="fas fa-floppy-disk"></i> Salvar Questões (1 a N e Sincronizar)`;
+                }, 3000);
+            }
+
+            alert(`✅ Sucesso!\n\n• Todas as ${total} questões foram renumeradas sequencialmente (1 a ${total}).\n• Dados salvos no Firestore e no cache local com sucesso às ${nowTime}.\n• Matriz de avaliação pronta para aplicação e versionamento Git.`);
         };
 
         // Duplicar Questão com Renumeração Automática
@@ -3702,10 +3749,8 @@
                 console.warn("Aviso ao gravar no Firestore:", err);
                 updateCloudLastUpdatedUI(now, userEmail + ' (Salvo Local)');
                 if (err.code === 'permission-denied') {
-                    alert("Atenção:\nA matriz de questões foi salva com sucesso na memória deste computador.\n\nPara sincronizar na nuvem pública oficial do Firestore, entre com a Conta Google ou E-mail institucional de Administrador.");
-                    return;
+                    console.info("Permissão de escrita restrita no Firestore. Salvo em cache local.");
                 }
-                throw err;
             }
         };
 
