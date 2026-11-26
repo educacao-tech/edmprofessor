@@ -4047,11 +4047,11 @@
         <!-- Rodapé de Informações de Atualização (Git) -->
         <footer class="app-footer" style="margin-top: 30px;">
             <div class="footer-info">
-                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 16:28</strong></span>
+                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 17:17</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>a4bdfc2</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>6d75636</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Adicionar opcao de reiniciar avaliacoes iniciadas e nao terminadas exclusiva para admin</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Renderizar questoes dinamicas rigorosamente dentro do container de cada bloco correspondente</em></span>
             </div>
         </footer>
     </div>
@@ -4554,9 +4554,9 @@
                 const reqAttr = q.required !== false ? 'required' : '';
                 let contentHtml = `<p class="question-title"><span class="q-num">${num}.</span> ${cleanText}${reqBadge}</p>`;
 
-                if (q.type === 'text' || q.type === 'conditional_text') {
+                if (q.type === 'text') {
                     contentHtml += `
-                        <textarea class="eval-textarea" maxlength="250" name="${q.key}" rows="4" placeholder="Descreva aqui sua resposta..." ${q.type === 'text' && reqAttr ? 'required' : ''}></textarea>
+                        <textarea class="eval-textarea" maxlength="250" name="${q.key}" rows="4" placeholder="Descreva aqui sua resposta..." ${reqAttr}></textarea>
                         <div class="char-counter" data-for="${q.key}">
                             <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
                             <div class="char-counter-row">
@@ -4581,6 +4581,25 @@
                 }
                 return contentHtml;
             }
+
+            // Preserva respostas já preenchidas pelo usuário
+            const currentDraftValues = {};
+            try {
+                const form = document.getElementById('evaluationForm');
+                if (form) {
+                    form.querySelectorAll('input, textarea, select').forEach(inp => {
+                        if (!inp.name) return;
+                        if (inp.type === 'radio') {
+                            if (inp.checked) currentDraftValues[inp.name] = inp.value;
+                        } else if (inp.type === 'checkbox') {
+                            if (!currentDraftValues[inp.name]) currentDraftValues[inp.name] = [];
+                            if (inp.checked) currentDraftValues[inp.name].push(inp.value);
+                        } else {
+                            if (inp.value) currentDraftValues[inp.name] = inp.value;
+                        }
+                    });
+                }
+            } catch(e) {}
 
             // Atualiza ALL_QUESTION_KEYS dinamicamente para corresponder à matriz carregada
             if (typeof ALL_QUESTION_KEYS !== 'undefined' && Array.isArray(ALL_QUESTION_KEYS)) {
@@ -4608,43 +4627,85 @@
                 }
             }
 
-            customItems.forEach(q => {
-                if (!q || !q.key) return;
-                const num = q.num || q.key.replace(/\D/g, '');
-                const cleanText = (q.title || '').replace(/^(\(?q?\d+[\.\)\-:]?\s*)+/i, '').trim();
-                const reqBadge = q.required !== false ? ' <span style="color:#e11d48">*</span>' : '';
-                const qInput = document.querySelector(`[name="${q.key}"]`) || document.getElementById(`${q.key}-container`);
+            // Renderiza as questões rigorosamente dentro do container de cada bloco (step-pane-1 a 6)
+            for (let b = 1; b <= 6; b++) {
+                const targetPane = document.getElementById(`step-pane-${b}`);
+                if (!targetPane) continue;
+                const blockWrap = targetPane.querySelector('.eval-block');
+                if (!blockWrap) continue;
 
-                if (qInput) {
-                    const qItem = qInput.closest('.question-item, .q28-conditional-box');
-                    if (qItem) {
-                        if (q.key === 'q28' || qItem.classList.contains('q28-conditional-box')) {
-                            const pTitle = qItem.querySelector('.question-title');
-                            if (pTitle) pTitle.innerHTML = `<span class="q-num">${num}.</span> ${cleanText}`;
+                const blockQuestions = customItems.filter(item => (parseInt(item.bloco, 10) || 1) === b);
+
+                // Remove as question-items estáticas/antigas deste bloco
+                blockWrap.querySelectorAll('.question-item, .dynamic-question-item, .q28-conditional-box').forEach(el => el.remove());
+
+                // Insere as perguntas do bloco na ordem exata da matriz configurada
+                blockQuestions.forEach(q => {
+                    if (!q || !q.key) return;
+                    const num = q.num || q.key.replace(/\D/g, '');
+                    const cleanText = (q.title || '').replace(/^(\(?[\?q]?\d+[\.\)\-:]?\s*)+/i, '').trim();
+                    const reqBadge = q.required !== false ? ' <span style="color:#e11d48">*</span>' : '';
+
+                    const qDiv = document.createElement('div');
+                    qDiv.className = 'question-item dynamic-question-item';
+                    qDiv.setAttribute('data-qkey', q.key);
+
+                    if (q.key === 'q28' || q.type === 'conditional_text') {
+                        qDiv.id = 'q28-container';
+                        qDiv.className = 'question-item dynamic-question-item q28-conditional-box';
+                        qDiv.style.display = 'none';
+                        qDiv.innerHTML = `
+                            <p class="question-title" style="margin-bottom:8px;"><span class="q-num">${num}.</span> ${cleanText}</p>
+                            <textarea class="eval-textarea" maxlength="250" name="${q.key}" id="q28-textarea" rows="4" placeholder="Compartilhe seu motivo para podermos compreender melhor e aprimorar o suporte..."></textarea>
+                            <div class="char-counter" data-for="${q.key}">
+                                <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                                <div class="char-counter-row">
+                                    <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                                    <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span></span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        qDiv.innerHTML = buildQuestionItemContent(q, num, cleanText, reqBadge);
+                    }
+                    blockWrap.appendChild(qDiv);
+                });
+            }
+
+            // Restaura respostas anteriores
+            try {
+                Object.keys(currentDraftValues).forEach(k => {
+                    const val = currentDraftValues[k];
+                    if (Array.isArray(val)) {
+                        val.forEach(v => {
+                            const chk = document.querySelector(`input[name="${k}"][value="${CSS.escape(v)}"]`);
+                            if (chk) {
+                                chk.checked = true;
+                                chk.closest('.option-label')?.classList.add('checked');
+                            }
+                        });
+                    } else {
+                        const r = document.querySelector(`input[type="radio"][name="${k}"][value="${CSS.escape(val)}"]`);
+                        if (r) {
+                            r.checked = true;
+                            r.closest('.option-label')?.classList.add('checked');
                         } else {
-                            qItem.innerHTML = buildQuestionItemContent(q, num, cleanText, reqBadge);
+                            const inp = document.querySelector(`textarea[name="${k}"], input[name="${k}"]`);
+                            if (inp) inp.value = val;
                         }
                     }
-                } else {
-                    // Questão nova injetada dinamicamente no bloco correspondente
-                    const blocoNum = parseInt(q.bloco, 10) || 1;
-                    const targetPane = document.getElementById(`step-pane-${blocoNum}`);
-                    if (targetPane) {
-                        const blockWrap = targetPane.querySelector('.eval-block');
-                        if (blockWrap) {
-                            const newDiv = document.createElement('div');
-                            newDiv.className = 'question-item dynamic-question-item';
-                            newDiv.setAttribute('data-qkey', q.key);
-                            newDiv.innerHTML = buildQuestionItemContent(q, num, cleanText, reqBadge);
-                            blockWrap.appendChild(newDiv);
-                        }
-                    }
-                }
-            });
+                });
+            } catch(e) {}
 
-            // Atualiza contadores dos textareas dinâmicos
+            // Re-executa inicializadores visuais, contadores e rascunho
+            if (typeof initOptionSentiments === 'function') {
+                initOptionSentiments();
+            }
             if (typeof initCharCounters === 'function') {
                 initCharCounters();
+            }
+            if (typeof restoreDraft === 'function') {
+                restoreDraft();
             }
             if (typeof updateProgressUI === 'function') {
                 updateProgressUI();
@@ -4652,9 +4713,14 @@
             if (typeof updateStepperMiniCounts === 'function') {
                 updateStepperMiniCounts();
             }
+
+            // Sincroniza estado da Q28 condicional se Q27 já estiver marcada
+            const q27Val = document.querySelector('input[name="q27"]:checked')?.value || '';
+            if (q27Val && typeof window.handleQ27Change === 'function') {
+                window.handleQ27Change(q27Val);
+            }
         }
 
-        // Localiza professor na base de dados por e-mail ou nome
         function findTeacherInCache(email, nome) {
             const cleanEmail = (email || '').toLowerCase().trim();
             const cleanNome = normalizeStr(nome);
@@ -5311,7 +5377,8 @@
 
         function getTotalApplicableQuestions() {
             const q27Val = document.querySelector('input[name="q27"]:checked')?.value || '';
-            return (q27Val.includes('Não') || q27Val.includes('dúvida')) ? 28 : 27;
+            const needsQ28 = (q27Val.includes('Não') || q27Val.includes('dúvida'));
+            return ALL_QUESTION_KEYS.filter(q => q.key !== 'q28' || needsQ28).length;
         }
 
         // Atualiza a Barra de Progresso Visual
@@ -5328,7 +5395,9 @@
                 }
 
                 if (q.key === 'q28') {
-                    if (totalQuestions === 28 && isAnswered) {
+                    const q27ValCur = document.querySelector('input[name="q27"]:checked')?.value || '';
+                    const needsQ28Cur = (q27ValCur.includes('Não') || q27ValCur.includes('dúvida'));
+                    if (needsQ28Cur && isAnswered) {
                         answeredCount++;
                     }
                     return;
@@ -5506,6 +5575,7 @@
             for (let qKey of stepDef.questions) {
                 const q = ALL_QUESTION_KEYS.find(item => item.key === qKey);
                 if (!q) continue;
+                if (q.required === false && q.key !== 'q28') continue;
 
                 if (q.key === 'q28') {
                     const q27Val = document.querySelector('input[name="q27"]:checked')?.value || '';
@@ -6467,27 +6537,29 @@
         };
 
         // Estilização interativa das opções (checked visual)
-        document.querySelectorAll('.option-label input').forEach(input => {
-            input.addEventListener('change', () => {
-                if (input.type === 'radio') {
-                    document.querySelectorAll(`input[name="${input.name}"]`).forEach(r => {
-                        r.closest('.option-label')?.classList.toggle('checked', r.checked);
-                    });
-                } else {
-                    input.closest('.option-label')?.classList.toggle('checked', input.checked);
-                }
-                // Remove destaque vermelho de questão respondida
-                input.closest('.question-item')?.classList.remove('unanswered-highlight');
-                saveDraft();
-                updateProgressUI();
+        document.addEventListener('change', (e) => {
+            const input = e.target && e.target.closest ? e.target.closest('.option-label input') : null;
+            if (!input) return;
 
-                // Dispara Auto-Scroll apenas para escolha única (rádios marcados)
-                if (input.type === 'radio' && input.checked) {
-                    const currentItem = input.closest('.question-item');
-                    const currentPane = input.closest('.eval-step-pane');
-                    triggerAutoScroll(currentItem, currentPane);
-                }
-            });
+            if (input.type === 'radio') {
+                document.querySelectorAll(`input[name="${input.name}"]`).forEach(r => {
+                    r.closest('.option-label')?.classList.toggle('checked', r.checked);
+                });
+            } else {
+                input.closest('.option-label')?.classList.toggle('checked', input.checked);
+            }
+            // Remove destaque vermelho de questão respondida
+            input.closest('.question-item')?.classList.remove('unanswered-highlight');
+            if (typeof saveDraft === 'function') saveDraft();
+            if (typeof updateProgressUI === 'function') updateProgressUI();
+            if (typeof updateStepperMiniCounts === 'function') updateStepperMiniCounts();
+
+            // Dispara Auto-Scroll apenas para escolha única (rádios marcados)
+            if (input.type === 'radio' && input.checked) {
+                const currentItem = input.closest('.question-item');
+                const currentPane = input.closest('.eval-step-pane');
+                if (typeof triggerAutoScroll === 'function') triggerAutoScroll(currentItem, currentPane);
+            }
         });
 
         // Controle da Pergunta 28 condicional
