@@ -4033,11 +4033,11 @@
         <!-- Rodapé de Informações de Atualização (Git) -->
         <footer class="app-footer" style="margin-top: 30px;">
             <div class="footer-info">
-                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 15:42</strong></span>
+                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 15:57</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>6ad0fb2</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>d6a2ac0</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Sincronizar questoes dinamicas com fallback local e cache busting v20261126</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Corrigir renderizacao dinamica de questoes dissertativas vs opcoes e delegacao de eventos</em></span>
             </div>
         </footer>
     </div>
@@ -4536,6 +4536,64 @@
 
             if (!customItems || !Array.isArray(customItems) || customItems.length === 0) return;
 
+            function buildQuestionItemContent(q, num, cleanText, reqBadge) {
+                const reqAttr = q.required !== false ? 'required' : '';
+                let contentHtml = `<p class="question-title"><span class="q-num">${num}.</span> ${cleanText}${reqBadge}</p>`;
+
+                if (q.type === 'text' || q.type === 'conditional_text') {
+                    contentHtml += `
+                        <textarea class="eval-textarea" maxlength="250" name="${q.key}" rows="4" placeholder="Descreva aqui sua resposta..." ${q.type === 'text' && reqAttr ? 'required' : ''}></textarea>
+                        <div class="char-counter" data-for="${q.key}">
+                            <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                            <div class="char-counter-row">
+                                <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                                <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span></span>
+                            </div>
+                        </div>
+                    `;
+                } else if (q.type === 'checkbox') {
+                    const opts = Array.isArray(q.options) && q.options.length > 0 ? q.options : ['Sim', 'Não'];
+                    contentHtml += `<div class="options-list">` + opts.map(opt => `
+                        <label class="option-label"><input type="checkbox" name="${q.key}" value="${escapeHtml(opt)}"> ${escapeHtml(opt)}</label>
+                    `).join('') + `</div>`;
+                } else {
+                    // radio (padrão)
+                    const opts = Array.isArray(q.options) && q.options.length > 0 ? q.options : ['Excelente', 'Bom', 'Regular', 'Precisa melhorar'];
+                    const gridClass = opts.length <= 4 ? 'options-grid' : 'options-list';
+                    const isQ27 = q.key === 'q27';
+                    contentHtml += `<div class="${gridClass}">` + opts.map(opt => `
+                        <label class="option-label"><input type="radio" name="${q.key}" value="${escapeHtml(opt)}" ${reqAttr} ${isQ27 ? 'onchange="handleQ27Change(this.value)"' : ''}> ${escapeHtml(opt)}</label>
+                    `).join('') + `</div>`;
+                }
+                return contentHtml;
+            }
+
+            // Atualiza ALL_QUESTION_KEYS dinamicamente para corresponder à matriz carregada
+            if (typeof ALL_QUESTION_KEYS !== 'undefined' && Array.isArray(ALL_QUESTION_KEYS)) {
+                ALL_QUESTION_KEYS.length = 0;
+                customItems.forEach(q => {
+                    if (q && q.key) {
+                        ALL_QUESTION_KEYS.push({
+                            key: q.key,
+                            type: q.type || 'radio',
+                            label: `Questão ${q.num || q.key.replace(/\D/g, '')}`,
+                            required: q.required !== false
+                        });
+                    }
+                });
+            }
+
+            // Atualiza STEP_DEFINITIONS dinamicamente por bloco
+            if (typeof STEP_DEFINITIONS !== 'undefined' && Array.isArray(STEP_DEFINITIONS)) {
+                for (let b = 1; b <= 6; b++) {
+                    if (STEP_DEFINITIONS[b]) {
+                        STEP_DEFINITIONS[b].questions = customItems
+                            .filter(item => (parseInt(item.bloco, 10) || 1) === b)
+                            .map(item => item.key);
+                    }
+                }
+            }
+
             customItems.forEach(q => {
                 if (!q || !q.key) return;
                 const num = q.num || q.key.replace(/\D/g, '');
@@ -4546,9 +4604,11 @@
                 if (qInput) {
                     const qItem = qInput.closest('.question-item, .q28-conditional-box');
                     if (qItem) {
-                        const pTitle = qItem.querySelector('.question-title');
-                        if (pTitle && q.title) {
-                            pTitle.innerHTML = `<span class="q-num">${num}.</span> ${cleanText}${reqBadge}`;
+                        if (q.key === 'q28' || qItem.classList.contains('q28-conditional-box')) {
+                            const pTitle = qItem.querySelector('.question-title');
+                            if (pTitle) pTitle.innerHTML = `<span class="q-num">${num}.</span> ${cleanText}`;
+                        } else {
+                            qItem.innerHTML = buildQuestionItemContent(q, num, cleanText, reqBadge);
                         }
                     }
                 } else {
@@ -4561,45 +4621,24 @@
                             const newDiv = document.createElement('div');
                             newDiv.className = 'question-item dynamic-question-item';
                             newDiv.setAttribute('data-qkey', q.key);
-
-                            let contentHtml = `<p class="question-title"><span class="q-num">${num}.</span> ${cleanText}${reqBadge}</p>`;
-
-                            if (q.type === 'text') {
-                                contentHtml += `
-                                    <textarea class="eval-textarea" maxlength="250" name="${q.key}" rows="4" placeholder="Digite sua resposta..." ${q.required !== false ? 'required' : ''}></textarea>
-                                    <div class="char-counter" data-for="${q.key}">
-                                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
-                                        <div class="char-counter-row">
-                                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
-                                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span></span>
-                                        </div>
-                                    </div>
-                                `;
-                            } else if (q.type === 'checkbox') {
-                                const opts = Array.isArray(q.options) && q.options.length > 0 ? q.options : ['Sim', 'Não'];
-                                contentHtml += `<div class="options-list">` + opts.map(opt => `
-                                    <label class="option-label"><input type="checkbox" name="${q.key}" value="${escapeHtml(opt)}"> ${escapeHtml(opt)}</label>
-                                `).join('') + `</div>`;
-                            } else {
-                                const opts = Array.isArray(q.options) && q.options.length > 0 ? q.options : ['Excelente', 'Bom', 'Regular', 'Precisa melhorar'];
-                                contentHtml += `<div class="options-grid">` + opts.map(opt => `
-                                    <label class="option-label"><input type="radio" name="${q.key}" value="${escapeHtml(opt)}" ${q.required !== false ? 'required' : ''}> ${escapeHtml(opt)}</label>
-                                `).join('') + `</div>`;
-                            }
-
-                            newDiv.innerHTML = contentHtml;
+                            newDiv.innerHTML = buildQuestionItemContent(q, num, cleanText, reqBadge);
                             blockWrap.appendChild(newDiv);
                         }
                     }
                 }
             });
 
-            // Atualiza contadores dos novos textareas dinâmicos se houver
+            // Atualiza contadores dos textareas dinâmicos
             if (typeof initCharCounters === 'function') {
                 initCharCounters();
             }
+            if (typeof updateProgressUI === 'function') {
+                updateProgressUI();
+            }
+            if (typeof updateStepperMiniCounts === 'function') {
+                updateStepperMiniCounts();
+            }
         }
-        loadDynamicQuestionsConfig();
 
         // Localiza professor na base de dados por e-mail ou nome
         function findTeacherInCache(email, nome) {
@@ -5225,7 +5264,7 @@
         // A PRESENÇA SÓ É REGISTRADA SE O FORMULÁRIO FOR 100% PREENCHIDO
         // ==========================================================================
 
-        const ALL_QUESTION_KEYS = [
+        let ALL_QUESTION_KEYS = [
             { key: 'q1', type: 'radio', label: 'Questão 1 (Planejamento)' },
             { key: 'q2', type: 'radio', label: 'Questão 2 (Conteúdos e Habilidades)' },
             { key: 'q3', type: 'radio', label: 'Questão 3 (Tempo de Aula)' },
@@ -5359,7 +5398,7 @@
         let currentStep = 0;
         const TOTAL_STEPS = 7;
 
-        const STEP_DEFINITIONS = [
+        let STEP_DEFINITIONS = [
             { index: 0, title: "Identificação", label: "Identificação", questions: [] },
             { index: 1, title: "Bloco 1", label: "Bloco 1", questions: ['q1', 'q2', 'q3', 'q4'] },
             { index: 2, title: "Bloco 2", label: "Bloco 2", questions: ['q5', 'q6', 'q7', 'q8'] },
@@ -5368,6 +5407,8 @@
             { index: 5, title: "Bloco 5", label: "Bloco 5", questions: ['q17', 'q18', 'q19', 'q20', 'q21', 'q22', 'q23'] },
             { index: 6, title: "Bloco 6 & Envio", label: "Bloco 6 & Envio", questions: ['q24', 'q25', 'q26', 'q27', 'q28'] }
         ];
+
+        loadDynamicQuestionsConfig();
 
         function isQuestionAnswered(qKey) {
             const q = ALL_QUESTION_KEYS.find(item => item.key === qKey);
@@ -6789,21 +6830,24 @@
             });
         });
 
-        // Salvar e atualizar progresso ao digitar em textareas / inputs / selects
-        document.querySelectorAll('#evaluationForm input, #evaluationForm textarea, #evaluationForm select').forEach(el => {
-            const handleFormChange = () => {
-                el.closest('.question-item')?.classList.remove('unanswered-highlight');
-                if (draftStatus) {
-                    draftStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-                    draftStatus.style.color = 'var(--text-secondary)';
+        // Salvar e atualizar progresso ao digitar em textareas / inputs / selects (com delegação para elementos dinâmicos)
+        const evalFormEl = document.getElementById('evaluationForm');
+        if (evalFormEl) {
+            const handleDynamicFormEvent = (e) => {
+                if (e.target && e.target.matches('input, textarea, select')) {
+                    e.target.closest('.question-item')?.classList.remove('unanswered-highlight');
+                    if (draftStatus) {
+                        draftStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                        draftStatus.style.color = 'var(--text-secondary)';
+                    }
+                    saveDraft();
+                    updateProgressUI();
+                    updateStepperUI();
                 }
-                saveDraft();
-                updateProgressUI();
-                updateStepperUI();
             };
-            el.addEventListener('input', handleFormChange);
-            el.addEventListener('change', handleFormChange);
-        });
+            evalFormEl.addEventListener('input', handleDynamicFormEvent);
+            evalFormEl.addEventListener('change', handleDynamicFormEvent);
+        }
 
         // Envio do Formulário: Salva Avaliação 2026 E Registra Presença SOMENTE se 100% preenchido
                 // ==========================================================================
