@@ -1663,6 +1663,9 @@
                     </p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="openRascunhosModal()" style="border-color: #f59e0b; color: #b45309;" title="Ver e reiniciar avaliações que foram iniciadas mas não concluídas">
+                        <i class="fas fa-rotate-left"></i> Avaliações em Andamento (<span id="iniciadasCount">0</span>)
+                    </button>
                     <button type="button" class="btn btn-primary btn-sm" onclick="printBlankEvaluationForm()" title="Imprimir formulário de avaliação oficial em branco para preenchimento manual em papel" style="box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
                         <i class="fas fa-print"></i> Imprimir Formulário em Branco
                     </button>
@@ -1981,11 +1984,11 @@
         <!-- Rodapé de Informações de Atualização (Git) -->
         <footer class="app-footer" style="margin-top: 30px;">
             <div class="footer-info">
-                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 15:57</strong></span>
+                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 16:28</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>d6a2ac0</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>a4bdfc2</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Corrigir renderizacao dinamica de questoes dissertativas vs opcoes e delegacao de eventos</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Adicionar opcao de reiniciar avaliacoes iniciadas e nao terminadas exclusiva para admin</em></span>
             </div>
         </footer>
     </div>
@@ -2256,6 +2259,13 @@
                 renderTable(allAvaliacoes);
                 renderExecutiveCharts();
                 renderQualitativeAnswers();
+
+                // Atualiza contagem de avaliações em andamento (iniciadas não concluídas)
+                try {
+                    const snapDrafts = await getDocs(collection(db, "rascunhos_avaliacoes_2026"));
+                    const iniciadasEl = document.getElementById('iniciadasCount');
+                    if (iniciadasEl) iniciadasEl.textContent = snapDrafts.size;
+                } catch (e) {}
             } catch (err) {
                 console.error("Erro ao carregar do Firestore:", err);
                 // Fallback para backup local no localStorage
@@ -2265,6 +2275,13 @@
                 renderTable(allAvaliacoes);
                 renderExecutiveCharts();
                 renderQualitativeAnswers();
+
+                // Atualiza contagem de avaliações em andamento (iniciadas não concluídas)
+                try {
+                    const snapDrafts = await getDocs(collection(db, "rascunhos_avaliacoes_2026"));
+                    const iniciadasEl = document.getElementById('iniciadasCount');
+                    if (iniciadasEl) iniciadasEl.textContent = snapDrafts.size;
+                } catch (e) {}
             }
         };
 
@@ -4974,7 +4991,170 @@
                 alert('Erro ao gerar backup JSON: ' + (err.message || err));
             }
         };
+
+        // Gestão de Rascunhos em Andamento (Iniciadas Não Concluídas) - Apenas Admin
+        window.openRascunhosModal = async () => {
+            const modal = document.getElementById('modalRascunhosAdmin');
+            if (modal) modal.style.display = 'block';
+            await window.loadRascunhosListAdmin();
+        };
+
+        window.closeRascunhosModal = () => {
+            const modal = document.getElementById('modalRascunhosAdmin');
+            if (modal) modal.style.display = 'none';
+        };
+
+        window.loadRascunhosListAdmin = async () => {
+            const container = document.getElementById('rascunhosAdminListContainer');
+            const badge = document.getElementById('rascunhosAdminCountBadge');
+            const topBadge = document.getElementById('iniciadasCount');
+            if (!container) return;
+
+            container.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Carregando avaliações iniciadas...</div>`;
+
+            try {
+                const snap = await getDocs(collection(db, "rascunhos_avaliacoes_2026"));
+                const drafts = [];
+                snap.forEach(d => {
+                    drafts.push({ docId: d.id, ...d.data() });
+                });
+
+                drafts.sort((a, b) => new Date(b._savedAt || 0) - new Date(a._savedAt || 0));
+
+                if (badge) badge.textContent = drafts.length;
+                if (topBadge) topBadge.textContent = drafts.length;
+
+                if (drafts.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #10b981; font-size: 2.4rem; margin-bottom: 12px; display: block;"></i>
+                            <h4 style="margin: 0 0 6px 0; color: var(--text-color); font-size: 1rem;">Nenhuma avaliação iniciada pendente</h4>
+                            <p style="margin: 0; font-size: 0.82rem;">Todos os docentes já concluíram suas avaliações ou ainda não começaram a preencher.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `<div style="display: flex; flex-direction: column; gap: 10px;">`;
+                drafts.forEach(item => {
+                    const nome = item.professor || item['eval-professor'] || 'Docente Não Identificado';
+                    const email = item.email || item['eval-email'] || '-';
+                    const escola = item.escola || item['eval-escola'] || item._docente?.escola || '-';
+                    const stepNum = (typeof item._currentStep === 'number') ? (item._currentStep + 1) : 1;
+                    const savedAt = item._savedAt ? new Date(item._savedAt).toLocaleString('pt-BR') : 'Data não registrada';
+
+                    html += `
+                        <div style="background: var(--zebra-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 220px;">
+                                <div style="font-weight: 700; color: var(--text-color); font-size: 0.90rem; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-user-clock text-warning"></i> ${escapeHtml(nome)}
+                                </div>
+                                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+                                    <span><i class="fas fa-envelope"></i> ${escapeHtml(email)}</span> • <span><i class="fas fa-school"></i> ${escapeHtml(escola)}</span>
+                                </div>
+                                <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px; display: flex; gap: 8px; align-items: center;">
+                                    <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #d97706; font-size: 0.70rem; padding: 2px 6px;">Etapa ${stepNum} de 7</span>
+                                    <span>Último salvamento: ${savedAt}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="reiniciarRascunhoDocenteAdmin('${item.docId}', '${escapeHtml(email)}', '${escapeHtml(nome)}')" style="font-weight: 700; font-size: 0.78rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;" title="Reiniciar avaliação deste docente">
+                                    <i class="fas fa-rotate-left"></i> Reiniciar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+            } catch (err) {
+                console.error("Erro ao carregar rascunhos:", err);
+                container.innerHTML = `<div style="text-align: center; padding: 20px; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar rascunhos: ${escapeHtml(err.message)}</div>`;
+            }
+        };
+
+        window.reiniciarRascunhoDocenteAdmin = async (docId, email, nome) => {
+            if (!confirm(`Deseja realmente reiniciar a avaliação iniciada de "${nome}" (${email})?\n\nTodas as respostas deste rascunho serão apagadas e o docente poderá iniciar a avaliação do zero.`)) {
+                return;
+            }
+
+            try {
+                await deleteDoc(doc(db, "rascunhos_avaliacoes_2026", docId));
+                alert(`Avaliação de ${nome} foi reiniciada com sucesso!`);
+                await window.loadRascunhosListAdmin();
+            } catch (err) {
+                console.error("Erro ao reiniciar rascunho:", err);
+                alert("Erro ao reiniciar avaliação: " + err.message);
+            }
+        };
+
+        window.reiniciarTodosRascunhosAdmin = async () => {
+            const snap = await getDocs(collection(db, "rascunhos_avaliacoes_2026"));
+            if (snap.empty) {
+                alert("Não há nenhuma avaliação iniciada para reiniciar.");
+                return;
+            }
+
+            if (!confirm(`⚠️ ATENÇÃO:\n\nDeseja reiniciar TODAS as ${snap.size} avaliações que estão iniciadas e não terminadas?\n\nTodos os rascunhos em andamento serão excluídos e os docentes começarão do zero.`)) {
+                return;
+            }
+
+            try {
+                const promises = [];
+                snap.forEach(d => {
+                    promises.push(deleteDoc(doc(db, "rascunhos_avaliacoes_2026", d.id)));
+                });
+                await Promise.all(promises);
+                alert(`Todas as ${snap.size} avaliações em andamento foram reiniciadas com sucesso!`);
+                await window.loadRascunhosListAdmin();
+            } catch (err) {
+                console.error("Erro ao reiniciar todos os rascunhos:", err);
+                alert("Erro ao reiniciar avaliações: " + err.message);
+            }
+        };
     </script>
+
+    <!-- Modal de Gestão de Avaliações em Andamento (Admin) -->
+    <div id="modalRascunhosAdmin" class="modal-details" style="display: none;">
+        <div class="modal-details-card" style="max-width: 720px;">
+            <div class="modal-details-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25);">
+                        <i class="fas fa-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.2rem; font-weight: 800;">Avaliações em Andamento (Iniciadas)</h2>
+                        <span style="font-size: 0.78rem; color: var(--text-secondary);">Gerencie e reinicie avaliações não finalizadas para permitir novo preenchimento</span>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeRascunhosModal()" title="Fechar" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Barra de Ações Rápidas -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 14px 0; background: var(--zebra-bg); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.84rem; font-weight: 700; color: var(--text-color);">Total em Andamento:</span>
+                    <span id="rascunhosAdminCountBadge" class="badge" style="background: #ef4444; color: #fff; font-size: 0.82rem; font-weight: 800;">0</span>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" onclick="reiniciarTodosRascunhosAdmin()" style="font-weight: 700; font-size: 0.78rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-trash-can"></i> Reiniciar Todas as Não Finalizadas
+                </button>
+            </div>
+
+            <!-- Lista de Rascunhos -->
+            <div id="rascunhosAdminListContainer" style="max-height: 380px; overflow-y: auto;">
+                <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando avaliações iniciadas...
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 18px;">
+                <button type="button" class="btn btn-secondary" onclick="closeRascunhosModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal de Detalhamento de Adesão por Escola -->
     <div id="modalSchoolAdherence" class="modal-details">

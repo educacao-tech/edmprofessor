@@ -77,6 +77,11 @@
                             <i class="fas fa-list-check"></i> Editor de Questões
                         </a>
                         <div class="dropdown-divider"></div>
+                        <button type="button" class="dropdown-item"
+                            onclick="closeAdminDropdown(); openRascunhosModal()">
+                            <i class="fas fa-rotate-left" style="color: #ef4444;"></i> Reiniciar Avaliações em Andamento
+                        </button>
+                        <div class="dropdown-divider"></div>
                         <button type="button" class="dropdown-item" id="btn-sync-emails"
                             onclick="closeAdminDropdown(); syncEmailsFromPresenca()">
                             <i class="fas fa-envelope-circle-check"></i> Sincronizar E-mails
@@ -294,7 +299,7 @@
                 <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>11/11/2026 às
                         17:24</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>d6a2ac0</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>a4bdfc2</code></span>
                 <span class="footer-separator">•</span>
                 <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação:
                     <em>Corrigir renderizacao dinamica de questoes dissertativas vs opcoes e delegacao de
@@ -681,6 +686,48 @@
 
             <div class="form-actions" style="margin-top: 18px; justify-content: flex-end;">
                 <button type="button" class="btn btn-secondary" onclick="closeEncontrosModal()">Concluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Gestão de Avaliações em Andamento (Rascunhos Iniciados Não Finalizados) -->
+    <div id="rascunhosModal" class="modal">
+        <div class="modal-content metadata-modal-content" style="max-width: 720px;">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25);">
+                        <i class="fas fa-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h2 id="rascunhosModalTitle" style="font-size: 1.15rem; font-weight: 800; margin: 0;">Avaliações em Andamento (Iniciadas)</h2>
+                        <p class="modal-subtitle" id="rascunhosModalSubtitle">Gerencie e reinicie avaliações iniciadas que ainda não foram enviadas pelos docentes</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeRascunhosModal()" title="Fechar" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Barra de Ações Rápidas do Modal -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: var(--zebra-bg); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.84rem; font-weight: 700; color: var(--text-color);">Total em Andamento:</span>
+                    <span id="rascunhosCountBadge" class="badge" style="background: #ef4444; color: #fff; font-size: 0.82rem; font-weight: 800;">0</span>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" id="btnReiniciarTodosRascunhos" onclick="reiniciarTodosRascunhos()" style="font-weight: 700; font-size: 0.78rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-trash-can"></i> Reiniciar Todas as Avaliações Não Finalizadas
+                </button>
+            </div>
+
+            <!-- Lista de Rascunhos -->
+            <div id="rascunhosListContainer" class="metadata-list-container" style="max-height: 380px; overflow-y: auto;">
+                <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando avaliações iniciadas...
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 18px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeRascunhosModal()">Concluir</button>
             </div>
         </div>
     </div>

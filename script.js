@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, doc, getDoc, addDoc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
 
@@ -2578,3 +2578,131 @@ document.getElementById('btn-clear-filters')?.addEventListener('click', () => {
         if (el) el.value = '';
     });
 });
+
+// ==========================================================================
+// GESTÃO E REINICIALIZAÇÃO DE AVALIAÇÕES INICIADAS (RASCUNHOS EM ANDAMENTO)
+// APENAS PARA ADMINISTRADORES AUTENTICADOS
+// ==========================================================================
+
+window.openRascunhosModal = async () => {
+    if (!auth.currentUser && !sessionStorage.getItem('edm_admin_authenticated') && !localStorage.getItem('edm_admin_authenticated')) {
+        window.showNotification("Acesso restrito para administradores.", "warning");
+        return;
+    }
+    const modal = document.getElementById('rascunhosModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    await window.loadRascunhosList();
+};
+
+window.closeRascunhosModal = () => {
+    const modal = document.getElementById('rascunhosModal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.loadRascunhosList = async () => {
+    const container = document.getElementById('rascunhosListContainer');
+    const badge = document.getElementById('rascunhosCountBadge');
+    if (!container) return;
+
+    container.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Carregando avaliações iniciadas...</div>`;
+
+    try {
+        const snap = await getDocs(collection(db, "rascunhos_avaliacoes_2026"));
+        const drafts = [];
+        snap.forEach(d => {
+            drafts.push({ docId: d.id, ...d.data() });
+        });
+
+        drafts.sort((a, b) => new Date(b._savedAt || 0) - new Date(a._savedAt || 0));
+
+        if (badge) badge.textContent = drafts.length;
+
+        if (drafts.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
+                    <i class="fas fa-check-circle" style="color: #10b981; font-size: 2.4rem; margin-bottom: 12px; display: block;"></i>
+                    <h4 style="margin: 0 0 6px 0; color: var(--text-color); font-size: 1rem;">Nenhuma avaliação iniciada pendente</h4>
+                    <p style="margin: 0; font-size: 0.82rem;">Todos os docentes já concluíram suas avaliações ou ainda não começaram a preencher.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = `<div style="display: flex; flex-direction: column; gap: 10px;">`;
+        drafts.forEach(item => {
+            const nome = item.professor || item['eval-professor'] || 'Docente Não Identificado';
+            const email = item.email || item['eval-email'] || '-';
+            const escola = item.escola || item['eval-escola'] || item._docente?.escola || '-';
+            const stepNum = (typeof item._currentStep === 'number') ? (item._currentStep + 1) : 1;
+            const savedAt = item._savedAt ? new Date(item._savedAt).toLocaleString('pt-BR') : 'Data não registrada';
+
+            html += `
+                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 220px;">
+                        <div style="font-weight: 700; color: var(--text-color); font-size: 0.90rem; display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-user-clock text-warning"></i> ${escapeHTML(nome)}
+                        </div>
+                        <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+                            <span><i class="fas fa-envelope"></i> ${escapeHTML(email)}</span> • <span><i class="fas fa-school"></i> ${escapeHTML(escola)}</span>
+                        </div>
+                        <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px; display: flex; gap: 8px; align-items: center;">
+                            <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #d97706; font-size: 0.70rem; padding: 2px 6px;">Etapa ${stepNum} de 7</span>
+                            <span>Último salvamento: ${savedAt}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="reiniciarRascunhoDocente('${item.docId}', '${escapeHTML(email)}', '${escapeHTML(nome)}')" style="font-weight: 700; font-size: 0.78rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;" title="Reiniciar avaliação deste docente">
+                            <i class="fas fa-rotate-left"></i> Reiniciar
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+    } catch (err) {
+        console.error("Erro ao carregar rascunhos:", err);
+        container.innerHTML = `<div style="text-align: center; padding: 20px; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar rascunhos: ${escapeHTML(err.message)}</div>`;
+    }
+};
+
+window.reiniciarRascunhoDocente = async (docId, email, nome) => {
+    if (!confirm(`Deseja realmente reiniciar a avaliação iniciada de "${nome}" (${email})?\n\nTodas as respostas deste rascunho serão apagadas e o docente poderá iniciar a avaliação do zero.`)) {
+        return;
+    }
+
+    try {
+        await deleteDoc(doc(db, "rascunhos_avaliacoes_2026", docId));
+        window.showNotification(`Avaliação de ${nome} foi reiniciada com sucesso!`, "success");
+        await window.loadRascunhosList();
+    } catch (err) {
+        console.error("Erro ao reiniciar rascunho:", err);
+        alert("Erro ao reiniciar avaliação: " + err.message);
+    }
+};
+
+window.reiniciarTodosRascunhos = async () => {
+    const snap = await getDocs(collection(db, "rascunhos_avaliacoes_2026"));
+    if (snap.empty) {
+        alert("Não há nenhuma avaliação iniciada para reiniciar.");
+        return;
+    }
+
+    if (!confirm(`⚠️ ATENÇÃO:\n\nDeseja reiniciar TODAS as ${snap.size} avaliações que estão iniciadas e não terminadas?\n\nTodos os rascunhos em andamento serão excluídos e os docentes começarão do zero.`)) {
+        return;
+    }
+
+    try {
+        const promises = [];
+        snap.forEach(d => {
+            promises.push(deleteDoc(doc(db, "rascunhos_avaliacoes_2026", d.id)));
+        });
+        await Promise.all(promises);
+        window.showNotification(`Todas as ${snap.size} avaliações em andamento foram reiniciadas!`, "success");
+        await window.loadRascunhosList();
+    } catch (err) {
+        console.error("Erro ao reiniciar todos os rascunhos:", err);
+        alert("Erro ao reiniciar avaliações: " + err.message);
+    }
+};

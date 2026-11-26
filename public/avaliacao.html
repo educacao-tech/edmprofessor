@@ -3322,6 +3322,20 @@
         <form id="evaluationForm" novalidate onsubmit="submitEvaluationForm(event)">
             <!-- ETAPA 1: IDENTIFICAÇÃO -->
             <div class="eval-step-pane active" id="step-pane-0">
+                <!-- Barra de Controle Administrativo (Exibida apenas para Administradores) -->
+                <div id="adminDraftResetBar" style="display: none; background: rgba(239, 68, 68, 0.08); border: 1.5px dashed #ef4444; border-radius: 12px; padding: 12px 18px; margin-bottom: 18px; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-shield-halved" style="color: #ef4444; font-size: 1.3rem;"></i>
+                        <div>
+                            <strong style="color: #b91c1c; font-size: 0.88rem;">Painel do Administrador:</strong>
+                            <span style="font-size: 0.80rem; color: var(--text-secondary); display: block;">Esta avaliação está em andamento (iniciada e não finalizada).</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="window.adminResetCurrentEvaluation()" style="background: #ef4444; border: none; font-weight: 700; padding: 8px 16px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; color: #fff; cursor: pointer; box-shadow: 0 2px 6px rgba(239,68,68,0.3);">
+                        <i class="fas fa-rotate-left"></i> Reiniciar esta Avaliação (Admin)
+                    </button>
+                </div>
+
                 <!-- Apresentação Institucional (Exibida apenas na primeira página com a identificação) -->
                 <div class="eval-presentation-card">
                     <h3><i class="fas fa-bullhorn"></i> Apresentação</h3>
@@ -4033,11 +4047,11 @@
         <!-- Rodapé de Informações de Atualização (Git) -->
         <footer class="app-footer" style="margin-top: 30px;">
             <div class="footer-info">
-                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 15:57</strong></span>
+                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 16:28</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>d6a2ac0</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>a4bdfc2</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Corrigir renderizacao dinamica de questoes dissertativas vs opcoes e delegacao de eventos</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Adicionar opcao de reiniciar avaliacoes iniciadas e nao terminadas exclusiva para admin</em></span>
             </div>
         </footer>
     </div>
@@ -6545,7 +6559,49 @@
             } catch (e) {
                 console.warn("Aviso ao buscar rascunho na nuvem:", e);
             }
+            checkAdminDraftControls();
         }
+
+        function checkAdminDraftControls() {
+            const isAdmin = sessionStorage.getItem('edm_admin_authenticated') === 'true' ||
+                            localStorage.getItem('edm_admin_authenticated') === 'true' ||
+                            (auth.currentUser && (
+                                auth.currentUser.email === 'madscold@gmail.com' ||
+                                auth.currentUser.email === 'sme@educacao.batatais.sp.gov.br' ||
+                                (auth.currentUser.email && auth.currentUser.email.endsWith('@educacao.batatais.sp.gov.br'))
+                            ));
+            const bar = document.getElementById('adminDraftResetBar');
+            if (bar) {
+                const hasDraft = !!localStorage.getItem(DRAFT_KEY);
+                bar.style.display = (isAdmin && hasDraft) ? 'flex' : 'none';
+            }
+        }
+
+        window.adminResetCurrentEvaluation = async () => {
+            const email = currentDocente?.email || document.getElementById('eval-email')?.value.trim();
+            const nome = currentDocente?.nome || document.getElementById('eval-professor')?.value.trim() || 'Docente';
+            if (!confirm(`Painel do Administrador:\n\nDeseja reiniciar esta avaliação em andamento de "${nome}"?\n\nTodas as respostas preenchidas deste rascunho serão apagadas e o docente poderá iniciar a avaliação do zero.`)) {
+                return;
+            }
+
+            if (email) {
+                const docId = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                try {
+                    await deleteDoc(doc(db, "rascunhos_avaliacoes_2026", docId));
+                } catch(e) {
+                    console.warn("Aviso ao excluir rascunho na nuvem:", e);
+                }
+            }
+
+            localStorage.removeItem(DRAFT_KEY);
+            sessionStorage.removeItem(DRAFT_KEY);
+
+            const form = document.getElementById('evaluationForm');
+            if (form) form.reset();
+
+            alert(`Avaliação de ${nome} foi reiniciada com sucesso! O formulário foi resetado para preenchimento do zero.`);
+            window.location.reload();
+        };
 
         function saveDraft() {
             if (document.body.classList.contains('print-blank-mode')) return;
@@ -6587,11 +6643,13 @@
                 draftStatus.style.color = '#16a34a';
             }
             queueCloudDraftSync(data);
+            checkAdminDraftControls();
         }
 
         function restoreDraft() {
             try {
                 const saved = localStorage.getItem(DRAFT_KEY);
+                checkAdminDraftControls();
                 if (!saved) return;
                 const data = JSON.parse(saved);
                 const form = document.getElementById('evaluationForm');

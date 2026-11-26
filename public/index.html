@@ -28,17 +28,15 @@
                 <span class="header-subtitle-inline">Gestão e Frequência Acadêmica</span>
             </div>
             <div class="header-actions">
-                <a href="avaliacao.html?v=20261126" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm"
-                    title="Preencher Avaliação Anual EDM 2026 (Abre em nova guia)" style="text-decoration:none;"><i
-                        class="fas fa-clipboard-check"></i> Avaliação 2026</a>
+                <a href="avaliacao.html?v=20261126" target="_blank" rel="noopener noreferrer"
+                    class="btn btn-primary btn-sm" title="Preencher Avaliação Anual EDM 2026 (Abre em nova guia)"
+                    style="text-decoration:none;"><i class="fas fa-clipboard-check"></i> Avaliação 2026</a>
                 <a href="respostas_avaliacao.html?v=20261126#questoes" target="_blank" rel="noopener noreferrer"
-                    class="btn btn-secondary btn-sm"
-                    title="Editor e Gestor de Questões da Avaliação 2026" style="text-decoration:none;"><i
-                        class="fas fa-sliders"></i> Questões</a>
+                    class="btn btn-secondary btn-sm" title="Editor e Gestor de Questões da Avaliação 2026"
+                    style="text-decoration:none;"><i class="fas fa-sliders"></i> Questões</a>
                 <a href="respostas_avaliacao.html?v=20261126" target="_blank" rel="noopener noreferrer"
-                    class="btn btn-secondary btn-sm"
-                    title="Ver Respostas da Avaliação 2026 (Painel da Coordenação)" style="text-decoration:none;"><i
-                        class="fas fa-chart-pie"></i> Respostas</a>
+                    class="btn btn-secondary btn-sm" title="Ver Respostas da Avaliação 2026 (Painel da Coordenação)"
+                    style="text-decoration:none;"><i class="fas fa-chart-pie"></i> Respostas</a>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="exportToPDF()"
                     title="Exportar para PDF"><i class="fas fa-file-pdf"></i> PDF</button>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="exportTeachersToCSV()"
@@ -49,29 +47,40 @@
                     <button type="button" class="btn btn-secondary btn-sm" id="btn-admin-dropdown"
                         onclick="toggleAdminDropdown(event)" aria-haspopup="true" aria-expanded="false"
                         title="Opções administrativas de gestão">
-                        <i class="fas fa-sliders"></i> Gerenciar <i class="fas fa-chevron-down" style="font-size:0.7rem; margin-left:2px;"></i>
+                        <i class="fas fa-sliders"></i> Gerenciar <i class="fas fa-chevron-down"
+                            style="font-size:0.7rem; margin-left:2px;"></i>
                     </button>
                     <div class="header-dropdown-menu" id="admin-dropdown-menu">
-                        <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); copyFilteredEmails()">
+                        <button type="button" class="dropdown-item"
+                            onclick="closeAdminDropdown(); copyFilteredEmails()">
                             <i class="fas fa-copy"></i> Copiar E-mails Filtrados
                         </button>
-                        <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); bulkMarkPresenceFiltered(true)">
+                        <button type="button" class="dropdown-item"
+                            onclick="closeAdminDropdown(); bulkMarkPresenceFiltered(true)">
                             <i class="fas fa-check-double"></i> Marcar Presentes (Filtrados)
                         </button>
                         <div class="dropdown-divider"></div>
-                        <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); openEncontrosModal()">
+                        <button type="button" class="dropdown-item"
+                            onclick="closeAdminDropdown(); openEncontrosModal()">
                             <i class="fas fa-calendar-check"></i> Encontros e Datas
                         </button>
-                        <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); openMetadataModal('escolas')">
+                        <button type="button" class="dropdown-item"
+                            onclick="closeAdminDropdown(); openMetadataModal('escolas')">
                             <i class="fas fa-school"></i> Gestão de Escolas
                         </button>
-                        <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); openMetadataModal('disciplinas')">
+                        <button type="button" class="dropdown-item"
+                            onclick="closeAdminDropdown(); openMetadataModal('disciplinas')">
                             <i class="fas fa-book-open"></i> Gestão de Disciplinas
                         </button>
                         <a href="respostas_avaliacao.html?v=20261126#questoes" target="_blank" rel="noopener noreferrer"
                             class="dropdown-item" onclick="closeAdminDropdown()">
                             <i class="fas fa-list-check"></i> Editor de Questões
                         </a>
+                        <div class="dropdown-divider"></div>
+                        <button type="button" class="dropdown-item"
+                            onclick="closeAdminDropdown(); openRascunhosModal()">
+                            <i class="fas fa-rotate-left" style="color: #ef4444;"></i> Reiniciar Avaliações em Andamento
+                        </button>
                         <div class="dropdown-divider"></div>
                         <button type="button" class="dropdown-item" id="btn-sync-emails"
                             onclick="closeAdminDropdown(); syncEmailsFromPresenca()">
@@ -183,7 +192,8 @@
                     <select id="select-encontro-ativo" onchange="handleEncontroChange(this.value)">
                         <option value="">Carregando...</option>
                     </select>
-                    <button type="button" class="btn-clear" onclick="openEncontrosModal()" title="Adicionar / Gerenciar Encontros">
+                    <button type="button" class="btn-clear" onclick="openEncontrosModal()"
+                        title="Adicionar / Gerenciar Encontros">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -200,28 +210,33 @@
                 <span id="results-count" style="display: none;">Carregando dados...</span>
                 <span id="kpi-avaliacoes-pill" style="display: none;"></span>
                 <div class="kpi-quick-strip" id="kpi-quick-strip">
-                    <button type="button" class="kpi-mini-card" id="kpi-card-total" onclick="applyKpiQuickFilter('all')" title="Mostrar todos os professores">
+                    <button type="button" class="kpi-mini-card" id="kpi-card-total" onclick="applyKpiQuickFilter('all')"
+                        title="Mostrar todos os professores">
                         <span class="kpi-mini-icon kpi-blue"><i class="fas fa-users"></i></span>
                         <span class="kpi-mini-body">
                             <span class="kpi-mini-label">Docentes</span>
                             <strong class="kpi-mini-value" id="kpi-total-profs">--</strong>
                         </span>
                     </button>
-                    <button type="button" class="kpi-mini-card admin-only" id="kpi-card-presenca" onclick="applyKpiQuickFilter('all')" title="Presença no encontro ativo">
+                    <button type="button" class="kpi-mini-card admin-only" id="kpi-card-presenca"
+                        onclick="applyKpiQuickFilter('all')" title="Presença no encontro ativo">
                         <span class="kpi-mini-icon kpi-emerald"><i class="fas fa-user-check"></i></span>
                         <span class="kpi-mini-body">
                             <span class="kpi-mini-label">Presentes</span>
                             <strong class="kpi-mini-value" id="kpi-presentes">--</strong>
                         </span>
                     </button>
-                    <button type="button" class="kpi-mini-card admin-only" id="kpi-card-concluidas" onclick="applyKpiQuickFilter('concluida')" title="Filtrar quem já concluiu a Avaliação 2026">
+                    <button type="button" class="kpi-mini-card admin-only" id="kpi-card-concluidas"
+                        onclick="applyKpiQuickFilter('concluida')" title="Filtrar quem já concluiu a Avaliação 2026">
                         <span class="kpi-mini-icon kpi-indigo"><i class="fas fa-clipboard-check"></i></span>
                         <span class="kpi-mini-body">
                             <span class="kpi-mini-label">Concluídas</span>
                             <strong class="kpi-mini-value" id="kpi-aval-concluidas">--</strong>
                         </span>
                     </button>
-                    <button type="button" class="kpi-mini-card admin-only" id="kpi-card-pendentes" onclick="applyKpiQuickFilter('pendente')" title="Filtrar quem ainda não respondeu a Avaliação 2026">
+                    <button type="button" class="kpi-mini-card admin-only" id="kpi-card-pendentes"
+                        onclick="applyKpiQuickFilter('pendente')"
+                        title="Filtrar quem ainda não respondeu a Avaliação 2026">
                         <span class="kpi-mini-icon kpi-amber"><i class="fas fa-clock"></i></span>
                         <span class="kpi-mini-body">
                             <span class="kpi-mini-label">Pendentes</span>
@@ -259,11 +274,21 @@
         </div>
         <div id="professores-list" class="table-responsive">
             <div class="skeleton-table" aria-busy="true" aria-label="Carregando lista de professores">
-                <div class="skeleton-row"><span class="skeleton-bar w-25"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span class="skeleton-bar w-20"></span><span class="skeleton-bar w-20"></span></div>
-                <div class="skeleton-row"><span class="skeleton-bar w-30"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-20"></span></div>
-                <div class="skeleton-row"><span class="skeleton-bar w-25"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span class="skeleton-bar w-20"></span><span class="skeleton-bar w-15"></span></div>
-                <div class="skeleton-row"><span class="skeleton-bar w-30"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-20"></span></div>
-                <div class="skeleton-row"><span class="skeleton-bar w-20"></span><span class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span class="skeleton-bar w-25"></span><span class="skeleton-bar w-20"></span></div>
+                <div class="skeleton-row"><span class="skeleton-bar w-25"></span><span
+                        class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span
+                        class="skeleton-bar w-20"></span><span class="skeleton-bar w-20"></span></div>
+                <div class="skeleton-row"><span class="skeleton-bar w-30"></span><span
+                        class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span
+                        class="skeleton-bar w-15"></span><span class="skeleton-bar w-20"></span></div>
+                <div class="skeleton-row"><span class="skeleton-bar w-25"></span><span
+                        class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span
+                        class="skeleton-bar w-20"></span><span class="skeleton-bar w-15"></span></div>
+                <div class="skeleton-row"><span class="skeleton-bar w-30"></span><span
+                        class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span
+                        class="skeleton-bar w-15"></span><span class="skeleton-bar w-20"></span></div>
+                <div class="skeleton-row"><span class="skeleton-bar w-20"></span><span
+                        class="skeleton-bar w-15"></span><span class="skeleton-bar w-10"></span><span
+                        class="skeleton-bar w-25"></span><span class="skeleton-bar w-20"></span></div>
             </div>
         </div>
         <div id="pagination" class="pagination"></div>
@@ -274,9 +299,11 @@
                 <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>11/11/2026 às
                         17:24</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>d6a2ac0</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>a4bdfc2</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Corrigir renderizacao dinamica de questoes dissertativas vs opcoes e delegacao de eventos</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação:
+                    <em>Corrigir renderizacao dinamica de questoes dissertativas vs opcoes e delegacao de
+                        eventos</em></span>
             </div>
         </footer>
     </div>
@@ -537,25 +564,30 @@
         <div class="modal-content metadata-modal-content">
             <div class="modal-header">
                 <div class="modal-title-wrap">
-                    <div class="modal-icon-badge" id="metadataIconBadge" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.16), rgba(124, 58, 237, 0.08)); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.25); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.18);">
+                    <div class="modal-icon-badge" id="metadataIconBadge"
+                        style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.16), rgba(124, 58, 237, 0.08)); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.25); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.18);">
                         <i class="fas fa-school"></i>
                     </div>
                     <div>
                         <h2 id="metadataModalTitle">Gestão de Escolas</h2>
-                        <p class="modal-subtitle" id="metadataModalSubtitle">Cadastre, edite e organize as escolas da rede municipal</p>
+                        <p class="modal-subtitle" id="metadataModalSubtitle">Cadastre, edite e organize as escolas da
+                            rede municipal</p>
                     </div>
                 </div>
-                <button type="button" class="modal-close-btn" onclick="closeMetadataModal()" title="Fechar" aria-label="Fechar">
+                <button type="button" class="modal-close-btn" onclick="closeMetadataModal()" title="Fechar"
+                    aria-label="Fechar">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
             <!-- Abas: Escolas / Disciplinas -->
             <div class="metadata-tabs">
-                <button type="button" class="metadata-tab-btn active" id="tab-btn-escolas" onclick="switchMetadataTab('escolas')">
+                <button type="button" class="metadata-tab-btn active" id="tab-btn-escolas"
+                    onclick="switchMetadataTab('escolas')">
                     <i class="fas fa-school"></i> Escolas (<span id="count-badge-escolas">0</span>)
                 </button>
-                <button type="button" class="metadata-tab-btn" id="tab-btn-disciplinas" onclick="switchMetadataTab('disciplinas')">
+                <button type="button" class="metadata-tab-btn" id="tab-btn-disciplinas"
+                    onclick="switchMetadataTab('disciplinas')">
                     <i class="fas fa-book-open"></i> Disciplinas (<span id="count-badge-disciplinas">0</span>)
                 </button>
             </div>
@@ -564,7 +596,8 @@
             <form id="metadataAddForm" onsubmit="handleMetadataAdd(event)" class="metadata-add-bar">
                 <div class="input-with-icon" style="flex: 1;">
                     <i class="fas fa-plus input-icon"></i>
-                    <input type="text" id="metadataNewInput" placeholder="NOME DA NOVA ESCOLA" required style="text-transform: uppercase;">
+                    <input type="text" id="metadataNewInput" placeholder="NOME DA NOVA ESCOLA" required
+                        style="text-transform: uppercase;">
                 </div>
                 <button type="submit" class="btn btn-primary" id="metadataAddBtn" style="white-space: nowrap;">
                     <i class="fas fa-plus"></i> Adicionar
@@ -589,7 +622,8 @@
         <div class="modal-content metadata-modal-content">
             <div class="modal-header">
                 <div class="modal-title-wrap">
-                    <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(5, 150, 105, 0.08)); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.18);">
+                    <div class="modal-icon-badge"
+                        style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(5, 150, 105, 0.08)); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.18);">
                         <i class="fas fa-calendar-check"></i>
                     </div>
                     <div>
@@ -597,28 +631,37 @@
                         <p class="modal-subtitle">Adicione datas de formação e controle a frequência oficial</p>
                     </div>
                 </div>
-                <button type="button" class="modal-close-btn" onclick="closeEncontrosModal()" title="Fechar" aria-label="Fechar">
+                <button type="button" class="modal-close-btn" onclick="closeEncontrosModal()" title="Fechar"
+                    aria-label="Fechar">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
             <!-- Formulário Novo Encontro -->
-            <form id="novoEncontroForm" onsubmit="handleNovoEncontroSubmit(event)" style="background: var(--zebra-bg); padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 18px;">
+            <form id="novoEncontroForm" onsubmit="handleNovoEncontroSubmit(event)"
+                style="background: var(--zebra-bg); padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 18px;">
                 <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-calendar-plus" style="color: var(--primary-color);"></i>
                     <span>Cadastrar Novo Encontro Formativo</span>
                 </h4>
                 <div style="display: grid; grid-template-columns: 1fr 1.3fr auto; gap: 10px; align-items: flex-end;">
                     <div class="form-group" style="margin: 0;">
-                        <label for="encontroDataInput" style="font-size: 0.74rem; font-weight: 700; text-transform: uppercase;">Data do Encontro <span class="req-star">*</span></label>
-                        <input type="date" id="encontroDataInput" required style="height: 38px; padding: 6px 10px; font-size: 0.88rem;">
+                        <label for="encontroDataInput"
+                            style="font-size: 0.74rem; font-weight: 700; text-transform: uppercase;">Data do Encontro
+                            <span class="req-star">*</span></label>
+                        <input type="date" id="encontroDataInput" required
+                            style="height: 38px; padding: 6px 10px; font-size: 0.88rem;">
                     </div>
                     <div class="form-group" style="margin: 0;">
-                        <label for="encontroNomeInput" style="font-size: 0.74rem; font-weight: 700; text-transform: uppercase;">Descrição / Tema</label>
-                        <input type="text" id="encontroNomeInput" placeholder="Ex: 2º Encontro EDM" style="height: 38px; padding: 6px 10px; font-size: 0.88rem;">
+                        <label for="encontroNomeInput"
+                            style="font-size: 0.74rem; font-weight: 700; text-transform: uppercase;">Descrição /
+                            Tema</label>
+                        <input type="text" id="encontroNomeInput" placeholder="Ex: 2º Encontro EDM"
+                            style="height: 38px; padding: 6px 10px; font-size: 0.88rem;">
                     </div>
                     <div>
-                        <button type="submit" class="btn btn-primary" id="btnSalvarEncontro" style="height: 38px; padding: 0 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                        <button type="submit" class="btn btn-primary" id="btnSalvarEncontro"
+                            style="height: 38px; padding: 0 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
                             <i class="fas fa-plus"></i> Criar Encontro
                         </button>
                     </div>
@@ -626,8 +669,10 @@
             </form>
 
             <!-- Lista de Encontros Cadastrados -->
-            <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">
+            <div
+                style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span
+                    style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">
                     <i class="fas fa-list-check"></i> Encontros Cadastrados (<span id="totalEncontrosCount">0</span>)
                 </span>
                 <span style="font-size: 0.72rem; color: var(--text-secondary);">Defina o encontro ativo na tabela</span>
@@ -641,6 +686,48 @@
 
             <div class="form-actions" style="margin-top: 18px; justify-content: flex-end;">
                 <button type="button" class="btn btn-secondary" onclick="closeEncontrosModal()">Concluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Gestão de Avaliações em Andamento (Rascunhos Iniciados Não Finalizados) -->
+    <div id="rascunhosModal" class="modal">
+        <div class="modal-content metadata-modal-content" style="max-width: 720px;">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25);">
+                        <i class="fas fa-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h2 id="rascunhosModalTitle" style="font-size: 1.15rem; font-weight: 800; margin: 0;">Avaliações em Andamento (Iniciadas)</h2>
+                        <p class="modal-subtitle" id="rascunhosModalSubtitle">Gerencie e reinicie avaliações iniciadas que ainda não foram enviadas pelos docentes</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeRascunhosModal()" title="Fechar" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Barra de Ações Rápidas do Modal -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: var(--zebra-bg); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.84rem; font-weight: 700; color: var(--text-color);">Total em Andamento:</span>
+                    <span id="rascunhosCountBadge" class="badge" style="background: #ef4444; color: #fff; font-size: 0.82rem; font-weight: 800;">0</span>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" id="btnReiniciarTodosRascunhos" onclick="reiniciarTodosRascunhos()" style="font-weight: 700; font-size: 0.78rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-trash-can"></i> Reiniciar Todas as Avaliações Não Finalizadas
+                </button>
+            </div>
+
+            <!-- Lista de Rascunhos -->
+            <div id="rascunhosListContainer" class="metadata-list-container" style="max-height: 380px; overflow-y: auto;">
+                <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando avaliações iniciadas...
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 18px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeRascunhosModal()">Concluir</button>
             </div>
         </div>
     </div>
