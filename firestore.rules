@@ -16,8 +16,7 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /configuracoes/{configId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
     match /avaliacoes_2026/{avaliacaoId} {
       allow read, create: if true;

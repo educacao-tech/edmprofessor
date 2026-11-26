@@ -28,14 +28,14 @@
                 <span class="header-subtitle-inline">Gestão e Frequência Acadêmica</span>
             </div>
             <div class="header-actions">
-                <a href="avaliacao.html?v=20261118" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm"
+                <a href="avaliacao.html?v=20261126" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm"
                     title="Preencher Avaliação Anual EDM 2026 (Abre em nova guia)" style="text-decoration:none;"><i
                         class="fas fa-clipboard-check"></i> Avaliação 2026</a>
-                <a href="respostas_avaliacao.html#questoes" target="_blank" rel="noopener noreferrer"
+                <a href="respostas_avaliacao.html?v=20261126#questoes" target="_blank" rel="noopener noreferrer"
                     class="btn btn-secondary btn-sm"
                     title="Editor e Gestor de Questões da Avaliação 2026" style="text-decoration:none;"><i
                         class="fas fa-sliders"></i> Questões</a>
-                <a href="respostas_avaliacao.html" target="_blank" rel="noopener noreferrer"
+                <a href="respostas_avaliacao.html?v=20261126" target="_blank" rel="noopener noreferrer"
                     class="btn btn-secondary btn-sm"
                     title="Ver Respostas da Avaliação 2026 (Painel da Coordenação)" style="text-decoration:none;"><i
                         class="fas fa-chart-pie"></i> Respostas</a>
@@ -68,7 +68,7 @@
                         <button type="button" class="dropdown-item" onclick="closeAdminDropdown(); openMetadataModal('disciplinas')">
                             <i class="fas fa-book-open"></i> Gestão de Disciplinas
                         </button>
-                        <a href="respostas_avaliacao.html#questoes" target="_blank" rel="noopener noreferrer"
+                        <a href="respostas_avaliacao.html?v=20261126#questoes" target="_blank" rel="noopener noreferrer"
                             class="dropdown-item" onclick="closeAdminDropdown()">
                             <i class="fas fa-list-check"></i> Editor de Questões
                         </a>
@@ -274,9 +274,9 @@
                 <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>11/11/2026 às
                         17:24</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>6029687</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>6ad0fb2</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Adicionar botao de salvar no editor de questoes com renumeracao automatica e sincronizacao git</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Sincronizar questoes dinamicas com fallback local e cache busting v20261126</em></span>
             </div>
         </footer>
     </div>
@@ -646,7 +646,7 @@
     </div>
 
     <!-- Lógica Principal -->
-    <script type="module" src="script.js"></script>
+    <script type="module" src="script.js?v=20261126"></script>
 </body>
 
 </html>

@@ -4033,11 +4033,11 @@
         <!-- Rodapé de Informações de Atualização (Git) -->
         <footer class="app-footer" style="margin-top: 30px;">
             <div class="footer-info">
-                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 15:25</strong></span>
+                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 15:42</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>6029687</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>6ad0fb2</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Adicionar botao de salvar no editor de questoes com renumeracao automatica e sincronizacao git</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Sincronizar questoes dinamicas com fallback local e cache busting v20261126</em></span>
             </div>
         </footer>
     </div>
@@ -4509,31 +4509,94 @@
         }
         loadSchoolsConfig();
 
-        // Carrega configurações customizadas de questões (se houver no Firestore)
+        // Carrega configurações customizadas de questões (Firestore com fallback para localStorage)
         async function loadDynamicQuestionsConfig() {
+            let customItems = null;
             try {
                 const snap = await getDoc(doc(db, "configuracoes", "questoes_avaliacao"));
-                if (snap.exists() && snap.data().items && Array.isArray(snap.data().items)) {
-                    const customItems = snap.data().items;
-                    customItems.forEach(q => {
-                        if (!q.key) return;
-                        const num = q.key.replace(/\D/g, '');
-                        const qInput = document.querySelector(`[name="${q.key}"]`) || document.getElementById(`${q.key}-container`);
-                        if (qInput) {
-                            const qItem = qInput.closest('.question-item, .q28-conditional-box');
-                            if (qItem) {
-                                const pTitle = qItem.querySelector('.question-title');
-                                if (pTitle && q.title) {
-                                    const reqBadge = q.required !== false ? ' <span style="color:#e11d48">*</span>' : '';
-                                    const cleanText = (q.title || '').replace(/^(\(?q?\d+[\.\)\-:]?\s*)+/i, '').trim();
-                                    pTitle.innerHTML = `<span class="q-num">${num}.</span> ${cleanText}${reqBadge}`;
-                                }
-                            }
-                        }
-                    });
+                if (snap.exists() && snap.data().items && Array.isArray(snap.data().items) && snap.data().items.length > 0) {
+                    customItems = snap.data().items;
                 }
             } catch (e) {
-                console.warn("Aviso ao carregar configuracoes/questoes_avaliacao:", e);
+                console.warn("Aviso ao carregar configuracoes/questoes_avaliacao do Firestore:", e);
+            }
+
+            // Fallback imediato para cache local
+            if (!customItems || customItems.length === 0) {
+                try {
+                    const local = localStorage.getItem('edm_questoes_avaliacao_local');
+                    if (local) {
+                        const parsed = JSON.parse(local);
+                        if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+                            customItems = parsed.items;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            if (!customItems || !Array.isArray(customItems) || customItems.length === 0) return;
+
+            customItems.forEach(q => {
+                if (!q || !q.key) return;
+                const num = q.num || q.key.replace(/\D/g, '');
+                const cleanText = (q.title || '').replace(/^(\(?q?\d+[\.\)\-:]?\s*)+/i, '').trim();
+                const reqBadge = q.required !== false ? ' <span style="color:#e11d48">*</span>' : '';
+                const qInput = document.querySelector(`[name="${q.key}"]`) || document.getElementById(`${q.key}-container`);
+
+                if (qInput) {
+                    const qItem = qInput.closest('.question-item, .q28-conditional-box');
+                    if (qItem) {
+                        const pTitle = qItem.querySelector('.question-title');
+                        if (pTitle && q.title) {
+                            pTitle.innerHTML = `<span class="q-num">${num}.</span> ${cleanText}${reqBadge}`;
+                        }
+                    }
+                } else {
+                    // Questão nova injetada dinamicamente no bloco correspondente
+                    const blocoNum = parseInt(q.bloco, 10) || 1;
+                    const targetPane = document.getElementById(`step-pane-${blocoNum}`);
+                    if (targetPane) {
+                        const blockWrap = targetPane.querySelector('.eval-block');
+                        if (blockWrap) {
+                            const newDiv = document.createElement('div');
+                            newDiv.className = 'question-item dynamic-question-item';
+                            newDiv.setAttribute('data-qkey', q.key);
+
+                            let contentHtml = `<p class="question-title"><span class="q-num">${num}.</span> ${cleanText}${reqBadge}</p>`;
+
+                            if (q.type === 'text') {
+                                contentHtml += `
+                                    <textarea class="eval-textarea" maxlength="250" name="${q.key}" rows="4" placeholder="Digite sua resposta..." ${q.required !== false ? 'required' : ''}></textarea>
+                                    <div class="char-counter" data-for="${q.key}">
+                                        <div class="char-progress-track"><div class="char-progress-bar" style="width: 0%;"></div></div>
+                                        <div class="char-counter-row">
+                                            <span class="char-counter-hint"><i class="fas fa-align-left"></i> Máx. 4 linhas</span>
+                                            <span class="char-counter-stats"><span class="char-counter-badge"><i class="fas fa-keyboard" style="opacity:0.75;"></i> <strong class="char-count">0</strong> / 250 carac.</span></span>
+                                        </div>
+                                    </div>
+                                `;
+                            } else if (q.type === 'checkbox') {
+                                const opts = Array.isArray(q.options) && q.options.length > 0 ? q.options : ['Sim', 'Não'];
+                                contentHtml += `<div class="options-list">` + opts.map(opt => `
+                                    <label class="option-label"><input type="checkbox" name="${q.key}" value="${escapeHtml(opt)}"> ${escapeHtml(opt)}</label>
+                                `).join('') + `</div>`;
+                            } else {
+                                const opts = Array.isArray(q.options) && q.options.length > 0 ? q.options : ['Excelente', 'Bom', 'Regular', 'Precisa melhorar'];
+                                contentHtml += `<div class="options-grid">` + opts.map(opt => `
+                                    <label class="option-label"><input type="radio" name="${q.key}" value="${escapeHtml(opt)}" ${q.required !== false ? 'required' : ''}> ${escapeHtml(opt)}</label>
+                                `).join('') + `</div>`;
+                            }
+
+                            newDiv.innerHTML = contentHtml;
+                            blockWrap.appendChild(newDiv);
+                        }
+                    }
+                }
+            });
+
+            // Atualiza contadores dos novos textareas dinâmicos se houver
+            if (typeof initCharCounters === 'function') {
+                initCharCounters();
             }
         }
         loadDynamicQuestionsConfig();
