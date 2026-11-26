@@ -24,6 +24,25 @@
         /* Estilos Customizados para o Formulário de Avaliação */
         :root {
             --eval-font-scale: 1;
+            --bg-color: #eef2f6;
+            --card-bg: #ffffff;
+            --surface-bg: #f8fafc;
+            --border-color: #cbd5e1;
+            --border-strong: #94a3b8;
+            --text-color: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #475569;
+        }
+
+        html[data-theme="dark"] {
+            --bg-color: #090e1a;
+            --card-bg: #131d35;
+            --surface-bg: #1e293b;
+            --border-color: #334155;
+            --border-strong: #475569;
+            --text-color: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
         }
 
         html, body {
@@ -40,14 +59,20 @@
         }
 
         .eval-container {
-            max-width: 920px;
+            max-width: 960px;
             margin: 0 auto;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 16px 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            background-color: #f1f5f9;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 18px;
+            padding: 18px 22px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
             position: relative;
+        }
+
+        html[data-theme="dark"] .eval-container {
+            background-color: #0f172a;
+            border-color: #334155;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
         }
 
         @media (max-width: 768px) {
@@ -274,28 +299,47 @@
 
         /* Card de Apresentação */
         .eval-presentation-card {
-            background-color: var(--zebra-bg);
-            border-left: 4px solid var(--primary-color);
-            border-radius: 8px;
+            background-color: #ffffff;
+            border: 1.5px solid #bfdbfe;
+            border-left: 5px solid var(--primary-color);
+            border-radius: 10px;
             padding: 10px 14px;
             margin-bottom: 12px;
             font-size: calc(0.83rem * var(--eval-font-scale, 1));
             line-height: calc(1.45 * var(--eval-font-scale, 1));
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
+        }
+
+        html[data-theme="dark"] .eval-presentation-card {
+            background-color: var(--card-bg);
+            border-color: rgba(59, 130, 246, 0.3);
+            border-left-color: #3b82f6;
         }
 
         .eval-presentation-card h3 {
             margin: 0 0 4px 0;
             font-size: 0.92rem;
-            color: var(--primary-color);
+            font-weight: 800;
+            color: #1d4ed8;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
+        html[data-theme="dark"] .eval-presentation-card h3 {
+            color: #60a5fa;
+        }
+
         .eval-presentation-card p {
             margin: 0 0 4px 0;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        html[data-theme="dark"] .eval-presentation-card p {
             color: var(--text-color);
         }
+
         .eval-presentation-card p:last-child {
             margin-bottom: 0;
         }
@@ -303,29 +347,38 @@
         /* Seção de Identificação Moderna */
         .ident-card {
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-top: 4px solid var(--primary-color);
+            border: 1.5px solid #cbd5e1;
+            border-top: 5px solid var(--primary-color);
             border-radius: 14px;
-            padding: 14px 18px;
+            padding: 16px 20px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
             transition: box-shadow 0.2s;
+        }
+
+        html[data-theme="dark"] .ident-card {
+            border-color: #334155;
+            border-top-color: #3b82f6;
         }
 
         .ident-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+            border-bottom: 1.5px solid #e2e8f0;
             flex-wrap: wrap;
             gap: 10px;
         }
 
+        html[data-theme="dark"] .ident-card-header {
+            border-bottom-color: #334155;
+        }
+
         .ident-card-title {
-            font-size: 0.96rem;
-            font-weight: 700;
+            font-size: 1rem;
+            font-weight: 800;
             color: var(--text-color);
             display: flex;
             align-items: center;
@@ -333,16 +386,22 @@
         }
 
         .ident-presence-pill {
-            font-size: 0.74rem;
-            font-weight: 700;
-            background: rgba(16, 185, 129, 0.12);
-            color: #059669;
-            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            background: #ecfdf5;
+            color: #047857;
+            padding: 4px 12px;
             border-radius: 20px;
-            border: 1px solid rgba(16, 185, 129, 0.25);
+            border: 1.5px solid #6ee7b7;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+        }
+
+        html[data-theme="dark"] .ident-presence-pill {
+            background: rgba(16, 185, 129, 0.18);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.4);
         }
 
         .ident-fields-layout {
@@ -387,13 +446,17 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.76rem;
-            font-weight: 700;
+            font-size: 0.78rem;
+            font-weight: 800;
             text-transform: uppercase;
-            color: var(--text-secondary);
+            color: #1e293b;
             letter-spacing: 0.03em;
             min-height: 20px;
             margin: 0;
+        }
+
+        html[data-theme="dark"] .ident-field label {
+            color: #e2e8f0;
         }
 
         .ident-field label span {
@@ -412,7 +475,7 @@
             font-weight: 700;
             text-transform: none;
             letter-spacing: normal;
-            background: rgba(37, 99, 235, 0.1);
+            background: rgba(37, 99, 235, 0.12);
             color: var(--primary-color);
             padding: 2px 7px;
             border-radius: 6px;
@@ -422,46 +485,62 @@
         }
 
         .badge-auto-tag.green {
-            background: rgba(16, 185, 129, 0.1);
-            color: #059669;
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
         }
 
         .ident-field input,
         .ident-field select {
-            height: 42px;
+            height: 44px;
             padding: 8px 14px;
-            border: 1.5px solid var(--border-color);
+            border: 1.5px solid #94a3b8;
             border-radius: 9px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            font-size: 0.90rem;
+            background: #ffffff;
+            color: #0f172a;
+            font-size: 0.92rem;
+            font-weight: 600;
             font-family: inherit;
             outline: none;
             box-sizing: border-box;
             width: 100%;
             transition: all 0.2s ease;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+        }
+
+        html[data-theme="dark"] .ident-field input,
+        html[data-theme="dark"] .ident-field select {
+            background: #1e293b;
+            border-color: #475569;
+            color: #f8fafc;
         }
 
         #eval-professor,
         #quickNome {
             text-transform: uppercase;
             letter-spacing: 0.02em;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .ident-field input:focus,
         .ident-field select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.2);
             background: var(--card-bg);
         }
 
         .ident-field input.input-readonly {
-            background: var(--zebra-bg);
-            border-color: var(--border-color);
-            color: var(--text-secondary);
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #334155;
             cursor: not-allowed;
-            font-weight: 500;
+            font-weight: 600;
+        }
+
+        html[data-theme="dark"] .ident-field input.input-readonly {
+            background: #0f172a;
+            border-color: #334155;
+            color: #94a3b8;
         }
 
         .ident-field input.input-date-lock {
@@ -807,15 +886,15 @@
         }
 
         /* ==========================================================================
-           Barra de Progresso de Preenchimento com Gradiente Animado
+           Barra de Progresso de Preenchimento com Gradiente Animado e Alto Contraste
            ========================================================================== */
         .eval-progress-container {
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            border: 1.5px solid #cbd5e1;
             border-radius: 12px;
-            padding: 7px 14px;
-            margin-bottom: 8px;
-            box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+            padding: 8px 14px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06);
             position: sticky;
             top: 6px;
             z-index: 100;
@@ -826,7 +905,7 @@
 
         html[data-theme="dark"] .eval-progress-container {
             background: rgba(19, 29, 53, 0.94);
-            border-color: rgba(255, 255, 255, 0.1);
+            border-color: #334155;
             box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.5);
         }
 
@@ -834,7 +913,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 7px;
             flex-wrap: wrap;
             gap: 8px;
         }
@@ -847,8 +926,8 @@
         }
 
         .eval-progress-title-label {
-            font-size: 0.85rem;
-            font-weight: 700;
+            font-size: 0.86rem;
+            font-weight: 800;
             color: var(--text-color);
             display: inline-flex;
             align-items: center;
@@ -859,49 +938,60 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 2px 9px;
+            padding: 2px 10px;
             border-radius: 9999px;
-            background: rgba(37, 99, 235, 0.12);
-            color: #2563eb;
+            background: #2563eb;
+            color: #ffffff;
             font-weight: 800;
             font-size: 0.80rem;
             letter-spacing: -0.01em;
-            border: 1px solid rgba(37, 99, 235, 0.22);
-            box-shadow: 0 1px 4px rgba(37, 99, 235, 0.1);
+            border: 1px solid #1d4ed8;
+            box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
             transition: all 0.3s ease;
         }
 
         html[data-theme="dark"] .eval-pct-badge {
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-            border-color: rgba(96, 165, 250, 0.3);
+            background: #3b82f6;
+            color: #ffffff;
+            border-color: #60a5fa;
         }
 
         .eval-count-badge {
-            font-size: 0.80rem;
-            color: var(--text-secondary);
-            font-weight: 600;
+            font-size: 0.82rem;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        html[data-theme="dark"] .eval-count-badge {
+            color: #e2e8f0;
         }
 
         .eval-est-time-badge {
-            font-size: 0.72rem;
+            font-size: 0.74rem;
             font-weight: 700;
-            color: var(--text-secondary);
-            background: var(--zebra-bg);
-            padding: 2px 7px;
+            color: #1e293b;
+            background: #f1f5f9;
+            padding: 2px 8px;
             border-radius: 6px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #cbd5e1;
             display: inline-flex;
             align-items: center;
             gap: 4px;
             transition: all 0.2s ease;
         }
 
+        html[data-theme="dark"] .eval-est-time-badge {
+            color: #cbd5e1;
+            background: #1e293b;
+            border-color: #334155;
+        }
+
         .badge-status-progresso {
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 2px 8px;
+            font-size: 0.74rem;
+            font-weight: 800;
+            padding: 2px 9px;
             border-radius: 8px;
+            border: 1px solid rgba(245, 158, 11, 0.35);
             display: inline-flex;
             align-items: center;
             gap: 5px;
@@ -911,41 +1001,60 @@
         .eval-toolbar-group {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             flex-wrap: wrap;
         }
 
         .eval-toolbar-group .btn-tool-item {
-            font-size: 0.74rem;
-            padding: 4px 9px;
+            font-size: 0.75rem;
+            padding: 4px 10px;
             border-radius: 8px;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
+            background: #f8fafc;
+            border: 1.5px solid #94a3b8;
+            color: #0f172a;
             cursor: pointer;
             transition: all 0.18s ease;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+
+        html[data-theme="dark"] .eval-toolbar-group .btn-tool-item {
+            background: #1e293b;
+            border-color: #475569;
+            color: #f8fafc;
         }
 
         .eval-toolbar-group .btn-tool-item:hover {
-            background-color: var(--zebra-bg);
-            border-color: rgba(37, 99, 235, 0.4);
+            background-color: #eff6ff;
+            border-color: #2563eb;
+            color: #1d4ed8;
             transform: translateY(-1px);
         }
 
+        html[data-theme="dark"] .eval-toolbar-group .btn-tool-item:hover {
+            background-color: rgba(59, 130, 246, 0.15);
+            border-color: #3b82f6;
+            color: #93c5fd;
+        }
+
         .eval-toolbar-group .btn-tool-pending {
-            border-color: rgba(225, 29, 72, 0.3) !important;
-            color: #e11d48 !important;
-            background: rgba(225, 29, 72, 0.06) !important;
+            border-color: #e11d48 !important;
+            color: #be123c !important;
+            background: #fff1f2 !important;
+        }
+
+        html[data-theme="dark"] .eval-toolbar-group .btn-tool-pending {
+            border-color: #fb7185 !important;
+            color: #fda4af !important;
+            background: rgba(225, 29, 72, 0.18) !important;
         }
 
         .eval-toolbar-group .btn-tool-pending:hover {
-            background: rgba(225, 29, 72, 0.14) !important;
-            box-shadow: 0 2px 8px rgba(225, 29, 72, 0.2) !important;
+            background: #ffe4e6 !important;
+            box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25) !important;
         }
 
         @media (max-width: 680px) {
@@ -956,12 +1065,17 @@
 
         .eval-progress-track {
             width: 100%;
-            height: 6px;
-            background: var(--zebra-bg);
+            height: 8px;
+            background: #e2e8f0;
             border-radius: 9999px;
             overflow: hidden;
-            border: 1px solid var(--border-color);
+            border: 1px solid #cbd5e1;
             position: relative;
+        }
+
+        html[data-theme="dark"] .eval-progress-track {
+            background: #1e293b;
+            border-color: #334155;
         }
 
         .eval-progress-bar {
@@ -1088,105 +1202,123 @@
         }
 
         /* ==========================================================================
-           Barra de Navegação de Etapas / Stepper em Pílula
+           Barra de Navegação de Etapas / Stepper em Pílula (Sem Rolagem Cortada)
            ========================================================================== */
         .eval-stepper-container {
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 6px 10px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+            border: 1.5px solid #cbd5e1;
+            border-radius: 14px;
+            padding: 8px 12px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
             transition: all 0.3s ease;
         }
 
         html[data-theme="dark"] .eval-stepper-container {
-            background: rgba(19, 29, 53, 0.7);
-            border-color: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: rgba(19, 29, 53, 0.85);
+            border-color: #334155;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
         }
 
         .eval-stepper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
             gap: 6px;
-            overflow-x: auto;
-            padding: 2px 2px 4px 2px;
-            scrollbar-width: thin;
+            padding: 2px 0;
         }
 
-        .eval-stepper::-webkit-scrollbar {
-            height: 4px;
+        @media (max-width: 820px) {
+            .eval-stepper {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .stepper-step {
+                flex: 1 1 calc(25% - 6px);
+            }
         }
-        .eval-stepper::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 10px;
+
+        @media (max-width: 520px) {
+            .stepper-step {
+                flex: 1 1 calc(50% - 6px);
+            }
         }
 
         .stepper-step {
-            flex: 1;
-            min-width: 90px;
+            min-width: 0;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            padding: 5px 10px;
-            border-radius: 9999px;
-            border: 1.5px solid var(--border-color);
-            background: var(--card-bg);
-            color: var(--text-secondary);
+            gap: 5px;
+            padding: 7px 6px;
+            border-radius: 10px;
+            border: 1.5px solid #94a3b8;
+            background: #f8fafc;
+            color: #1e293b;
             font-size: 0.76rem;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
-            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             white-space: nowrap;
             position: relative;
             user-select: none;
         }
 
+        html[data-theme="dark"] .stepper-step {
+            background: #1e293b;
+            border-color: #475569;
+            color: #e2e8f0;
+        }
+
         .stepper-step:hover {
-            border-color: var(--primary-color);
-            color: var(--text-color);
-            background: var(--zebra-bg);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+            border-color: #2563eb;
+            color: #1d4ed8;
+            background: #eff6ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.12);
+        }
+
+        html[data-theme="dark"] .stepper-step:hover {
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border-color: #3b82f6;
         }
 
         .stepper-step.active {
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
             color: #ffffff !important;
-            border-color: #2563eb !important;
-            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4) !important;
-            transform: translateY(-2px);
+            border-color: #1e40af !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.38) !important;
+            transform: translateY(-1px);
         }
 
         .stepper-step.completed {
-            border-color: rgba(16, 185, 129, 0.45) !important;
-            color: #059669 !important;
-            background: rgba(16, 185, 129, 0.08) !important;
+            border-color: #10b981 !important;
+            color: #047857 !important;
+            background: #ecfdf5 !important;
         }
 
         html[data-theme="dark"] .stepper-step.completed {
             color: #34d399 !important;
-            background: rgba(16, 185, 129, 0.16) !important;
-            border-color: rgba(16, 185, 129, 0.35) !important;
+            background: rgba(16, 185, 129, 0.18) !important;
+            border-color: rgba(16, 185, 129, 0.45) !important;
         }
 
         .stepper-step.active.completed {
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
             color: #ffffff !important;
-            border-color: #2563eb !important;
+            border-color: #1e40af !important;
         }
 
         .stepper-step .step-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 22px;
-            height: 22px;
+            width: 21px;
+            height: 21px;
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.08);
+            background: #e2e8f0;
+            color: #0f172a;
             font-size: 0.72rem;
             font-weight: 800;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1194,7 +1326,8 @@
         }
 
         html[data-theme="dark"] .stepper-step .step-badge {
-            background: rgba(255, 255, 255, 0.12);
+            background: #334155;
+            color: #f8fafc;
         }
 
         .stepper-step.active .step-badge {
@@ -1299,74 +1432,116 @@
         /* Blocos de Perguntas */
         .eval-block {
             margin-bottom: 20px;
-            padding: 18px 20px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
+            padding: 20px 22px;
+            background: #e2e8f0;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 16px;
             position: relative;
+        }
+
+        html[data-theme="dark"] .eval-block {
+            background: rgba(15, 23, 42, 0.75);
+            border-color: #334155;
         }
 
         .eval-block-header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding-bottom: 8px;
-            margin-bottom: 14px;
-            border-bottom: 2px solid rgba(0, 123, 255, 0.15);
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1.5px solid #bfdbfe;
+            border-left: 5px solid #2563eb;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        }
+
+        html[data-theme="dark"] .eval-block-header {
+            background: #131d35;
+            border-color: rgba(59, 130, 246, 0.3);
+            border-left-color: #3b82f6;
         }
 
         .eval-block-badge {
-            background: var(--primary-color);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
-            font-size: 0.76rem;
+            font-size: 0.80rem;
             font-weight: 800;
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
         }
 
         .eval-block-title {
             margin: 0;
-            font-size: 1.12rem;
-            font-weight: 700;
-            color: var(--text-color);
+            font-size: 1.16rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        html[data-theme="dark"] .eval-block-title {
+            color: #f8fafc;
         }
 
         .eval-block-note {
-            font-size: 0.86rem;
-            color: var(--text-secondary);
-            font-style: italic;
-            margin: -10px 0 20px 0;
-            padding: 10px 14px;
-            background: var(--zebra-bg);
-            border-radius: 8px;
+            font-size: 0.88rem;
+            color: #1e293b;
+            font-weight: 600;
+            margin: -6px 0 18px 0;
+            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-left: 4px solid #8b5cf6;
+            border-radius: 10px;
+        }
+
+        html[data-theme="dark"] .eval-block-note {
+            background: #131d35;
+            color: #e2e8f0;
+            border-color: #334155;
+            border-left-color: #a78bfa;
         }
 
         /* ==========================================================================
-           Cards de Questões com Borda Luminosa e Seleção Destacada
+           Cards de Questões com Alto Contraste, Borda Nítida e Seleção Destacada
            ========================================================================== */
         .question-item {
-            margin-bottom: 22px;
-            padding: 22px 24px;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.02);
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-bottom: 18px;
+            padding: 20px 24px;
+            border-radius: 14px;
+            border: 1.5px solid #cbd5e1;
+            border-left: 5px solid #2563eb;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
         }
 
+        .question-item.q-answered {
+            border-left-color: #10b981;
+            border-color: #a7f3d0;
+        }
+
         html[data-theme="dark"] .question-item {
-            background: rgba(19, 29, 53, 0.55);
-            border-color: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            background: #131d35;
+            border-color: #334155;
+            border-left-color: #3b82f6;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+        }
+
+        html[data-theme="dark"] .question-item.q-answered {
+            border-left-color: #10b981;
+            border-color: rgba(16, 185, 129, 0.4);
         }
 
         .question-item:hover {
-            border-color: rgba(37, 99, 235, 0.35);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+            border-color: #60a5fa;
+            border-left-color: #1d4ed8;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
             transform: translateY(-1px);
         }
 
@@ -1496,68 +1671,83 @@
         }
 
         .question-title {
-            font-size: calc(0.98rem * var(--eval-font-scale, 1));
-            font-weight: 700;
-            color: var(--text-color);
-            margin: 0 0 14px 0;
+            font-size: calc(1.04rem * var(--eval-font-scale, 1));
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 16px 0;
             line-height: 1.5;
             display: flex;
             align-items: baseline;
-            gap: 4px;
+            gap: 6px;
             flex-wrap: wrap;
+        }
+
+        html[data-theme="dark"] .question-title {
+            color: #f8fafc;
         }
 
         .question-title .q-num {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 32px;
-            height: 24px;
-            padding: 0 7px;
-            border-radius: 7px;
-            background: rgba(37, 99, 235, 0.12);
-            color: #2563eb;
-            font-size: 0.8rem;
+            min-width: 34px;
+            height: 26px;
+            padding: 0 8px;
+            border-radius: 8px;
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 0.84rem;
             font-weight: 800;
-            margin-right: 6px;
-            border: 1px solid rgba(37, 99, 235, 0.2);
+            margin-right: 4px;
+            border: 1px solid #1d4ed8;
             flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25);
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         html[data-theme="dark"] .question-title .q-num {
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-            border-color: rgba(96, 165, 250, 0.25);
+            background: #3b82f6;
+            color: #ffffff;
+            border-color: #60a5fa;
         }
 
-        /* Questão respondida: número ganha badge verde esmeralda com checkmark */
+        /* Questão respondida: número ganha badge verde esmeralda sólido com checkmark */
         .question-item.q-answered .q-num {
-            background: rgba(16, 185, 129, 0.16) !important;
-            color: #059669 !important;
-            border-color: rgba(16, 185, 129, 0.45) !important;
-            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.18);
+            background: #059669 !important;
+            color: #ffffff !important;
+            border-color: #047857 !important;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
         }
 
         html[data-theme="dark"] .question-item.q-answered .q-num {
-            background: rgba(16, 185, 129, 0.25) !important;
-            color: #34d399 !important;
-            border-color: rgba(16, 185, 129, 0.5) !important;
+            background: #10b981 !important;
+            color: #064e3b !important;
+            border-color: #34d399 !important;
         }
 
         .question-item.q-answered .q-num::before {
             content: "\f00c";
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
-            font-size: 0.65rem;
+            font-size: 0.68rem;
             margin-right: 4px;
         }
 
         .question-hint {
-            font-size: calc(0.80rem * var(--eval-font-scale, 1));
-            color: var(--text-secondary);
-            font-weight: 500;
-            margin-left: 6px;
+            font-size: calc(0.82rem * var(--eval-font-scale, 1));
+            color: #334155;
+            font-weight: 700;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            margin-left: 4px;
+        }
+
+        html[data-theme="dark"] .question-hint {
+            color: #cbd5e1;
+            background: #1e293b;
+            border-color: #334155;
         }
 
         /* Opções de Escolha Única (Radio) e Múltipla (Checkbox) */
@@ -1591,17 +1781,25 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px 14px;
-            min-height: 48px;
-            border: 1.5px solid var(--border-color);
+            padding: 12px 15px;
+            min-height: 50px;
+            border: 1.5px solid #94a3b8;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            background-color: var(--card-bg);
+            background-color: #f8fafc;
+            color: #0f172a;
             user-select: none;
-            font-size: calc(0.86rem * var(--eval-font-scale, 1));
-            font-weight: 600;
+            font-size: calc(0.90rem * var(--eval-font-scale, 1));
+            font-weight: 700;
             position: relative;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        }
+
+        html[data-theme="dark"] .option-label {
+            background-color: #1e293b;
+            border-color: #475569;
+            color: #f1f5f9;
         }
 
         /* Badge com dica de tecla de atalho numérico (1 a 4) - Teclado Keycap Real */
@@ -2175,14 +2373,15 @@
         /* Textarea para respostas abertas */
         .eval-textarea {
             width: 100%;
-            height: 96px;
-            max-height: 110px;
+            height: 98px;
+            max-height: 115px;
             padding: 12px 14px;
-            border: 1.5px solid var(--border-color);
+            border: 1.5px solid #94a3b8;
             border-radius: 12px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            font-size: calc(0.88rem * var(--eval-font-scale, 1));
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: calc(0.92rem * var(--eval-font-scale, 1));
+            font-weight: 600;
             font-family: inherit;
             line-height: 1.45;
             resize: none;
@@ -2191,16 +2390,30 @@
             word-break: break-word;
             overflow-wrap: anywhere;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.04);
+        }
+
+        html[data-theme="dark"] .eval-textarea {
+            background: #1e293b;
+            border-color: #475569;
+            color: #f8fafc;
+        }
+
+        .eval-textarea::placeholder {
+            color: #64748b;
+            font-weight: 500;
         }
 
         .eval-textarea:focus {
+            background: #ffffff;
             border-color: #2563eb !important;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16), 0 4px 14px rgba(37, 99, 235, 0.1) !important;
+            box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.2), 0 4px 14px rgba(37, 99, 235, 0.1) !important;
         }
 
         html[data-theme="dark"] .eval-textarea:focus {
+            background: #0f172a;
             border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22), 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+            box-shadow: 0 0 0 3.5px rgba(59, 130, 246, 0.25), 0 4px 14px rgba(0, 0, 0, 0.3) !important;
         }
         /* Contador de Caracteres para Questões Dissertativas */
         .char-counter {
@@ -2749,24 +2962,113 @@
         .stepper-mini-count {
             display: inline-flex;
             align-items: center;
-            gap: 3px;
-            font-size: 0.68rem;
+            gap: 2px;
+            font-size: 0.67rem;
             font-weight: 800;
-            padding: 1px 6px;
+            padding: 1px 5px;
             border-radius: 999px;
-            background: rgba(148, 163, 184, 0.18);
-            color: var(--text-secondary);
-            margin-left: 4px;
-            line-height: 1.3;
+            background: #e2e8f0;
+            color: #1e293b;
+            margin-left: 2px;
+            line-height: 1.25;
+            border: 1px solid #cbd5e1;
+        }
+
+        html[data-theme="dark"] .stepper-mini-count {
+            background: #334155;
+            color: #e2e8f0;
+            border-color: #475569;
+        }
+
+        .stepper-step.active .stepper-mini-count {
+            background: rgba(255, 255, 255, 0.24);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         .stepper-mini-count.done {
-            background: rgba(16, 185, 129, 0.16);
-            color: #059669;
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #6ee7b7;
         }
 
         html[data-theme="dark"] .stepper-mini-count.done {
+            background: rgba(16, 185, 129, 0.25);
             color: #34d399;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        /* Banner guia para ir diretamente às 28 questões quando na Etapa 0 */
+        .questions-cta-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            color: #ffffff;
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin-top: 14px;
+            box-shadow: 0 8px 22px rgba(37, 99, 235, 0.28);
+            flex-wrap: wrap;
+        }
+
+        .questions-cta-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .questions-cta-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background: rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .questions-cta-text h4 {
+            margin: 0 0 2px 0;
+            font-size: 0.98rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .questions-cta-text p {
+            margin: 0;
+            font-size: 0.82rem;
+            color: #dbeafe;
+            font-weight: 500;
+        }
+
+        .btn-start-questions {
+            background: #ffffff;
+            color: #1d4ed8;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-start-questions:hover {
+            background: #eff6ff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
         }
 
         @media print {
@@ -2961,7 +3263,7 @@
                 </button>
                 <button type="button" class="stepper-step" id="step-btn-6" onclick="goToStep(6)" title="Bloco 6 – Perspectivas para 2027 e Envio">
                     <span class="step-badge" id="step-badge-6">6</span>
-                    <span class="step-label">Bloco 6 & Envio</span>
+                    <span class="step-label">Bloco 6</span>
                 </button>
             </div>
         </div>
@@ -3155,7 +3457,23 @@
                 </div>
             </div> <!-- /ident-card -->
 
-            <div class="step-nav-footer">
+            <!-- Banner de Destaque Claro para Iniciar as 27 Questões (Bloco 1 a 6) -->
+            <div class="questions-cta-banner no-print">
+                <div class="questions-cta-text">
+                    <div class="questions-cta-icon">
+                        <i class="fas fa-list-check"></i>
+                    </div>
+                    <div>
+                        <h4>Pronto para responder às 27 questões da Avaliação?</h4>
+                        <p>Confira seus dados de identificação acima (Escola, Ano e Turma) e clique ao lado para abrir o <strong>Bloco 1 de Perguntas</strong>.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-start-questions" onclick="nextStep()">
+                    Responder Perguntas (Bloco 1) <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div class="step-nav-footer" style="display: none;">
                 <div style="font-size: 0.84rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
                     <i class="fas fa-id-badge text-primary"></i> Chamada oficial do encontro
                 </div>
@@ -4033,6 +4351,55 @@
                 .replace(/\s+/g, ' ');
         }
 
+        // Helper inteligente para selecionar opção em <select> (Escola, Ano, Turma, Turno) mesmo com diferenças de nome/acentos
+        function selectMatchingOption(selectEl, rawVal, createIfMissing = false) {
+            if (!selectEl || !rawVal) return false;
+            const target = normalizeStr(rawVal);
+            if (!target || target === 'N/A' || target === 'NA') return false;
+
+            const options = Array.from(selectEl.options).filter(o => o.value && o.value.trim() !== '');
+
+            // 1. Correspondência exata normalizada
+            let match = options.find(o => normalizeStr(o.value) === target || normalizeStr(o.textContent) === target);
+
+            // 2. Correspondência bidirecional por inclusão (ex: "ALZIRA" <-> "ALZIRA ACRA", "3º" <-> "3º ANO")
+            if (!match) {
+                match = options.find(o => {
+                    const normOpt = normalizeStr(o.value);
+                    if (!normOpt) return false;
+                    return normOpt.includes(target) || target.includes(normOpt);
+                });
+            }
+
+            // 3. Correspondência pela primeira palavra-chave significativa (>= 3 letras)
+            if (!match) {
+                const targetFirstWord = target.split(/[\s\-–/]+/).find(w => w.length >= 3);
+                if (targetFirstWord) {
+                    match = options.find(o => {
+                        const optWords = normalizeStr(o.value).split(/[\s\-–/]+/);
+                        return optWords.some(w => w === targetFirstWord || (w.length >= 3 && (w.startsWith(targetFirstWord) || targetFirstWord.startsWith(w))));
+                    });
+                }
+            }
+
+            if (match) {
+                selectEl.value = match.value;
+                return true;
+            }
+
+            if (createIfMissing) {
+                const cleanVal = String(rawVal).trim().toUpperCase();
+                const newOpt = document.createElement('option');
+                newOpt.value = cleanVal;
+                newOpt.textContent = cleanVal;
+                selectEl.appendChild(newOpt);
+                selectEl.value = cleanVal;
+                return true;
+            }
+
+            return false;
+        }
+
         // Carregar lista de professores para autocompletar e validação (prioriza Firestore com fallback offline)
         async function loadProfessorsList() {
             const datalist = document.getElementById('professoresDatalist');
@@ -4066,6 +4433,40 @@
                 const profs = Array.from(new Set(professoresListCache.map(p => (p.nome || '').trim()).filter(Boolean))).sort();
                 datalist.innerHTML = profs.map(name => `<option value="${name}">`).join('');
             }
+
+            // Caso o docente já esteja autenticado quando a lista terminar de carregar, enriquece Escola/Ano/Turma/Turno vazios
+            if (currentDocente && (currentDocente.email || currentDocente.nome)) {
+                const matched = findTeacherInCache(currentDocente.email, currentDocente.nome);
+                if (matched) {
+                    let updated = false;
+                    if (!currentDocente.escola && matched.escola) { currentDocente.escola = matched.escola; updated = true; }
+                    if (!currentDocente.ano && matched.ano && matched.ano !== 'N/A') { currentDocente.ano = matched.ano; updated = true; }
+                    if (!currentDocente.turma && matched.turma && matched.turma !== 'N/A') { currentDocente.turma = matched.turma; updated = true; }
+                    if (!currentDocente.turno && matched.turno && matched.turno !== 'N/A') { currentDocente.turno = matched.turno; updated = true; }
+                    if (updated) {
+                        sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(currentDocente));
+                    }
+                    const selectEscola = document.getElementById('eval-escola');
+                    const selectAno = document.getElementById('eval-ano');
+                    const selectTurma = document.getElementById('eval-turma');
+                    const selectPeriodo = document.getElementById('eval-periodo');
+                    if (selectEscola && !selectEscola.value && (currentDocente.escola || matched.escola)) {
+                        selectMatchingOption(selectEscola, currentDocente.escola || matched.escola, true);
+                    }
+                    if (selectAno && !selectAno.value && (currentDocente.ano || matched.ano)) {
+                        selectMatchingOption(selectAno, currentDocente.ano || matched.ano);
+                    }
+                    if (selectTurma && !selectTurma.value && (currentDocente.turma || matched.turma)) {
+                        selectMatchingOption(selectTurma, currentDocente.turma || matched.turma);
+                    }
+                    if (selectPeriodo && !selectPeriodo.value && (currentDocente.turno || matched.turno)) {
+                        selectMatchingOption(selectPeriodo, currentDocente.turno || matched.turno);
+                    }
+                    updateProgressUI();
+                    updateStepperUI();
+                    if (typeof updateFinalConfirmSummary === 'function') updateFinalConfirmSummary();
+                }
+            }
         }
         loadProfessorsList();
 
@@ -4080,11 +4481,13 @@
                         ['eval-escola', 'quickEscola'].forEach(id => {
                             const selectEl = document.getElementById(id);
                             if (selectEl) {
-                                const currentVal = selectEl.value;
+                                const currentVal = selectEl.value || (id === 'eval-escola' ? (currentDocente?.escola || '') : '');
                                 selectEl.innerHTML = '<option value="">Selecione a Escola...</option>' + 
                                     escolas.map(e => `<option value="${e}">${e}</option>`).join('') +
                                     (!escolas.includes('OUTRA') ? '<option value="OUTRA">OUTRA</option>' : '');
-                                if (currentVal) selectEl.value = currentVal;
+                                if (currentVal) {
+                                    selectMatchingOption(selectEl, currentVal, true);
+                                }
                             }
                         });
                     }
@@ -4168,9 +4571,7 @@
                     quickEmail.value = matched.email;
                 }
                 if (quickEscola && matched.escola && !quickEscola.value) {
-                    const options = Array.from(quickEscola.options);
-                    const opt = options.find(o => matched.escola.toUpperCase().includes(o.value.toUpperCase()));
-                    if (opt) quickEscola.value = opt.value;
+                    selectMatchingOption(quickEscola, matched.escola, true);
                 }
             } else {
                 const evalEmail = document.getElementById('eval-email');
@@ -4185,24 +4586,16 @@
                     evalEmail.value = matched.email;
                 }
                 if (evalEscola && matched.escola) {
-                    const options = Array.from(evalEscola.options);
-                    const opt = options.find(o => matched.escola.toUpperCase().includes(o.value.toUpperCase()));
-                    if (opt) evalEscola.value = opt.value;
+                    selectMatchingOption(evalEscola, matched.escola, true);
                 }
                 if (evalAno && matched.ano) {
-                    const options = Array.from(evalAno.options);
-                    const opt = options.find(o => o.value.toUpperCase().includes(matched.ano.toUpperCase()) || matched.ano.toUpperCase().includes(o.value.toUpperCase()));
-                    if (opt) evalAno.value = opt.value;
+                    selectMatchingOption(evalAno, matched.ano);
                 }
                 if (evalTurma && matched.turma) {
-                    const options = Array.from(evalTurma.options);
-                    const opt = options.find(o => o.value.toUpperCase() === matched.turma.toUpperCase());
-                    if (opt) evalTurma.value = opt.value;
+                    selectMatchingOption(evalTurma, matched.turma);
                 }
                 if (evalPeriodo && matched.turno) {
-                    const options = Array.from(evalPeriodo.options);
-                    const opt = options.find(o => o.value.toUpperCase() === matched.turno.toUpperCase());
-                    if (opt) evalPeriodo.value = opt.value;
+                    selectMatchingOption(evalPeriodo, matched.turno);
                 }
                 if (evalTurmas) {
                     const tComposta = [matched.ano, matched.turma ? `Turma ${matched.turma}` : '', matched.turno ? `(${matched.turno})` : ''].filter(Boolean).join(' ');
@@ -4242,8 +4635,7 @@
                 const quickEscola = document.getElementById('quickEscola');
                 if (quickNome && !quickNome.value) quickNome.value = matched.nome;
                 if (quickEscola && !quickEscola.value && matched.escola) {
-                    const opt = Array.from(quickEscola.options).find(o => matched.escola.toUpperCase().includes(o.value.toUpperCase()));
-                    if (opt) quickEscola.value = opt.value;
+                    selectMatchingOption(quickEscola, matched.escola, true);
                 }
             } else {
                 const evalProf = document.getElementById('eval-professor');
@@ -4385,24 +4777,16 @@
             if (inputProf && profile.nome) inputProf.value = profile.nome;
             if (inputEmail && profile.email) inputEmail.value = profile.email;
             if (selectEscola && profile.escola) {
-                const options = Array.from(selectEscola.options);
-                const matchingOpt = options.find(opt => profile.escola.toUpperCase().includes(opt.value.toUpperCase()));
-                if (matchingOpt) selectEscola.value = matchingOpt.value;
+                selectMatchingOption(selectEscola, profile.escola, true);
             }
             if (selectAno && profile.ano) {
-                const options = Array.from(selectAno.options);
-                const matchingOpt = options.find(opt => opt.value.toUpperCase().includes(profile.ano.toUpperCase()) || profile.ano.toUpperCase().includes(opt.value.toUpperCase()));
-                if (matchingOpt) selectAno.value = matchingOpt.value;
+                selectMatchingOption(selectAno, profile.ano);
             }
             if (selectTurma && profile.turma) {
-                const options = Array.from(selectTurma.options);
-                const matchingOpt = options.find(opt => opt.value.toUpperCase() === profile.turma.toUpperCase());
-                if (matchingOpt) selectTurma.value = matchingOpt.value;
+                selectMatchingOption(selectTurma, profile.turma);
             }
-            if (selectPeriodo && profile.turno) {
-                const options = Array.from(selectPeriodo.options);
-                const matchingOpt = options.find(opt => opt.value.toUpperCase() === profile.turno.toUpperCase());
-                if (matchingOpt) selectPeriodo.value = matchingOpt.value;
+            if (selectPeriodo && (profile.turno || profile.periodo)) {
+                selectMatchingOption(selectPeriodo, profile.turno || profile.periodo);
             }
 
             // Controle de edição do e-mail
@@ -4555,7 +4939,7 @@
             setAuthenticatedTeacher({
                 nome: (matched?.nome || nome).toUpperCase(),
                 email: (email || '').toLowerCase(),
-                escola: matched?.escola || escola || '',
+                escola: escola || matched?.escola || '',
                 ano: matched?.ano || '',
                 turma: matched?.turma || '',
                 turno: matched?.turno || '',
@@ -4647,7 +5031,7 @@
             const profile = {
                 nome: (matched?.nome || nome).toUpperCase(),
                 email: email.toLowerCase(),
-                escola: matched?.escola || escola || '',
+                escola: escola || matched?.escola || '',
                 ano: matched?.ano || '',
                 turma: matched?.turma || '',
                 turno: matched?.turno || '',
@@ -4842,13 +5226,13 @@
                 badgePct.textContent = pct + '%';
                 badgePct.classList.toggle('celebrate', pct >= 100);
                 if (pct >= 100) {
-                    badgePct.style.background = 'rgba(16, 185, 129, 0.18)';
-                    badgePct.style.color = '#059669';
-                    badgePct.style.borderColor = 'rgba(16, 185, 129, 0.35)';
+                    badgePct.style.background = '#10b981';
+                    badgePct.style.color = '#ffffff';
+                    badgePct.style.borderColor = '#059669';
                 } else {
-                    badgePct.style.background = 'rgba(37, 99, 235, 0.12)';
-                    badgePct.style.color = '#2563eb';
-                    badgePct.style.borderColor = 'rgba(37, 99, 235, 0.22)';
+                    badgePct.style.background = '#2563eb';
+                    badgePct.style.color = '#ffffff';
+                    badgePct.style.borderColor = '#1d4ed8';
                 }
             }
             if (txt) txt.textContent = `${answeredCount} de ${totalQuestions} respondidas`;
@@ -6098,8 +6482,9 @@
                 const form = document.getElementById('evaluationForm');
                 if (!form) return;
 
+                const identKeys = ['eval-professor', 'eval-email', 'eval-escola', 'eval-ano', 'eval-turma', 'eval-periodo', 'eval-data'];
                 Object.keys(data).forEach(k => {
-                    if (k.startsWith('_')) return;
+                    if (k.startsWith('_') || identKeys.includes(k)) return;
                     const val = data[k];
                     const elements = form.querySelectorAll(`[name="${k}"]`);
                     elements.forEach(el => {
@@ -6122,13 +6507,14 @@
 
                 // IDs diretos (apenas restaura professor/email/escola se o docente já estiver confirmado nesta sessão)
                 if (currentDocente) {
-                    if (data['eval-escola']) document.getElementById('eval-escola').value = data['eval-escola'];
-                    if (data['eval-professor']) document.getElementById('eval-professor').value = data['eval-professor'];
-                    if (data['eval-email']) document.getElementById('eval-email').value = data['eval-email'];
+                    const escolaTarget = currentDocente.escola || data['eval-escola'] || '';
+                    if (escolaTarget) selectMatchingOption(document.getElementById('eval-escola'), escolaTarget, true);
+                    if (currentDocente.nome || data['eval-professor']) document.getElementById('eval-professor').value = currentDocente.nome || data['eval-professor'];
+                    if (currentDocente.email || data['eval-email']) document.getElementById('eval-email').value = currentDocente.email || data['eval-email'];
                 }
-                if (data['eval-ano']) document.getElementById('eval-ano').value = data['eval-ano'];
-                if (data['eval-turma']) document.getElementById('eval-turma').value = data['eval-turma'];
-                if (data['eval-periodo']) document.getElementById('eval-periodo').value = data['eval-periodo'];
+                if (data['eval-ano'] || currentDocente?.ano) selectMatchingOption(document.getElementById('eval-ano'), data['eval-ano'] || currentDocente?.ano);
+                if (data['eval-turma'] || currentDocente?.turma) selectMatchingOption(document.getElementById('eval-turma'), data['eval-turma'] || currentDocente?.turma);
+                if (data['eval-periodo'] || currentDocente?.turno) selectMatchingOption(document.getElementById('eval-periodo'), data['eval-periodo'] || currentDocente?.turno);
                 // Data é SEMPRE a data atual oficial do sistema para presença (não recupera data antiga de rascunho)
                 setSystemDate();
                 if (data['q27']) handleQ27Change(data['q27']);
@@ -6969,13 +7355,14 @@
         });
         setTimeout(updateStepperMiniCounts, 500);
 
-        // Link Direto Pré-identificado (?email=...&nome=...)
+        // Link Direto Pré-identificado (?email=...&nome=...&prof=...&escola=...)
         (async function applyPreIdentifiedUrlParams() {
             try {
                 const params = new URLSearchParams(window.location.search);
                 const paramEmail = (params.get('email') || '').trim().toLowerCase();
-                const paramNome = (params.get('nome') || '').trim();
-                if (!paramEmail && !paramNome) return;
+                const paramNome = (params.get('nome') || params.get('prof') || '').trim();
+                const paramEscola = (params.get('escola') || '').trim();
+                if (!paramEmail && !paramNome && !paramEscola) return;
 
                 // Aguarda brevemente o carregamento da lista de professores para enriquecer escola/ano/turma
                 let tries = 0;
@@ -6992,7 +7379,7 @@
                 setAuthenticatedTeacher({
                     nome: finalNome,
                     email: finalEmail,
-                    escola: matched?.escola || '',
+                    escola: paramEscola || matched?.escola || '',
                     ano: matched?.ano || '',
                     turma: matched?.turma || '',
                     turno: matched?.turno || '',

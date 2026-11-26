@@ -2072,7 +2072,7 @@
             </div>
 
             <!-- Formulário de Edição -->
-            <form id="formQuestionEdit" onsubmit="handleSaveQuestionForm(event)">
+            <form id="formQuestionEdit" novalidate onsubmit="handleSaveQuestionForm(event)">
                 <input type="hidden" id="editQuestionOriginalKey" value="">
 
                 <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-bottom: 14px;">
@@ -3335,11 +3335,14 @@
             const list = document.getElementById('optionsInputsList');
             if (!list) return;
 
+            const qType = document.getElementById('editQuestionType')?.value || 'radio';
+            const isTextType = (qType === 'text' || qType === 'conditional_text');
+
             const row = document.createElement('div');
             row.style.cssText = 'display: flex; gap: 8px; align-items: center;';
             row.innerHTML = `
                 <i class="fas fa-grip-vertical" style="color: var(--text-secondary); opacity: 0.5;"></i>
-                <input type="text" class="q-form-input q-option-value-input" value="${escapeHtml(val)}" placeholder="Texto da alternativa..." style="padding: 7px 10px; font-size: 0.86rem;" required>
+                <input type="text" class="q-form-input q-option-value-input" value="${escapeHtml(val)}" placeholder="Texto da alternativa..." style="padding: 7px 10px; font-size: 0.86rem;" ${isTextType ? 'disabled' : 'required'}>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="this.parentElement.remove()" title="Remover alternativa" style="color:#ef4444; padding: 6px 10px;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -3370,10 +3373,19 @@
             const wrap = document.getElementById('editQuestionOptionsWrap');
             if (!wrap) return;
 
-            if (qType === 'text' || qType === 'conditional_text') {
+            const isTextType = (qType === 'text' || qType === 'conditional_text');
+            if (isTextType) {
                 wrap.style.display = 'none';
+                wrap.querySelectorAll('.q-option-value-input').forEach(inp => {
+                    inp.required = false;
+                    inp.disabled = true;
+                });
             } else {
                 wrap.style.display = 'block';
+                wrap.querySelectorAll('.q-option-value-input').forEach(inp => {
+                    inp.disabled = false;
+                    inp.required = true;
+                });
             }
         };
 
@@ -3432,7 +3444,7 @@
 
             const existingIdx = origKey 
                 ? currentQuestionsData.findIndex(item => (item.key || '').toLowerCase().trim() === origKey.toLowerCase())
-                : currentQuestionsData.findIndex(item => (item.key || '').toLowerCase().trim() === key.toLowerCase());
+                : -1;
 
             const questionData = {
                 key: key || `q${currentQuestionsData.length + 1}`,
