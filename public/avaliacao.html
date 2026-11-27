@@ -2615,15 +2615,22 @@
 
         /* Estilos de Impressão Otimizados para Folha A4 / Papel */
         @media print {
-            body {
+            html, body {
+                height: auto !important;
+                min-height: 100% !important;
+                overflow: visible !important;
                 background: #ffffff !important;
                 color: #000000 !important;
                 padding: 0 !important;
-                font-size: 11pt !important;
+                margin: 0 !important;
+                font-size: 10.5pt !important;
                 line-height: 1.35 !important;
             }
+
+            /* Ocultar rigorosamente modais, fundos, barras de navegação e elementos flutuantes */
             .no-print,
             .print-blank-banner,
+            #printBlankBanner,
             .eval-top-nav,
             .eval-footer-actions,
             .eval-stepper-container,
@@ -2634,6 +2641,10 @@
             .badge-auto-tag,
             #theme-toggle,
             #questionsMapModal,
+            #shortcutsModal,
+            #quickProfileModal,
+            #adminAuthModal,
+            #adminDraftResetBar,
             #btnToggleMap,
             #evalReviewBox,
             #chamadaBanner,
@@ -2641,62 +2652,142 @@
             .ident-presence-pill,
             .char-counter,
             .btn-submit-eval,
+            .auth-gate-modal,
+            #authGateModal,
+            .modal,
+            .modal-backdrop,
+            .floating-quick-nav,
+            .floating-pending-bar,
+            #floatingPendingBar,
+            .block-congrats-toast,
+            .eval-toast-container,
+            .teacher-combobox-list,
+            .shortcut-key-badge,
             button,
             datalist {
                 display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
             }
+
             .eval-container {
                 max-width: 100% !important;
                 width: 100% !important;
                 margin: 0 !important;
-                padding: 0 5px !important;
+                padding: 0 4px !important;
                 border: none !important;
                 box-shadow: none !important;
             }
+
             .eval-logos-row {
-                margin-bottom: 14px !important;
+                margin-bottom: 12px !important;
             }
+
             .eval-logo-img {
-                height: 48px !important;
+                height: 42px !important;
             }
+
             .eval-header-title h1 {
-                font-size: 1.35rem !important;
+                font-size: 1.25rem !important;
                 color: #000000 !important;
-                margin-bottom: 4px !important;
+                margin-bottom: 3px !important;
             }
+
             .eval-header-title p {
-                font-size: 0.88rem !important;
+                font-size: 0.84rem !important;
                 color: #334155 !important;
             }
+
+            /* Exibir todas as etapas continuamente */
             .eval-step-pane {
                 display: block !important;
                 opacity: 1 !important;
                 visibility: visible !important;
                 transform: none !important;
+                page-break-inside: auto !important;
+                break-inside: auto !important;
+                margin-bottom: 20px !important;
             }
-            .eval-block, .ident-card, .eval-question-card, .question-card {
+
+            /* Permitir que o bloco quebre páginas naturalmente para não engolir questões */
+            .eval-block {
                 border: 1px solid #94a3b8 !important;
+                background: #ffffff !important;
+                box-shadow: none !important;
+                break-inside: auto !important;
+                page-break-inside: auto !important;
+                margin-bottom: 18px !important;
+                padding: 12px 16px !important;
+                border-radius: 6px !important;
+            }
+
+            .ident-card,
+            .eval-question-card,
+            .question-card {
+                border: 1px solid #94a3b8 !important;
+                background: #ffffff !important;
+                box-shadow: none !important;
+                margin-bottom: 14px !important;
+                padding: 12px 16px !important;
+                border-radius: 6px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Cada questão individual evita ser cortada ao meio */
+            .question-item,
+            .dynamic-question-item {
+                display: block !important;
+                border: 1px solid #cbd5e1 !important;
                 background: #ffffff !important;
                 box-shadow: none !important;
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
-                margin-bottom: 14px !important;
-                padding: 12px 16px !important;
+                margin-bottom: 12px !important;
+                padding: 10px 14px !important;
                 border-radius: 6px !important;
+                opacity: 1 !important;
+                filter: none !important;
+                transform: none !important;
             }
+
+            /* Desativar efeitos do Modo Foco na impressão */
+            body.focus-mode-active .question-item {
+                opacity: 1 !important;
+                filter: none !important;
+                transform: none !important;
+            }
+
+            body.focus-mode-active .question-item.active-focus-item::after {
+                display: none !important;
+            }
+
+            /* Exibir sempre a Questão 28 condicional na versão impressa */
+            .q28-conditional-box,
+            #q28-container {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                margin-top: 10px !important;
+            }
+
             .eval-block-header h2 {
                 color: #000000 !important;
-                font-size: 1.1rem !important;
+                font-size: 1.05rem !important;
             }
+
             .eval-block-header p {
                 color: #475569 !important;
-                font-size: 0.84rem !important;
+                font-size: 0.82rem !important;
             }
+
             .question-title {
                 color: #000000 !important;
-                font-size: 0.95rem !important;
+                font-size: 0.92rem !important;
                 font-weight: 700 !important;
             }
+
             /* Linhas para preenchimento manual na identificação */
             .print-blank-mode input[type="text"],
             .print-blank-mode input[type="email"],
@@ -2706,34 +2797,40 @@
                 border-radius: 0 !important;
                 background: transparent !important;
                 color: transparent !important;
-                height: 28px !important;
+                height: 26px !important;
                 box-shadow: none !important;
             }
+
             .print-blank-mode select {
                 display: none !important;
             }
+
             .print-only-ident-boxes,
             .print-only-signature {
                 display: block !important;
             }
+
             /* Opções e alternativas como caixas/círculos nítidos */
-            .options-grid {
+            .options-grid,
+            .options-list {
                 display: block !important;
             }
+
             .option-label {
                 border: 1px solid #cbd5e1 !important;
                 background: #ffffff !important;
                 color: #000000 !important;
                 box-shadow: none !important;
-                padding: 5px 8px !important;
-                margin-bottom: 5px !important;
+                padding: 4px 8px !important;
+                margin-bottom: 4px !important;
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
                 display: flex !important;
                 align-items: center !important;
                 gap: 6px !important;
-                font-size: 0.88rem !important;
+                font-size: 0.85rem !important;
             }
+
             .option-label input[type="radio"],
             .option-label input[type="checkbox"] {
                 appearance: auto !important;
@@ -2741,12 +2838,13 @@
                 display: inline-block !important;
                 margin-right: 4px !important;
             }
+
             /* Linhas pautadas para questões dissertativas */
             .eval-textarea {
                 display: block !important;
                 width: 100% !important;
-                height: 90px !important;
-                min-height: 90px !important;
+                height: 84px !important;
+                min-height: 84px !important;
                 border: 1px solid #94a3b8 !important;
                 background-color: transparent !important;
                 background-image: repeating-linear-gradient(transparent, transparent 23px, #cbd5e1 24px) !important;
@@ -2755,11 +2853,12 @@
                 color: transparent !important;
                 box-shadow: none !important;
             }
-            /* Cabeçalhos nítidos */
+
             h1, h2, h3, h4, h5 {
                 color: #000000 !important;
             }
         }
+
         /* ==========================================================================
            MELHORIAS DE UI/UX — COMBOBOX DOCENTE, TOASTS, BARRA PENDÊNCIAS & RESUMO
            ========================================================================== */
@@ -4047,11 +4146,11 @@
         <!-- Rodapé de Informações de Atualização (Git) -->
         <footer class="app-footer" style="margin-top: 30px;">
             <div class="footer-info">
-                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 17:17</strong></span>
+                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>27/11/2026 às 16:05</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>6d75636</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>ea7d865</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Renderizar questoes dinamicas rigorosamente dentro do container de cada bloco correspondente</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Exibir todas as questoes nos relatorios e corrigir impressao sem sobreposicao de modais</em></span>
             </div>
         </footer>
     </div>
@@ -4704,8 +4803,14 @@
             if (typeof initCharCounters === 'function') {
                 initCharCounters();
             }
-            if (typeof restoreDraft === 'function') {
-                restoreDraft();
+            if (!isPrintBlank) {
+                if (typeof restoreDraft === 'function') {
+                    restoreDraft();
+                }
+            } else {
+                if (typeof preparePrintBlankView === 'function') {
+                    preparePrintBlankView();
+                }
             }
             if (typeof updateProgressUI === 'function') {
                 updateProgressUI();
@@ -5116,6 +5221,7 @@
 
         // Abertura e Fechamento do Modal
         window.openAuthGateModal = () => {
+            if (typeof isPrintBlank !== 'undefined' && isPrintBlank) return;
             const modal = document.getElementById('authGateModal');
             if (modal) modal.style.display = 'block';
             renderRecentProfiles();
@@ -6434,6 +6540,10 @@
         };
 
         function applyFocusModeUI() {
+            if (typeof isPrintBlank !== 'undefined' && isPrintBlank) {
+                document.body.classList.remove('focus-mode-active');
+                return;
+            }
             document.body.classList.toggle('focus-mode-active', isFocusModeEnabled);
             const btn = document.getElementById('btnToggleFocusMode');
             if (btn) {
@@ -6877,16 +6987,26 @@
         const urlParams = new URLSearchParams(window.location.search);
         const isPrintBlank = urlParams.get('print') === 'blank' || urlParams.get('modo') === 'imprimir_em_branco';
 
-        if (isPrintBlank) {
+        function preparePrintBlankView() {
             document.body.classList.add('print-blank-mode');
-            const printBanner = document.getElementById('printBlankBanner');
-            if (printBanner) printBanner.style.display = 'block';
+            document.body.classList.remove('focus-mode-active');
+            isFocusModeEnabled = false;
+
+            const authModal = document.getElementById('authGateModal');
+            if (authModal) authModal.style.display = 'none';
 
             // Abre todas as 7 etapas para impressão integral e corrida
             document.querySelectorAll('.eval-step-pane').forEach(el => {
                 el.classList.add('active');
                 el.style.display = 'block';
             });
+
+            // Garante que o container condicional da Q28 fique visível para preenchimento em papel
+            const q28 = document.getElementById('q28-container');
+            if (q28) q28.style.display = 'block';
+
+            const printBanner = document.getElementById('printBlankBanner');
+            if (printBanner) printBanner.style.display = 'block';
 
             // Reseta inputs e desativa valores pré-gravados
             const form = document.getElementById('evaluationForm');
@@ -6897,11 +7017,15 @@
             if (email) email.value = '';
 
             document.title = "Avaliação Anual EDM 2026 – Formulário em Branco Oficial";
+        }
 
-            // Dispara diálogo de impressão após renderizar
+        if (isPrintBlank) {
+            preparePrintBlankView();
+            // Dispara diálogo de impressão após garantia da renderização completa
             setTimeout(() => {
+                preparePrintBlankView();
                 window.print();
-            }, 600);
+            }, 900);
         } else {
             restoreDraft();
         }

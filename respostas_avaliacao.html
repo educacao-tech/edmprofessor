@@ -1984,11 +1984,11 @@
         <!-- Rodapé de Informações de Atualização (Git) -->
         <footer class="app-footer" style="margin-top: 30px;">
             <div class="footer-info">
-                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>26/11/2026 às 17:17</strong></span>
+                <span><i class="fas fa-clock-rotate-left"></i> Última Atualização: <strong>27/11/2026 às 16:05</strong></span>
                 <span class="footer-separator">•</span>
-                <span><i class="fas fa-code-commit"></i> Commit: <code>6d75636</code></span>
+                <span><i class="fas fa-code-commit"></i> Commit: <code>ea7d865</code></span>
                 <span class="footer-separator">•</span>
-                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Renderizar questoes dinamicas rigorosamente dentro do container de cada bloco correspondente</em></span>
+                <span class="footer-changes" title="Última alteração no Git"><i class="fab fa-git-alt"></i> Modificação: <em>Exibir todas as questoes nos relatorios e corrigir impressao sem sobreposicao de modais</em></span>
             </div>
         </footer>
     </div>
@@ -4755,6 +4755,94 @@
                 .map(a => `<div class="quote-box"><div class="quote-meta"><strong>${escapeHtml(a.professor || 'Docente')}</strong> • ${escapeHtml(a.escola || '-')}</div><div class="quote-text">${escapeHtml(String(a.respostas.q25).trim())}</div></div>`)
                 .join('') || '<p>Sem sugestões registradas para Q25.</p>';
 
+            // Geração detalhada de TODAS as questões da matriz (Blocos 1 a 6)
+            let allQuestionsReportHtml = '';
+            const questionsList = (Array.isArray(currentQuestionsData) && currentQuestionsData.length > 0)
+                ? currentQuestionsData
+                : (typeof DEFAULT_QUESTIONS_DATA !== 'undefined' ? DEFAULT_QUESTIONS_DATA : []);
+
+            const BLOCOS_TITULOS = {
+                1: "Bloco 1 – Planejamento e Organização das Aulas",
+                2: "Bloco 2 – Práticas Pedagógicas e Metodologias",
+                3: "Bloco 3 – Aprendizagem e Desenvolvimento dos Alunos",
+                4: "Bloco 4 – Desafios e Necessidades",
+                5: "Bloco 5 – Autoavaliação Docente",
+                6: "Bloco 6 – Perspectivas e Propostas para 2027"
+            };
+
+            for (let b = 1; b <= 6; b++) {
+                const bQuestions = questionsList.filter(q => (parseInt(q.bloco, 10) || 1) === b);
+                if (bQuestions.length === 0) continue;
+
+                allQuestionsReportHtml += `<div class="block-section" style="page-break-inside: auto; margin-top: 24px; border-top: 2px solid #2563eb; padding-top: 14px;">`;
+                allQuestionsReportHtml += `<h2 style="font-size: 16px; color: #1e3a8a; margin: 0 0 14px 0;">${escapeHtml(BLOCOS_TITULOS[b] || ('Bloco ' + b))} (${bQuestions.length} questões)</h2>`;
+
+                bQuestions.forEach(q => {
+                    const qNum = q.num || q.key.replace(/\D/g, '');
+                    const cleanTitle = (q.title || '').replace(/^(\(?[\?q]?\d+[\.\)\-:]?\s*)+/i, '').trim();
+                    const isText = (q.type === 'text' || q.type === 'conditional_text');
+
+                    allQuestionsReportHtml += `<div class="question-report-card" style="margin-bottom: 18px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; background: #ffffff; page-break-inside: avoid;">`;
+                    allQuestionsReportHtml += `<div style="font-weight: 800; font-size: 13px; color: #0f172a; margin-bottom: 8px;">`;
+                    allQuestionsReportHtml += `<span style="background: #2563eb; color: #fff; padding: 2px 7px; border-radius: 4px; font-size: 11px; margin-right: 6px;">Q${qNum}</span>`;
+                    allQuestionsReportHtml += `${escapeHtml(cleanTitle)}`;
+                    allQuestionsReportHtml += `</div>`;
+
+                    if (isText) {
+                        const textAnswers = allAvaliacoes
+                            .filter(a => a.respostas && a.respostas[q.key] && String(a.respostas[q.key]).trim())
+                            .map(a => `<div class="quote-box" style="margin-bottom: 6px; padding: 8px 10px; background: #f8fafc; border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 11.5px;"><div class="quote-meta" style="font-size: 10.5px; color: #64748b; margin-bottom: 2px;"><strong>${escapeHtml(a.professor || 'Docente')}</strong> • ${escapeHtml(a.escola || '-')}</div><div class="quote-text" style="color: #1e293b; white-space: pre-wrap;">${escapeHtml(String(a.respostas[q.key]).trim())}</div></div>`);
+
+                        if (textAnswers.length > 0) {
+                            allQuestionsReportHtml += `<div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">${textAnswers.length} reflexões registradas:</div>`;
+                            allQuestionsReportHtml += textAnswers.slice(0, 15).join('');
+                            if (textAnswers.length > 15) {
+                                allQuestionsReportHtml += `<div style="font-size: 11px; color: #94a3b8; font-style: italic; margin-top: 4px;">(+ ${textAnswers.length - 15} outras respostas registradas na base de dados)</div>`;
+                            }
+                        } else {
+                            allQuestionsReportHtml += `<div style="font-size: 11.5px; color: #94a3b8; font-style: italic;">Nenhuma resposta dissertativa registrada para esta questão.</div>`;
+                        }
+                    } else {
+                        const options = Array.isArray(q.options) && q.options.length > 0 ? q.options : ['Excelente', 'Bom', 'Regular', 'Precisa melhorar'];
+                        const counts = {};
+                        options.forEach(opt => counts[opt] = 0);
+                        let totalAnswered = 0;
+
+                        allAvaliacoes.forEach(a => {
+                            const val = a.respostas ? a.respostas[q.key] : null;
+                            if (!val) return;
+                            totalAnswered++;
+                            if (Array.isArray(val)) {
+                                val.forEach(v => { counts[v] = (counts[v] || 0) + 1; });
+                            } else {
+                                counts[val] = (counts[val] || 0) + 1;
+                            }
+                        });
+
+                        allQuestionsReportHtml += `<table style="width: 100%; border-collapse: collapse; font-size: 11.5px; margin-top: 6px;">`;
+                        allQuestionsReportHtml += `<thead><tr style="background: #f1f5f9;"><th style="padding: 6px 8px; border: 1px solid #cbd5e1; text-align: left;">Alternativa</th><th style="padding: 6px 8px; border: 1px solid #cbd5e1; width: 60px; text-align: center;">Respostas</th><th style="padding: 6px 8px; border: 1px solid #cbd5e1; width: 60px; text-align: center;">%</th><th style="padding: 6px 8px; border: 1px solid #cbd5e1; width: 140px; text-align: left;">Distribuição</th></tr></thead><tbody>`;
+
+                        options.forEach(opt => {
+                            const count = counts[opt] || 0;
+                            const pct = totalAnswered > 0 ? Math.round((count / totalAnswered) * 100) : 0;
+                            allQuestionsReportHtml += `<tr>`;
+                            allQuestionsReportHtml += `<td style="padding: 5px 8px; border: 1px solid #cbd5e1;">${escapeHtml(opt)}</td>`;
+                            allQuestionsReportHtml += `<td style="padding: 5px 8px; border: 1px solid #cbd5e1; text-align: center;"><strong>${count}</strong></td>`;
+                            allQuestionsReportHtml += `<td style="padding: 5px 8px; border: 1px solid #cbd5e1; text-align: center;">${pct}%</td>`;
+                            allQuestionsReportHtml += `<td style="padding: 5px 8px; border: 1px solid #cbd5e1;"><div style="background: #e2e8f0; border-radius: 4px; height: 12px; width: 100%; overflow: hidden;"><div style="background: #2563eb; height: 100%; width: ${pct}%;"></div></div></td>`;
+                            allQuestionsReportHtml += `</tr>`;
+                        });
+
+                        allQuestionsReportHtml += `</tbody></table>`;
+                        allQuestionsReportHtml += `<div style="font-size: 10.5px; color: #64748b; margin-top: 4px;">Total de respondentes nesta questão: <strong>${totalAnswered}</strong> de ${allAvaliacoes.length}</div>`;
+                    }
+
+                    allQuestionsReportHtml += `</div>`;
+                });
+
+                allQuestionsReportHtml += `</div>`;
+            }
+
             const win = window.open('', '_blank', 'width=960,height=800');
             if (!win) {
                 alert('Por favor, permita pop-ups para gerar o Relatório Executivo em PDF.');
@@ -4792,10 +4880,8 @@
                 '<table><thead><tr><th>Escola</th><th>Respondidas</th><th>Cadastrados</th><th>Adesão</th></tr></thead><tbody>',
                 schoolRowsHtml,
                 '</tbody></table>',
-                '<h2>Destaques de Práticas de Sucesso (Questão 8)</h2>',
-                highlightsQ8,
-                '<h2>Sugestões para Fortalecer a EDM em 2027 (Questão 25)</h2>',
-                highlightsQ25,
+                '<h2 style="font-size:18px; margin-top:28px; border-left:4px solid #2563eb; padding-left:10px;">Consolidado Geral de Todas as Questões (Blocos 1 a 6)</h2>',
+                allQuestionsReportHtml,
                 '<' + '/body><' + '/html>'
             ].join('');
             win.document.open();
